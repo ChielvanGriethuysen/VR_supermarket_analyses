@@ -6,6 +6,10 @@
 # set the parameters
 params <- list(
   
+  # save every nth data point of the original file
+  
+  nth_point = 4,
+  
   # name of image of supermarket
   #img.name ='Supermarkt Screenshot 10 Producten (volwassenen, tieners, kinderen).png',
   img.name = 'Supermarkt2.png',

@@ -55,7 +55,8 @@ for(i in 1 : length(data.files)){
                           input.dir = params$input.dir, 
                           output.dir = params$output.dir,
                           products = params$features$products,
-                          i = i)
+                          i = i,
+                          nth_point = params$nth_point)
   
 
   if(params$save.data | params$full.images){

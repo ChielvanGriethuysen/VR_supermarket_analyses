@@ -124,7 +124,9 @@ runFirstAnalyses <- function(JSONfile,
                              input.dir,
                              output.dir,
                              products,
-                             i){
+                             i,
+                             nth_point){
+  
   # Read the JSON files, remove excess data, 
   # save first basic results (total time, total distance and n data points),
   # make first gg plot and save it
@@ -167,6 +169,9 @@ runFirstAnalyses <- function(JSONfile,
     FootPosition <- FootPosition[-last : -nrow(FootPosition), ]
     time <- time[-last : -length(time)]
   }
+  FootPosition <- FootPosition[seq(1, nrow(FootPosition), nth_point), ]
+  time <- time[seq(1, length(time), nth_point)]
+  
   row.names(FootPosition) <- 1:nrow(FootPosition)
   
   x.change <- diff(FootPosition$x, 1)
