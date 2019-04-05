@@ -2,8 +2,6 @@
 #
 # Last edited 2018-10-18 by Laurent Smeets (l.s.m.smeets@uu.nl)
 
-
-
 getStops <- function(data, FootPosition, time, gg,
                      stop.time, stop.radius, productsbox,
                      save.data, full.images, i){
@@ -11,6 +9,13 @@ getStops <- function(data, FootPosition, time, gg,
   final.step <- first(which(time > max(time) - stop.time)) - 1
   
   stop <- data.frame(begin.stop = rep(FALSE, length(time)), end.stop = numeric(length(time)))
+
+  #calculate distance between two points for every point
+  stop.radius.squared<-stop.radius^2
+  
+  x.change <- diff(FootPosition$x, 1)
+  y.change <- diff(FootPosition$z, 1) 
+  distance.between.points<-sqrt(x.change^2 + y.change^2)
   
   k <- dis <- final.step.in.stop <- 0
   for(s in 1 : final.step){
@@ -25,13 +30,22 @@ getStops <- function(data, FootPosition, time, gg,
     
     dis <- 0
     k <- s
-    while(dis < stop.radius && k < length(time)){
-      k <- k + 1
-      dis <- sqrt((FootPosition$x[s] - FootPosition$x[k]) ^ 2 +
-                    (FootPosition$z[s] - FootPosition$z[k]) ^ 2  
-      )
+    #skip points that can't be on the border of the stop.radius, skips distance calculations for uninteresting points
+    helpDis<-0
+    while (helpDis<stop.radius&& k < length(time)) {
+      helpDis<-helpDis+distance.between.points[k]
+      k<-k+1
     }
+    dis <- (FootPosition$x[s] - FootPosition$x[k]) ^ 2 +
+      (FootPosition$z[s] - FootPosition$z[k]) ^ 2
     
+    #look at the points that are byond stop.radius walking distance
+    while(dis < stop.radius.squared && k < length(time)){
+      k <- k + 1
+      dis <- (FootPosition$x[s] - FootPosition$x[k]) ^ 2 +
+                    (FootPosition$z[s] - FootPosition$z[k]) ^ 2
+    }
+    # if point on distance stop.radius and time more than stop.time than it is a stop
     if(time[k - 1] - time[s] > stop.time){
       stop[s : (k - 1), 1] <- TRUE
       stop[s, 2] <- final.step.in.stop <- k - 1
@@ -57,7 +71,7 @@ getStops <- function(data, FootPosition, time, gg,
   #####
   
   
-  stop.points <- which(stop[, 1])
+  stop.points <- stop[, 1]
   
   stop.start.points <- which(stop[, 2] != 0)
   n.stops <- length(stop.start.points)

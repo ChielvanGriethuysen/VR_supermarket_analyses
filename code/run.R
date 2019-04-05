@@ -55,8 +55,7 @@ for(i in 1 : length(data.files)){
                           input.dir = params$input.dir, 
                           output.dir = params$output.dir,
                           products = params$features$products,
-                          i = i,
-                          nth_point = params$nth_point)
+                          i = i)
   
 
   if(params$save.data | params$full.images){
@@ -68,10 +67,12 @@ for(i in 1 : length(data.files)){
                                 full.images = params$full.images,
                                 save.data = params$save.data,
                                 i = i)
+    #skip points, if to close to each other, to speed op crossing finding
+    move_data<-skippoints(FootPosition =res$FootPosition,Time = res$time,distance = 1)
     
     res.cross <- getCrossings(data = res.aisles$data,
-                              FootPosition = res$FootPosition,
-                              time = res$time,
+                              FootPosition = move_data[,-4],
+                              time = move_data$t,
                               gg = res.aisles$gg.aisles,
                               shopping.aisle.time.points = res.aisles$shopping.aisle.time.points,
                               aisles = params$features$aisles,
@@ -105,7 +106,7 @@ for(i in 1 : length(data.files)){
                           FootPosition = res$FootPosition, 
                           time = res$time, 
                           gg = res.products$gg.products,
-                          stop.points = res.stops$stop.points, 
+                          stop.points = res.stops$stop.points[[1]], 
                           slow.time = params$features$slows$slow.time, 
                           slow.radius = params$features$slows$slow.radius,
                           producttimepoint.time.points = res.products$producttimepoint.time.points,

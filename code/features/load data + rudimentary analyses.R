@@ -124,8 +124,7 @@ runFirstAnalyses <- function(JSONfile,
                              input.dir,
                              output.dir,
                              products,
-                             i,
-                             nth_point){
+                             i){
   
   # Read the JSON files, remove excess data, 
   # save first basic results (total time, total distance and n data points),
@@ -169,8 +168,6 @@ runFirstAnalyses <- function(JSONfile,
     FootPosition <- FootPosition[-last : -nrow(FootPosition), ]
     time <- time[-last : -length(time)]
   }
-  FootPosition <- FootPosition[seq(1, nrow(FootPosition), nth_point), ]
-  time <- time[seq(1, length(time), nth_point)]
   
   row.names(FootPosition) <- 1:nrow(FootPosition)
   
@@ -182,7 +179,7 @@ runFirstAnalyses <- function(JSONfile,
   # Save results of basic analyses
   if(save.data){
     data$name[i] <- JSONfile
-    data$ID[i]<-substr(JSONfile,1,5)
+    data$ID[i]<-substr(JSONfile,1,6)
     data$total.time[i] <- last(time) - time[1]
     data$total.distance[i] <- total.distance
     data$n.datapoints[i] <- length(time)

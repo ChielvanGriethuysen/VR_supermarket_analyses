@@ -11,6 +11,12 @@ getSlows <- function(data, FootPosition, time, gg,
   slow <- data.frame(begin.slow = rep(FALSE, length(time)), end.slow = numeric(length(time)))
   
   k <- dis <- final.step.in.slow <- 0
+  #calculate distance between two points for every point
+  slow.radius.squared<-slow.radius^2 
+  x.change <- diff(FootPosition$x, 1) 
+  y.change <- diff(FootPosition$z, 1)  
+  distance.between.points<-sqrt(x.change^2 + y.change^2)
+  
   for(b in 1 : final.step){
     if(b %% 1000 == 0){
       print(paste0('Calculating SLOW of time point ', b, ' of ', final.step, 
@@ -22,13 +28,21 @@ getSlows <- function(data, FootPosition, time, gg,
     
     dis <- 0
     k <- b
-    while(dis < slow.radius && !k %in% stop.points && k < length(time)){
-      k <- k + 1
-      dis <- sqrt((FootPosition$x[b] - FootPosition$x[k]) ^ 2 +
-                    (FootPosition$z[b] - FootPosition$z[k]) ^ 2  
-      )
+    #skip points that can't be on the border of the stop.radius, skips distance calculations for uninteresting points
+    helpDis<-0
+    while (helpDis<sqrt(slow.radius)&& !stop.points[k]&& k < length(time)) {
+      helpDis<-helpDis+distance.between.points[k]
+      k<-k+1
     }
-    
+    dis <- (FootPosition$x[b] - FootPosition$x[k]) ^ 2 +
+      (FootPosition$z[b] - FootPosition$z[k]) ^ 2
+    #look at the points that are byond stop.radius walking distance
+    while(dis < slow.radius.squared && !stop.points[k] && k < length(time)){
+      k <- k + 1
+      dis <- (FootPosition$x[b] - FootPosition$x[k]) ^ 2 +
+                    (FootPosition$z[b] - FootPosition$z[k]) ^ 2
+    }
+    # if point on distance stop.radius and time more than stop.time than it is a stop
     if(time[k - 1] - time[b] > slow.time) {
       slow[b, 1] <- TRUE
       slow[b, 2] <- final.step.in.slow <- k
