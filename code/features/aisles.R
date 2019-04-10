@@ -42,6 +42,26 @@ getAisleTimes <- function(data, FootPosition, time, gg,
   t <- which(a, arr.ind = TRUE)
   aisle.time.points <- t[, 2]
   
+  # find order in wich the aisles are visited to determine if a aisles is walked thru or if there was a turnaround 
+  # also calculate the distance used to determine efficiency
+  order.of.visiting<-t[t[,1] != lag(t[,1], default = !t[1,1]),]
+  same.side.in.out<-walk.thru<-0
+  dist.same.side.in.out<-dist.walk.thru<-c()
+  
+  for (i in 1:(nrow(order.of.visiting)-2)) {
+    if(aisles$type[order.of.visiting[i,1]]== "main"){
+      if(order.of.visiting[i,1]!= order.of.visiting[i+2,1]){
+        walk.thru<-walk.thru+1
+        dist.walk.thru<-c(dist.walk.thru,subdistance(FootPosition,order.of.visiting[i+1,2], order.of.visiting[i+2,2]))
+      }
+      else{
+        same.side.in.out<-same.side.in.out+1
+        dist.same.side.in.out<-c(dist.same.side.in.out,subdistance(FootPosition,order.of.visiting[i+1,2], order.of.visiting[i+2,2]))
+      }
+    }
+  }
+  
+  
   if(any(a) &  save.data){
     time.in.aisle <- time[t[c(diff(t[,1]) != 0, T), 2]] - time[t[c(T, diff(t[,1]) != 0), 2]] #time spent in each aisle (which aisle is speficied later)
     times.through.aisle <- t[c(TRUE, diff(t[,1]) != 0), ] # dit klopt niet

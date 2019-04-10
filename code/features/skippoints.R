@@ -1,7 +1,7 @@
-skippoints<-function(FootPositions, Time, distance){
+skippoints<-function(FootPosition, Time, distance){
   curent.dist<-0
-  x.change <- diff(res$FootPosition$x, 1)
-  y.change <- diff(res$FootPosition$z, 1)
+  x.change <- diff(FootPosition$x, 1)
+  y.change <- diff(FootPosition$z, 1)
   distance.between.points<-sqrt(x.change^2 + y.change^2)
   filltered.points<-c()
   
@@ -13,8 +13,18 @@ skippoints<-function(FootPositions, Time, distance){
     }
   }
   
-  f<-res$FootPosition[filltered.points,] 
-  t<-res$time[filltered.points]
+  f<-FootPosition[filltered.points,] 
+  t<-Time[filltered.points]
   data.frame(f,t)
+  
+}
+
+subdistance<-function(FootPosition, start, stop){
+  curent.dist<-0
+  x.change <- diff(FootPosition$x, 1)
+  y.change <- diff(FootPosition$z, 1)
+  distance.between.points<-sqrt(x.change^2 + y.change^2)
+  
+  sum(distance.between.points[start:stop])
   
 }

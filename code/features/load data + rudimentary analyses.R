@@ -216,10 +216,20 @@ runFirstAnalyses <- function(JSONfile,
     data$qt95.difference.between.timepoints[i] <- quantile(diff(time),probs = 0.95)
     data$qt99.difference.between.timepoints[i]<- quantile(diff(time),probs = 0.99)
 
-     }
+  }
+  subpoints<- skippoints(FootPosition,time,0.2)
+  F1<-subpoints[,-4]
+  T1<-subpoints[,4]
+  
+  x.change <- diff(F1$x, 1)
+  y.change <- diff(F1$z, 1)
+  distance.between.subpoints<-sqrt(x.change^2 + y.change^2)
+  speed<- distance.between.subpoints/diff(T1)
+  speed<- c(mean(speed),speed)
+  
   
   # Make and save plot of raw walking path
-  gg <- ggplot() + 
+  ggpath <- ggplot() + 
     #ylim(-53, -7) + xlim(0, 29) +
     scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
     scale_y_continuous(limits = c(-50, -2.5), expand=c(0,0)) +
@@ -229,7 +239,7 @@ runFirstAnalyses <- function(JSONfile,
                       -Inf, Inf, -Inf, Inf) +
     geom_path(data = FootPosition, 
               mapping = aes(x = x, y = -z, color = 1:length(x)),
-              arrow = arrow(length = unit(5, "points"))) + 
+              arrow = arrow(length = unit(5, "points"))) +
     #    coord_fixed() + 
     coord_flip() +
     theme(legend.position = "none",
@@ -241,7 +251,27 @@ runFirstAnalyses <- function(JSONfile,
               size = 5) + 
     geom_hline(yintercept = -45.5)
   
-  gg
+  ggspeed <- ggplot() + 
+    #ylim(-53, -7) + xlim(0, 29) +
+    scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
+    scale_y_continuous(limits = c(-50, -2.5), expand=c(0,0)) +
+    annotation_custom(rasterGrob(image, 
+                                 width = unit(1, "npc"), 
+                                 height = unit(1, "npc")), 
+                      -Inf, Inf, -Inf, Inf) +
+    geom_path(data = F1, 
+              mapping = aes(x = x, y = -z, color = speed),
+              arrow = arrow(length = unit(5, "points"))) +
+    scale_colour_gradient(low = "red", high = "yellow") +
+    #    coord_fixed() + 
+    coord_flip() +
+    theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
+    geom_text(aes(y = -12, x = 2, 
+                  label = paste("Person", 
+                                substr(JSONfile[i], 1, 5),
+                                "\n Walking route")), 
+              size = 5) + 
+    geom_hline(yintercept = -45.5)
   
   # Save if required
   if(raw.images){
@@ -250,8 +280,12 @@ runFirstAnalyses <- function(JSONfile,
       dir.create(paste0('output/png/', output.dir))
     }
     ggsave(paste0('output/png/', output.dir, '/',
-                  JSONfile, '_RAW.png'), gg, 
+                  JSONfile, '_RAW.png'), ggpath, 
            width = 37.5, height = 21, units = 'cm')
+    ggsave(paste0('output/png/', output.dir, '/',
+                  JSONfile, '_RAWspeed.png'), ggspeed, 
+           width = 37.5, height = 21, units = 'cm')
+    
   }
   
   
@@ -281,7 +315,7 @@ runFirstAnalyses <- function(JSONfile,
   
   
   res <- list(dat = dat,
-              gg = gg, 
+              gg = ggpath, 
               FootPosition = FootPosition,
               time = time, 
               data = data,
