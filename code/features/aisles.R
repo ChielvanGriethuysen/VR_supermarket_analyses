@@ -48,19 +48,21 @@ getAisleTimes <- function(data, FootPosition, time, gg,
   same.side.in.out<-walk.thru<-0
   dist.same.side.in.out<-dist.walk.thru<-c()
   
-  for (i in 1:(nrow(order.of.visiting)-2)) {
-    if(aisles$type[order.of.visiting[i,1]]== "main"){
-      if(order.of.visiting[i,1]!= order.of.visiting[i+2,1]){
+  for (j in 1:(nrow(order.of.visiting)-2)) {
+    if(aisles$type[order.of.visiting[j,1]]== "main"){
+      if(order.of.visiting[j,1]!= order.of.visiting[j+2,1]){
         walk.thru<-walk.thru+1
-        dist.walk.thru<-c(dist.walk.thru,subdistance(FootPosition,order.of.visiting[i+1,2], order.of.visiting[i+2,2]))
+        dist.walk.thru<-c(dist.walk.thru,subdistance(FootPosition,order.of.visiting[j+1,2], order.of.visiting[j+2,2]))
       }
       else{
         same.side.in.out<-same.side.in.out+1
-        dist.same.side.in.out<-c(dist.same.side.in.out,subdistance(FootPosition,order.of.visiting[i+1,2], order.of.visiting[i+2,2]))
+        dist.same.side.in.out<-c(dist.same.side.in.out,subdistance(FootPosition,order.of.visiting[j+1,2], order.of.visiting[j+2,2]))
       }
     }
   }
   
+  data[i,]$n.walked.through.aisles<-walk.thru
+  data[i,]$n.walked.in.out.aisles<-same.side.in.out
   
   if(any(a) &  save.data){
     time.in.aisle <- time[t[c(diff(t[,1]) != 0, T), 2]] - time[t[c(T, diff(t[,1]) != 0), 2]] #time spent in each aisle (which aisle is speficied later)

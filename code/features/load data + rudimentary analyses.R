@@ -88,6 +88,10 @@ createDataFrame <- function(data.files){
                      Hit_Totaal = numeric(length(data.files)),         # total items someone picked up
                      n.walked.past.not.picked.up= numeric(length(data.files)),         # number of times walked past an item without picking it up
                      n.walked.past.not.picked.up.unique = numeric(length(data.files)), # number of times walked past an unique item without picking it up
+                     
+                     n.walked.through.aisles= numeric(length(data.files)), #nr of times walked through a aisles
+                     n.walked.in.out.aisles= numeric(length(data.files)), #nr of times walked in an aisles and the same side out
+                     
                      Avatars = numeric(length(data.files)),           # this item was merged from an other dataset and not created in this code
                      VR_aborted = numeric(length(data.files)),        # this item was merged from an other dataset and not created in this code
                      Tijd = numeric(length(data.files)),              # this item was merged from an other dataset and not created in this code
