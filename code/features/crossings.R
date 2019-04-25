@@ -123,7 +123,7 @@ getCrossings = function(data, FootPosition, time, gg,
     data$cross.3rd.1.3rd[i]<-cross.3rd.1.3rd
 
     # add the crossings to the plot
-    if(full.images){
+    if(full.images && n.crossings>0){
       gg.cross <- gg +
         geom_point(data = crossings.pos,
                    aes(x = x, y = -z, size = 2),
@@ -131,6 +131,10 @@ getCrossings = function(data, FootPosition, time, gg,
         geom_text(aes(y = -48, x = 4, 
                       label = paste("N crossings =", n.crossings, "(", n.crossings.out.aisles, ")" )),
                   colour = 'blue')
+    }else{
+      gg.cross<-gg+ geom_text(aes(y = -48, x = 4, 
+                                  label = paste("N crossings =", n.crossings, "(", n.crossings.out.aisles, ")" )),
+                              colour = 'blue')
     }
     
 
