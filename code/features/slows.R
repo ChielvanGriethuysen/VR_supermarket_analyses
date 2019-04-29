@@ -3,9 +3,12 @@
 # Last edited 2018-10-18 by Laurent Smeets (l.s.m.smeets@uu.nl)
 
 
-getSlows <- function(data, FootPosition, time, gg,
+getSlows <- function(data, input.data, gg,
                      stop.points, slow.time, slow.radius, producttimepoint.time.points,
                      full.images, save.data, i){
+  time<- input.data[,1]
+  FootPosition<-input.data[,2:4]
+  
   
   final.step <- first(which(time > max(time) - slow.time)) - 1
   slow <- data.frame(begin.slow = rep(FALSE, length(time)), end.slow = numeric(length(time)))

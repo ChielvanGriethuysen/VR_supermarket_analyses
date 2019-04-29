@@ -149,45 +149,40 @@ runFirstAnalyses <- function(JSONfile,
                     simplifyDataFrame = TRUE)
   )
   
+
+
+  # put data in one dataframe
+  input.data<-data.frame(dat[[1]]$m_PupilTime,dat[[1]]$m_FootPosition)
+  names(input.data)[1]<- "time"
+  
   # Remove duplicate data (speeds up all analyses)
-  time <- dat[[1]]$m_PupilTime
-  dup <- which(diff(time) == 0)
-  FootPosition <- dat[[1]]$m_FootPosition
+  dup <- which(diff(input.data$time) == 0)
   if(length(dup) > 0){
-    time <- time[-dup]
-    FootPosition <- FootPosition[-dup, ]
-    row.names(FootPosition) <- 1:nrow(FootPosition)
+    input.data<-input.data[-dup,]
   }
-  
-  # Remove all datapoints before start of the task
-  first <- first(which(FootPosition$z < 45.5 & FootPosition$z >10))
-  if(first > 1){
-    FootPosition <- FootPosition[-1 : -first, ]
-    time <- time[-1 : -first]
-  }
-  
-  # Remove all datapoints after end of the task
-  last <- last(which(FootPosition$z < 45.5))
-  if(last < nrow(FootPosition)){
-    FootPosition <- FootPosition[-last : -nrow(FootPosition), ]
-    time <- time[-last : -length(time)]
-  }
-  
-  row.names(FootPosition) <- 1:nrow(FootPosition)
-  
-  x.change <- diff(FootPosition$x, 1)
-  y.change <- diff(FootPosition$z, 1)
+  #only use the data in the actuale supermarket
+  input.data<-input.data[dat[[1]]$m_Area=="S",]
+  row.names(input.data) <- 1:nrow(input.data)
+
+  #add speed to dataframe and calculate total distance
+  x.change <- diff(input.data$x, 1)
+  y.change <- diff(input.data$z, 1)
   distance.between.points<-sqrt(x.change^2 + y.change^2)
+  speed<-c(0,distance.between.points/diff(input.data$t,1))
+  input.data<- data.frame(input.data, speed,c(0,distance.between.points))
+  names(input.data)[6]<- "dist"
+
+  
   total.distance<-sum(sqrt(x.change^2 + y.change^2))
   
   # Save results of basic analyses
   if(save.data){
     data$name[i] <- JSONfile
     data$ID[i]<-substr(JSONfile,1,6)
-    data$total.time[i] <- last(time) - time[1]
+    data$total.time[i] <- last(input.data$time) - input.data$time[1]
     data$total.distance[i] <- total.distance
-    data$n.datapoints[i] <- length(time)
-    data$datapoints.per.second[i] <- length(time) / (last(time) - time[1])
+    data$n.datapoints[i] <- length(input.data$time)
+    data$datapoints.per.second[i] <- length(input.data$time) / (last(input.data$time) - input.data$time[1])
     data$average.speed[i]<- data$total.distance[i] / data$total.time[i]
     data$Hit_Totaal[i]<-filter(Excel, ID== data$ID[i])$Hit_Totaal
     data$Avatars[i]<-filter(Excel, ID== data$ID[i])$Avatars
@@ -216,19 +211,17 @@ runFirstAnalyses <- function(JSONfile,
     data$max.difference.between.points[i] <-  max(abs(diff(distance.between.points)))
     data$qt95.difference.between.points[i] <-quantile(abs(diff(distance.between.points)), probs = 0.95)
     data$qt99.difference.between.points[i]  <-quantile(abs(diff(distance.between.points)), probs = 0.99)
-    data$max.difference.between.timepoints[i] <- max(diff(time))
-    data$qt95.difference.between.timepoints[i] <- quantile(diff(time),probs = 0.95)
-    data$qt99.difference.between.timepoints[i]<- quantile(diff(time),probs = 0.99)
+    data$max.difference.between.timepoints[i] <- max(diff(input.data$time))
+    data$qt95.difference.between.timepoints[i] <- quantile(diff(input.data$time),probs = 0.95)
+    data$qt99.difference.between.timepoints[i]<- quantile(diff(input.data$time),probs = 0.99)
 
   }
-  subpoints<- skippoints(FootPosition,time,0.2)
-  F1<-subpoints[,-4]
-  T1<-subpoints[,4]
+  subpoints<- skippoints(input.data,0.2)
   
-  x.change <- diff(F1$x, 1)
-  y.change <- diff(F1$z, 1)
+  x.change <- diff(subpoints$x, 1)
+  y.change <- diff(subpoints$z, 1)
   distance.between.subpoints<-sqrt(x.change^2 + y.change^2)
-  speed<- distance.between.subpoints/diff(T1)
+  speed<- distance.between.subpoints/diff(subpoints$time)
   speed<- c(mean(speed),speed)
   
   
@@ -241,7 +234,7 @@ runFirstAnalyses <- function(JSONfile,
                                  width = unit(1, "npc"), 
                                  height = unit(1, "npc")), 
                       -Inf, Inf, -Inf, Inf) +
-    geom_path(data = FootPosition, 
+    geom_path(data = input.data, 
               mapping = aes(x = x, y = -z, color = 1:length(x)),
               arrow = arrow(length = unit(5, "points"))) +
     #    coord_fixed() + 
@@ -263,7 +256,7 @@ runFirstAnalyses <- function(JSONfile,
                                  width = unit(1, "npc"), 
                                  height = unit(1, "npc")), 
                       -Inf, Inf, -Inf, Inf) +
-    geom_path(data = F1, 
+    geom_path(data = subpoints, 
               mapping = aes(x = x, y = -z, color = speed),
               arrow = arrow(length = unit(5, "points"))) +
     scale_colour_gradient(low = "red", high = "yellow") +
@@ -320,8 +313,7 @@ runFirstAnalyses <- function(JSONfile,
   
   res <- list(dat = dat,
               gg = ggpath, 
-              FootPosition = FootPosition,
-              time = time, 
+              input.data= input.data,
               data = data,
               x.change=x.change,
               y.change=y.change,

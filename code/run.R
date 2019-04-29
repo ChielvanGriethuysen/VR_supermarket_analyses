@@ -60,19 +60,17 @@ for(i in 1 : length(data.files)){
 
   if(params$save.data | params$full.images){
     res.aisles <- getAisleTimes(data = res$data,
-                                FootPosition = res$FootPosition,
-                                time = res$time,
+                                input.data= res$input.data,
                                 gg = res$gg,
                                 aisles = params$features$aisles,
                                 full.images = params$full.images,
                                 save.data = params$save.data,
                                 i = i)
     #skip points, if to close to each other, to speed op crossing finding
-    move_data<-skippoints(FootPosition =res$FootPosition,Time = res$time,distance = 1)
+    move_data<-skippoints(res$input.data,distance = 1)
     
     res.cross <- getCrossings(data = res.aisles$data,
-                              FootPosition = move_data[,-4],
-                              time = move_data$t,
+                              input.data = res$input.data,
                               gg = res.aisles$gg.aisles,
                               shopping.aisle.time.points = res.aisles$shopping.aisle.time.points,
                               aisles = params$features$aisles,
@@ -82,8 +80,7 @@ for(i in 1 : length(data.files)){
                               i = i)
     
     res.stops <- getStops(data = res.cross$data,
-                          FootPosition = res$FootPosition,
-                          time = res$time,
+                          input.data = res$input.data,
                           gg = res.cross$gg.cross,
                           stop.time = params$features$stops$stop.time,
                           stop.radius = params$features$stops$stop.radius,
@@ -93,8 +90,7 @@ for(i in 1 : length(data.files)){
                           i = i)
     
     res.products <- WalkpastProduct(data = res.stops$data,
-                                   FootPosition = res$FootPosition,
-                                   time = res$time,
+                                   input.data = res$input.data,
                                    gg = res.stops$gg,
                                    products =  res$productbox,
                                    products2 = params$features$products, 
@@ -103,8 +99,7 @@ for(i in 1 : length(data.files)){
                                    i = i)
     
     res.slows <- getSlows(data = res.products$data, 
-                          FootPosition = res$FootPosition, 
-                          time = res$time, 
+                          input.data = res$input.data,
                           gg = res.products$gg.products,
                           stop.points = res.stops$stop.points[[1]], 
                           slow.time = params$features$slows$slow.time, 

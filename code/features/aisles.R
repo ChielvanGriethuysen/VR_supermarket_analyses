@@ -4,7 +4,7 @@
 
 
 
-getAisleTimes <- function(data, FootPosition, time, gg,
+getAisleTimes <- function(data, input.data, gg,
                           aisles, full.images, save.data, i){
   
   if(full.images){
@@ -37,7 +37,7 @@ getAisleTimes <- function(data, FootPosition, time, gg,
   
   # a is a matrix with [n.aisles, n.time points] with T or F.
   # T indicating that timepoint was spent in that aisle
-  a <- apply(FootPosition[, c(1, 3)], 1, CheckPathInAisle, aisles = aisles)
+  a <- apply(input.data[, c(2, 4)], 1, CheckPathInAisle, aisles = aisles)
   # t is a matrix with 2 columns. [, 1] = aisle number and [, 2] = time point
   t <- which(a, arr.ind = TRUE)
   aisle.time.points <- t[, 2]
@@ -53,13 +53,13 @@ getAisleTimes <- function(data, FootPosition, time, gg,
     if(aisles$type[order.of.visiting[j,1]]== "main"){
       if(order.of.visiting[j,1]!= order.of.visiting[j+2,1]){
 
-        dist.walk.through<-c(dist.walk.through,subdistance(FootPosition,order.of.visiting[j+1,2], order.of.visiting[j+2,2]))
-        time.walk.through<-c(time.walk.through,time[order.of.visiting[j+2,2]]-time[order.of.visiting[j+1,2]])
+        dist.walk.through<-c(dist.walk.through,subdistance(input.data[,2:4],order.of.visiting[j+1,2], order.of.visiting[j+2,2]))
+        time.walk.through<-c(time.walk.through,input.data$time[order.of.visiting[j+2,2]]-input.data$time[order.of.visiting[j+1,2]])
         walk.through.id<-c(walk.through.id,order.of.visiting[j+1,1])
       }
       else{
-        dist.same.side.in.out<-c(dist.same.side.in.out,subdistance(FootPosition,order.of.visiting[j+1,2], order.of.visiting[j+2,2]))
-        time.same.side.in.out<-c(time.same.side.in.out,time[order.of.visiting[j+2,2]]-time[order.of.visiting[j+1,2]])
+        dist.same.side.in.out<-c(dist.same.side.in.out,subdistance(input.data[,2:4],order.of.visiting[j+1,2], order.of.visiting[j+2,2]))
+        time.same.side.in.out<-c(time.same.side.in.out,input.data$time[order.of.visiting[j+2,2]]-input.data$time[order.of.visiting[j+1,2]])
         same.side.in.out.id<-c(same.side.in.out.id,order.of.visiting[j+1,1])
       }
     }
@@ -72,7 +72,7 @@ getAisleTimes <- function(data, FootPosition, time, gg,
   data[i,]$n.walked.in.out.aisles<-nrow(same.side.in.out)
   
   if(any(a) &  save.data){
-    time.in.aisle <- time[t[c(diff(t[,1]) != 0, T), 2]] - time[t[c(T, diff(t[,1]) != 0), 2]] #time spent in each aisle (which aisle is speficied later)
+    time.in.aisle <- input.data$time[t[c(diff(t[,1]) != 0, T), 2]] - input.data$time[t[c(T, diff(t[,1]) != 0), 2]] #time spent in each aisle (which aisle is speficied later)
     times.through.aisle <- t[c(TRUE, diff(t[,1]) != 0), ] # dit klopt niet
     times.through.aisle <- data.frame(aisles$aisle.names[times.through.aisle[, 1]], times.through.aisle, time.in.aisle)
     colnames(times.through.aisle)[1:3] <- c("aisle.names", "aisle", "Entry.time.point")
@@ -128,7 +128,7 @@ getAisleTimes <- function(data, FootPosition, time, gg,
     
   } 
   # check, per coordinate whether they are in an aisle or not.
-  a.shoppingaisles <- apply(FootPosition[, c(1, 3)], 1, CheckPathInAisle, aisles = filter(aisles, type=="shopping"))
+  a.shoppingaisles <- apply(input.data[, c(2, 4)], 1, CheckPathInAisle, aisles = filter(aisles, type=="shopping"))
   t.shoppingaisles <- which(a.shoppingaisles, arr.ind = TRUE)
   shopping.aisle.time.points <- t.shoppingaisles[, 2]
   

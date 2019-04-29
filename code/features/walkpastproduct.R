@@ -6,8 +6,7 @@
 
 
 WalkpastProduct<-function(data,
-                          FootPosition,
-                          time,
+                          input.data,
                           gg,
                           products,
                           products2,
@@ -72,7 +71,7 @@ WalkpastProduct<-function(data,
   }
   
   
-  a <- apply(FootPosition[, c(1, 3)], 1, Checkwalkinproductbox, productbox = productbox2)
+  a <- apply(input.data[, 2:4], 1, Checkwalkinproductbox, productbox = productbox2)
   t <- which(a, arr.ind = TRUE)
   producttimepoint.time.points <- t[, 2]
    
@@ -85,7 +84,7 @@ WalkpastProduct<-function(data,
       times.through.productbox$productnumber <- factor(times.through.productbox$productnumber, levels = productbox2$productnumber)
       
     }else{
-      time.in.productbox <- time[t[c(diff(t[,1]) != 0, T), 2]] - time[t[c(T, diff(t[,1]) != 0), 2]] 
+      time.in.productbox <- input.data$time[t[c(diff(t[,1]) != 0, T), 2]] - input.data$time[t[c(T, diff(t[,1]) != 0), 2]] 
       times.through.productbox  <- matrix(t[c(TRUE, diff(t[,1]) != 0), ], ncol=2)
       times.through.productbox <- data.frame(productbox2$productnumber[ as.data.frame(times.through.productbox)[, 1]], times.through.productbox, time.in.productbox)
       colnames(times.through.productbox)[1:3] <- c("productnumber", "product", "Entry.time.point")

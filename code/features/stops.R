@@ -2,9 +2,12 @@
 #
 # Last edited 2018-10-18 by Laurent Smeets (l.s.m.smeets@uu.nl)
 
-getStops <- function(data, FootPosition, time, gg,
+getStops <- function(data, input.data, gg,
                      stop.time, stop.radius, productsbox,
                      save.data, full.images, i){
+  
+  FootPosition<-input.data[,2:4]
+  time<-input.data[,1]
   
   final.step <- first(which(time > max(time) - stop.time)) - 1
   

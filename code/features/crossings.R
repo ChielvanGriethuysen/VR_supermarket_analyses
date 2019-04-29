@@ -5,10 +5,13 @@
 
 
 
-getCrossings = function(data, FootPosition, time, gg, 
+getCrossings = function(data, input.data, gg, 
                         shopping.aisle.time.points, aisles,
                         cross.lag1, cross.lag2,
                         full.images, i){
+  FootPosition<- input.data[,2:4]
+  time<- input.data[,1]
+  
   
   print(paste('Calculating crossings of file', i))
   crossings <- anyIntersects(FootPosition$x, -FootPosition$z, time, cross.lag1)
