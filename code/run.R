@@ -66,8 +66,6 @@ for(i in 1 : length(data.files)){
                                 full.images = params$full.images,
                                 save.data = params$save.data,
                                 i = i)
-    #skip points, if to close to each other, to speed op crossing finding
-    move_data<-skippoints(res$input.data,distance = 1)
     
     res.cross <- getCrossings(data = res.aisles$data,
                               input.data = res$input.data,
@@ -101,7 +99,7 @@ for(i in 1 : length(data.files)){
     res.slows <- getSlows(data = res.products$data, 
                           input.data = res$input.data,
                           gg = res.products$gg.products,
-                          stop.points = res.stops$stop.points[[1]], 
+                          stop.points = res.stops$stop.points, 
                           slow.time = params$features$slows$slow.time, 
                           slow.radius = params$features$slows$slow.radius,
                           producttimepoint.time.points = res.products$producttimepoint.time.points,

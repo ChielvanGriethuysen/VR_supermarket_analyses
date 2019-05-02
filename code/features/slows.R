@@ -9,70 +9,24 @@ getSlows <- function(data, input.data, gg,
   time<- input.data[,1]
   FootPosition<-input.data[,2:4]
   
+  slow<- speedfeature(input.data,slow.time,slow.radius,stop.points)
+  slow<- add.times(slow,input.data)
   
-  final.step <- first(which(time > max(time) - slow.time)) - 1
-  slow <- data.frame(begin.slow = rep(FALSE, length(time)), end.slow = numeric(length(time)))
-  
-  k <- dis <- final.step.in.slow <- 0
-  #calculate distance between two points for every point
-  slow.radius.squared<-slow.radius^2 
-  x.change <- diff(FootPosition$x, 1) 
-  y.change <- diff(FootPosition$z, 1)  
-  distance.between.points<-sqrt(x.change^2 + y.change^2)
-  
-  for(b in 1 : final.step){
-    if(b %% 1000 == 0){
-      print(paste0('Calculating SLOW of time point ', b, ' of ', final.step, 
-                   ' of file ', i))  }  
-    
-    if(final.step.in.slow > b || b %in% stop.points){ #Don't check points that are already part of previous slow or a stop
-      next
-    }
-    
-    dis <- 0
-    k <- b
-    #skip points that can't be on the border of the stop.radius, skips distance calculations for uninteresting points
-    helpDis<-0
-    while (helpDis<sqrt(slow.radius)&& !stop.points[k]&& k < length(time)) {
-      helpDis<-helpDis+distance.between.points[k]
-      k<-k+1
-    }
-    dis <- (FootPosition$x[b] - FootPosition$x[k]) ^ 2 +
-      (FootPosition$z[b] - FootPosition$z[k]) ^ 2
-    #look at the points that are byond stop.radius walking distance
-    while(dis < slow.radius.squared && !stop.points[k] && k < length(time)){
-      k <- k + 1
-      dis <- (FootPosition$x[b] - FootPosition$x[k]) ^ 2 +
-                    (FootPosition$z[b] - FootPosition$z[k]) ^ 2
-    }
-    # if point on distance stop.radius and time more than stop.time than it is a stop
-    if(time[k - 1] - time[b] > slow.time) {
-      slow[b, 1] <- TRUE
-      slow[b, 2] <- final.step.in.slow <- k
-    }
-    
-  }
-  
-  slow.points<-which(slow[, 1])
+  slow.points<-slow$begin
   slow.points2<-as.data.frame(slow.points)
 
-  n.slows <- length(slow.points)
+  n.slows <- nrow(slow)
   n.slows.before.item<-sum(slow.points  %in% producttimepoint.time.points)
   slows.elsewhere <- n.slows-n.slows.before.item
   
   
-  
-  slow.begin.slow<-slow$begin.slow
-  slow.end.slow<-slow$end.slow
-  frame<-tibble(slow.end.slow=slow.end.slow,obs=1:length(slow.end.slow)) %>%
-    filter(slow.end.slow!=0)
-  if(nrow(frame)==0){
+  if(nrow(slow)==0){
     n.slows.before.item2 <- 0
     slows.elsewhere2 <- 0
   }else{
     listslowpoint<-list()
-    for(g in 1:nrow(frame)){
-      listslowpoint[[g]]<-as.numeric(frame[g,2]):as.numeric(frame[g,1])
+    for(g in 1:nrow(slow)){
+      listslowpoint[[g]]<-as.numeric(slow$begin[g]):as.numeric(slow$end[g])
     }
     sumslowpoints<-c()  
     for(w in 1:length(listslowpoint)){
@@ -115,28 +69,15 @@ getSlows <- function(data, input.data, gg,
   data$slows.1st.1.3rd.items[i]<-slows.1st.1.3rd.items
   data$slows.2nd.1.3rd.items[i]<-slows.2nd.1.3rd.items
   data$slows.3rd.1.3rd.items[i]<-slows.3rd.1.3rd.items
-
   
-  ## calculate total slowing time
-  
-  
-  frame1<-tibble(slow.end.slow=slow.end.slow,obs=1:length(slow.end.slow), time.beginning=time) %>%
-    filter(slow.end.slow!=0)
-  
-  frame2<-tibble(time.end=time, observation=1:length(time))%>%
-    filter(observation%in%frame1$slow.end.slow)%>%
-    bind_cols(frame1) %>%
-    select(-observation) %>%
-    mutate(slowduration=time.end-time.beginning)
-  
-  data$total.slowing.time[i]<-sum(frame2$slowduration)
+  data$total.slowing.time[i]<-sum(slow$time.spend)
   
   gg.slows <- gg
   
   if(full.images){
-    if(any(slow[, 1])){
-      for(s in which(slow[, 1])){
-        slows.df <- FootPosition[c(s : slow[s, 2]), ]
+    if(n.slows>0){
+      for(s in 1:nrow(slow)){
+        slows.df <- FootPosition[c(slow$begin[s] : slow$end[s]), ]
         gg.slows$layers <- append(gg.slows$layers,
                                   geom_encircle(data = slows.df,
                                                 mapping = aes(x = x, y = -z) , s_shape = .5, 
@@ -173,8 +114,8 @@ getSlows <- function(data, input.data, gg,
              slow.points=slow.points,
              slow.points2=slow.points2,
              slow=slow,
-             final.step=final.step,
-             frame2=frame2)
+             final.step=final.step)#,
+             #frame2=frame2)
   }
   
   return(res)

@@ -9,81 +9,35 @@ getStops <- function(data, input.data, gg,
   FootPosition<-input.data[,2:4]
   time<-input.data[,1]
   
-  final.step <- first(which(time > max(time) - stop.time)) - 1
+  stop<-speedfeature(input.data,stop.time,stop.radius)
   
-  stop <- data.frame(begin.stop = rep(FALSE, length(time)), end.stop = numeric(length(time)))
+  stop.points<- expandstops(stop, nrow(input.data))
 
-  #calculate distance between two points for every point
-  stop.radius.squared<-stop.radius^2
+  stop<- add.times(stop,input.data)
   
-  x.change <- diff(FootPosition$x, 1)
-  y.change <- diff(FootPosition$z, 1) 
-  distance.between.points<-sqrt(x.change^2 + y.change^2)
   
-  k <- dis <- final.step.in.stop <- 0
-  for(s in 1 : final.step){
-    if(s %% 1000 == 0){
-      print(paste0('Calculating STOP of time point ', s, ' of ', final.step, 
-                   ' of file ', i))
-    }
-    
-    if(final.step.in.stop > s){ #Don't check points that are already part of previous stop
-      next
-    }
-    
-    dis <- 0
-    k <- s
-    #skip points that can't be on the border of the stop.radius, skips distance calculations for uninteresting points
-    helpDis<-0
-    while (helpDis<stop.radius&& k < length(time)) {
-      helpDis<-helpDis+distance.between.points[k]
-      k<-k+1
-    }
-    dis <- (FootPosition$x[s] - FootPosition$x[k]) ^ 2 +
-      (FootPosition$z[s] - FootPosition$z[k]) ^ 2
-    
-    #look at the points that are byond stop.radius walking distance
-    while(dis < stop.radius.squared && k < length(time)){
-      k <- k + 1
-      dis <- (FootPosition$x[s] - FootPosition$x[k]) ^ 2 +
-                    (FootPosition$z[s] - FootPosition$z[k]) ^ 2
-    }
-    # if point on distance stop.radius and time more than stop.time than it is a stop
-    if(time[k - 1] - time[s] > stop.time){
-      stop[s : (k - 1), 1] <- TRUE
-      stop[s, 2] <- final.step.in.stop <- k - 1
-    }
-  }
+  
   
   #####
-  stop.begin.stop<-stop$begin.stop
-  stop.end.stop<-stop$end.stop
+  # stop.begin.stop<-stop$begin
+  # stop.end.stop<-stop$end
   
   
-  frame1<-tibble(stop.end.stop=stop.end.stop,obs=1:length(stop.end.stop), time.beginning=time) %>%
-    filter(stop.end.stop!=0)
-  
-  frame2<-tibble(time.end=time, observation=1:length(time))%>%
-    filter(observation%in%frame1$stop.end.stop)%>%
-    bind_cols(frame1) %>%
-    select(-observation) %>%
-    mutate(stopduration=time.end-time.beginning)
-  
-  data$total.stoping.time[i]<-sum(frame2$stopduration)
+  # frame1<-tibble(stop.end.stop=stop.end.stop,obs=1:length(stop.end.stop), time.beginning=time) %>%
+  #   filter(stop.end.stop!=0)
+  # 
+  # frame2<-tibble(time.end=time, observation=1:length(time))%>%
+  #   filter(observation%in%frame1$stop.end.stop)%>%
+  #   bind_cols(frame1) %>%
+  #   select(-observation) %>%
+  #   mutate(stopduration=time.end-time.beginning)
+  # 
+  # data$total.stoping.time[i]<-sum(frame2$stopduration)
   
   #####
   
-  
-  stop.points <- stop[, 1]
-  
-  stop.start.points <- which(stop[, 2] != 0)
-  n.stops <- length(stop.start.points)
-  stop.pos <- FootPosition[stop.start.points, ]
-  
-  Checkstopbeforeitem <- function(position, productsbox){
-    position[1] > productsbox$xmin & position[1] < productsbox$xmax &
-      -position[2] > productsbox$zmin & -position[2] < productsbox$zmax
-  }
+  n.stops <- nrow(stop)
+  stop.pos <- FootPosition[stop$begin, ]
   
   
   a <- apply(stop.pos[, c(1, 3)], 1, Checkstopbeforeitem, productsbox = productsbox)
@@ -113,7 +67,7 @@ getStops <- function(data, input.data, gg,
   #split slows per third.
   
   
-  stoppointstibble<-tibble(stoppoints=stop.start.points)
+  stoppointstibble<-tibble(stoppoints=stop$begin)
   split1<-which.min(abs(time - last(time)/3)) 
   split2<-which.min(abs(time - (last(time)/3*2)))
   
@@ -149,11 +103,11 @@ getStops <- function(data, input.data, gg,
   }
   
   res.stops <- list(gg.stops = gg.stops,
-                    stop.points = list(stop.points),
                     data = data,
-                    n.stops = n.stops,
+                    stop.log = stop,
                     stop.points=stop.points,
                     stop.pos=stop.pos,
+                    n.stops = n.stops,
                     n.stops.before.item=n.stops.before.item)
   
   return(res.stops)
