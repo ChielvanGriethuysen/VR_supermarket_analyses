@@ -149,8 +149,6 @@ runFirstAnalyses <- function(JSONfile,
                     simplifyDataFrame = TRUE)
   )
   
-
-
   # put data in one dataframe
   input.data<-data.frame(dat[[1]]$m_PupilTime,dat[[1]]$m_FootPosition)
   names(input.data)[1]<- "time"
@@ -160,8 +158,18 @@ runFirstAnalyses <- function(JSONfile,
   if(length(dup) > 0){
     input.data<-input.data[-dup,]
   }
+  
   #only use the data in the actuale supermarket
-  input.data<-input.data[dat[[1]]$m_Area=="S",]
+  first <- first(which(input.data$z < 45.5 & input.data$z >10))
+  if(first > 1){
+    input.data<-input.data[-1:-first,]
+  }
+  
+  # Remove all datapoints after end of the task
+  last <- last(which(input.data$z < 45.5))
+  if(last < nrow(input.data)){
+    input.data<-input.data[-last:-nrow(input.data),]
+  }
   row.names(input.data) <- 1:nrow(input.data)
 
   #add speed to dataframe and calculate total distance
@@ -171,7 +179,6 @@ runFirstAnalyses <- function(JSONfile,
   speed<-c(0,distance.between.points/diff(input.data$t,1))
   input.data<- data.frame(input.data, speed,c(0,distance.between.points))
   names(input.data)[6]<- "dist"
-
   
   total.distance<-sum(sqrt(x.change^2 + y.change^2))
   

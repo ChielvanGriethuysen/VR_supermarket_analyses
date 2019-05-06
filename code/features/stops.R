@@ -13,8 +13,8 @@ getStops <- function(data, input.data, gg,
   
   stop.points<- expandstops(stop, nrow(input.data))
 
-  stop<- add.times(stop,input.data)
-  
+  stop<- add.times.location(stop,input.data)
+  stop$type<-"Stop"
   
   
   

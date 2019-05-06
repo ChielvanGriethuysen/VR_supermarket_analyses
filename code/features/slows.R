@@ -6,11 +6,13 @@
 getSlows <- function(data, input.data, gg,
                      stop.points, slow.time, slow.radius, producttimepoint.time.points,
                      full.images, save.data, i){
+
   time<- input.data[,1]
   FootPosition<-input.data[,2:4]
   
   slow<- speedfeature(input.data,slow.time,slow.radius,stop.points)
-  slow<- add.times(slow,input.data)
+  slow<- add.times.location(slow,input.data)
+  slow$type<-"Slow"
   
   slow.points<-slow$begin
   slow.points2<-as.data.frame(slow.points)
@@ -111,10 +113,10 @@ getSlows <- function(data, input.data, gg,
              n.slows = n.slows,
              n.slows.before.item=n.slows.before.item,
              n.slows.before.item2=n.slows.before.item2,
-             slow.points=slow.points,
+             slow.points=list(slow.points),
              slow.points2=slow.points2,
-             slow=slow,
-             final.step=final.step)#,
+             slow.log=list(slow))#,
+             #final.step=final.step)#,
              #frame2=frame2)
   }
   
