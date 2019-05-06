@@ -46,8 +46,8 @@ getAisleTimes <- function(data, input.data, gg,
   # also calculate the distance used to determine efficiency
   order.of.visiting<-t[t[,1] != lag(t[,1], default = !t[1,1]),]
 
-  dist.walk.through<-time.walk.through<-walk.through.id<-c()
-  dist.same.side.in.out<-time.same.side.in.out<-same.side.in.out.id<-c()
+  dist.walk.through<-time.walk.through<-walk.through.id<-walk.through.name<-c()
+  dist.same.side.in.out<-time.same.side.in.out<-same.side.in.out.id<-same.side.in.out.name<-c()
   
   for (j in 1:(nrow(order.of.visiting)-2)) {
     if(aisles$type[order.of.visiting[j,1]]== "main"){
@@ -56,11 +56,13 @@ getAisleTimes <- function(data, input.data, gg,
         dist.walk.through<-c(dist.walk.through,subdistance(input.data[,2:4],order.of.visiting[j+1,2], order.of.visiting[j+2,2]))
         time.walk.through<-c(time.walk.through,input.data$time[order.of.visiting[j+2,2]]-input.data$time[order.of.visiting[j+1,2]])
         walk.through.id<-c(walk.through.id,order.of.visiting[j+1,1])
+        walk.through.name<-c(walk.through.name, aisles$aisle.names[order.of.visiting[j+1,1]])
       }
       else{
         dist.same.side.in.out<-c(dist.same.side.in.out,subdistance(input.data[,2:4],order.of.visiting[j+1,2], order.of.visiting[j+2,2]))
         time.same.side.in.out<-c(time.same.side.in.out,input.data$time[order.of.visiting[j+2,2]]-input.data$time[order.of.visiting[j+1,2]])
         same.side.in.out.id<-c(same.side.in.out.id,order.of.visiting[j+1,1])
+        same.side.in.out.name<-c(same.side.in.out.name,aisles$aisle.names[order.of.visiting[j+1,1]])
       }
     }
   }
