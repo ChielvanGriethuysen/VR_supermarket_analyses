@@ -91,10 +91,15 @@ Checkstopbeforeitem <- function(position, productsbox){
     -position[2] > productsbox$zmin & -position[2] < productsbox$zmax
 }
 # add time info to stop/slow
-add.times<- function(points, input.data){
+add.times.location<- function(points, input.data){
   points$start.time<-input.data$time[points$begin]
   points$stop.time<- input.data$time[points$end]
   points$time.spend<-points$stop.time- points$start.time
+  points$x.start<-input.data$x[points$begin]
+  points$z.start<-input.data$z[points$begin]
+  points$x.stop<-input.data$x[points$end]
+  points$z.stop<-input.data$z[points$end]
+  
   return(points)
 }
 
