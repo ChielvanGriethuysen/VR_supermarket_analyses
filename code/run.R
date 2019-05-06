@@ -155,7 +155,7 @@ for(i in 1 : length(data.files)){
       event.log<-rbind(res.slows$slow.log,res.stops$stop.log) %>%
         arrange(begin)
       
-      write.csv2(event.log, file = paste0("output/logs/log_",data$ID[1], ".csv"), row.names = FALSE)
+      write.csv2(event.log, file = paste0("output/logs/log_",data$ID[i], ".csv"), row.names = FALSE)
       
       
     }

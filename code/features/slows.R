@@ -12,8 +12,9 @@ getSlows <- function(data, input.data, gg,
   
   slow<- speedfeature(input.data,slow.time,slow.radius,stop.points)
   slow<- add.times.location(slow,input.data)
+  if(nrow(slow)>0){
   slow$type<-"Slow"
-  
+  }
   slow.points<-slow$begin
   slow.points2<-as.data.frame(slow.points)
 
