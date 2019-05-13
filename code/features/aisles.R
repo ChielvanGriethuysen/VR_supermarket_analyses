@@ -17,7 +17,7 @@ getAisleTimes <- function(data, input.data, gg,
                                  geom_rect(data = aisles,
                                            mapping = aes(xmin = xmin, xmax = xmax,
                                                          ymin = zmin, ymax = zmax,
-                                                         colour = colour, x = x, y = y, fill=factor(type)), 
+                                                         fill=factor(type)), 
                                            alpha = .3)+
         geom_label(data = aisles,
                    mapping = aes(x = xmin, y = zmin, label = aisles$aisle.names),

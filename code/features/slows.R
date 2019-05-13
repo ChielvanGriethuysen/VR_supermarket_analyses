@@ -11,9 +11,10 @@ getSlows <- function(data, input.data, gg,
   FootPosition<-input.data[,2:4]
   
   slow<- speedfeature(input.data,slow.time,slow.radius,stop.points)
-  slow<- add.times.location(slow,input.data)
+
   if(nrow(slow)>0){
-  slow$type<-"Slow"
+    slow<- add.times.location(slow,input.data)
+    slow$type<-"Slow"
   }
   slow.points<-slow$begin
   slow.points2<-as.data.frame(slow.points)
@@ -29,7 +30,7 @@ getSlows <- function(data, input.data, gg,
   }else{
     listslowpoint<-list()
     for(g in 1:nrow(slow)){
-      listslowpoint[[g]]<-as.numeric(slow$begin[g]):as.numeric(slow$end[g])
+      listslowpoint[[g]]<-as.numeric(slow$start[g]):as.numeric(slow$stop[g])
     }
     sumslowpoints<-c()  
     for(w in 1:length(listslowpoint)){
@@ -53,7 +54,7 @@ getSlows <- function(data, input.data, gg,
   
   #split slows per third.
   
-  slowpointstibble<-tibble(slowpoints=slow.points)
+  slowpointstibble<-tibble(slowpoints=slow$start)
   split1<-which.min(abs(time - last(time)/3)) 
   split2<-which.min(abs(time - (last(time)/3*2)))
   
@@ -80,7 +81,7 @@ getSlows <- function(data, input.data, gg,
   if(full.images){
     if(n.slows>0){
       for(s in 1:nrow(slow)){
-        slows.df <- FootPosition[c(slow$begin[s] : slow$end[s]), ]
+        slows.df <- FootPosition[c(slow$start[s] : slow$stop[s]), ]
         gg.slows$layers <- append(gg.slows$layers,
                                   geom_encircle(data = slows.df,
                                                 mapping = aes(x = x, y = -z) , s_shape = .5, 

@@ -33,7 +33,7 @@ speedfeature<- function(input.data, break.time, radius, skippoints=c()){
   
   final.step <- first(which(time > max(time) - break.time)) - 1
   
-  stop <- data.frame(begin = numeric(length(time)), end = numeric(length(time)))
+  stop <- data.frame(start = numeric(length(time)), stop = numeric(length(time)))
   
   #calculate distance between two points for every point
   radius.squared<-radius^2
@@ -80,8 +80,10 @@ speedfeature<- function(input.data, break.time, radius, skippoints=c()){
 #give indexed liste for each datapoint if it is part of a stop
 expandstops<-function(data,n.datapoints){
   stop<-rep(FALSE,n.datapoints)
-  for (i in 1:nrow(data)) {
-    stop[data$begin[i] : data$end[i]] <- TRUE
+  if(nrow(data)>0){
+    for (i in 1:nrow(data)) {
+      stop[data$start[i] : data$stop[i]] <- TRUE
+    }
   }
   stop
 }
@@ -92,14 +94,122 @@ Checkstopbeforeitem <- function(position, productsbox){
 }
 # add time info to stop/slow
 add.times.location<- function(points, input.data){
-  points$start.time<-input.data$time[points$begin]
-  points$stop.time<- input.data$time[points$end]
+  points$start.time<-input.data$time[points$start]
+  points$stop.time<- input.data$time[points$stop]
   points$time.spend<-points$stop.time- points$start.time
-  points$x.start<-input.data$x[points$begin]
-  points$z.start<-input.data$z[points$begin]
-  points$x.stop<-input.data$x[points$end]
-  points$z.stop<-input.data$z[points$end]
+  points$x.start<-input.data$x[points$start]
+  points$z.start<-input.data$z[points$start]
+  points$x.stop<-input.data$x[points$stop]
+  points$z.stop<-input.data$z[points$stop]
+  points$absolute.dist<- 0
+  points$relative.dist<-sqrt((points$x.start-points$x.stop)^2+(points$z.start-points$z.stop)^2)
+
   
+  for(i in 1:nrow(points)){
+    points$absolute.dist[i]<- sum(input.data$dist[points$start[i]:points$stop[i]])
+  }
+  points$absolute.speed<-points$absolute.dist/points$time.spend
+  points$relative.speed<-points$relative.dist/points$time.spend
   return(points)
 }
+
+calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequations=TRUE){
+  candidates <-output<- data.frame(start = numeric(), stop = numeric())
+  j<-1
+  dist<-0
+  i<-1
+  #find all parts below or above certain speed with minimum duration
+  if(lowerinequations){
+    while(i < nrow(input.data)){
+      if(input.data$speed[i]<cuttoff){
+        t<-0
+        j<-i
+        while (input.data$speed[j]<cuttoff && j< nrow(input.data)) {
+          j<-j+1
+        }
+        if(input.data$time[j]-input.data$time[i]>0.05){
+          candidates<-rbind(candidates,data.frame(start= i,stop=j))
+          i<-j
+        }
+      }
+      i<-i+1
+    }
+  } else{
+    while(i < nrow(input.data)){
+      if(input.data$speed[i]>cuttoff){
+        t<-0
+        j<-i
+        while (input.data$speed[j]>cuttoff && j<nrow(input.data)) {
+          j<-j+1
+        }
+        if(input.data$time[j]-input.data$time[i]>0.05){
+          candidates<-rbind(candidates,data.frame(start= i,stop=j))
+          i<-j
+        }
+      }
+      i<-i+1
+    }
+    
+  }
+  #if parts are to short afther each other then combine them
+  k<-1
+  while (k<nrow(candidates)) {
+    l<-k
+    while (l<nrow(candidates) && 
+           input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist) {
+      l<-l+1
+    }
+    output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[l]))
+    k<-l+1
+  }
+  # add last element if not mearged with previous one
+  if(last(candidates$stop)!=last(output$stop))
+  {
+    output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[k]))
+  }
+  output
+}
+#add the type to eache datapoint
+datapoint.add.label<-function(input.data, log){
+  
+  label<-rep("none",nrow(input.data))
+  
+  for (i in 1:nrow(log)) {
+    label[log$start[i]:log$stop[i]]<-log$label[i]
+  }
+  data.frame(input.data,label)
+  
+}
+
+
+# nice.plot<-function(data,start, stop){
+#   
+#   stops<-calc.speed.discretisation( data)%>%add.times.location(data)%>%filter(time.spend>2)
+#   walking<-calc.speed.discretisation(data,lowerinequations = FALSE) %>%add.times.location(data) %>% filter(time.spend>1)
+#   stops<-stops%>%filter(start>start , end<stop)
+#   walking<-walking%>% filter(start>start,end<=stop)
+#   
+#   #data<-data.frame(data,types=expandstops(stops,nrow(data)))
+# 
+#   plot<-ggplot()+
+#     geom_point(data[start:stop,], mapping =  aes(time, speed),size=0.75)+
+#     geom_hline(yintercept=0.15, color="red") +
+#     ylim(0,0.6)
+#   
+#   if(nrow(stops)>0){
+#     stops$types<-"Stop"
+#     plot<-plot+
+#       geom_rect(stops,mapping =  aes(xmin=start.time,xmax=stop.time,ymin=0,ymax=0.15, fill= types),alpha=0.5)
+#   }
+#   if(nrow(walking)>0){
+#     walking$types<-"Walking"
+#     plot<-plot+
+#       geom_rect(walking,mapping =  aes(xmin=start.time,xmax=stop.time,ymin=0.4,ymax=0.6, fill= types),alpha=0.5)
+#   }
+# 
+# 
+#   
+#   plot
+# }
+
 

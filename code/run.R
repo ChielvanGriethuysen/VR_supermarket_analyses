@@ -67,9 +67,25 @@ for(i in 1 : length(data.files)){
                                 save.data = params$save.data,
                                 i = i)
     
-    res.cross <- getCrossings(data = res.aisles$data,
+    res.products <- WalkpastProduct(data = res.aisles$data,
+                                    input.data = res$input.data,
+                                    gg = res.aisles$gg,
+                                    products =  res$productbox,
+                                    products2 = params$features$products, 
+                                    full.images = params$full.images,
+                                    save.data = params$save.data,
+                                    i = i)
+    
+    res.speed<- speeddiscretisation(data = res.products$data,
+                                    input.data = res$input.data,
+                                    gg=res.products$gg.products,
+                                    stop.params = params$features$stops,
+                                    walk.params = params$features$walk,
+                                    i=i)
+    
+    res.cross <- getCrossings(data = res.speed$data,
                               input.data = res$input.data,
-                              gg = res.aisles$gg.aisles,
+                              gg = res.speed$gg,
                               shopping.aisle.time.points = res.aisles$shopping.aisle.time.points,
                               aisles = params$features$aisles,
                               cross.lag1 = params$features$cross$cross.lag1,
@@ -77,36 +93,29 @@ for(i in 1 : length(data.files)){
                               full.images = params$full.images,
                               i = i)
     
-    res.stops <- getStops(data = res.cross$data,
-                          input.data = res$input.data,
-                          gg = res.cross$gg.cross,
-                          stop.time = params$features$stops$stop.time,
-                          stop.radius = params$features$stops$stop.radius,
-                          full.images = params$full.images,
-                          productsbox = res$productbox,
-                          save.data = params$save.data,
-                          i = i)
-    
-    res.products <- WalkpastProduct(data = res.stops$data,
-                                   input.data = res$input.data,
-                                   gg = res.stops$gg,
-                                   products =  res$productbox,
-                                   products2 = params$features$products, 
-                                   full.images = params$full.images,
-                                   save.data = params$save.data,
-                                   i = i)
-    
-    res.slows <- getSlows(data = res.products$data, 
-                          input.data = res$input.data,
-                          gg = res.products$gg.products,
-                          stop.points = res.stops$stop.points, 
-                          slow.time = params$features$slows$slow.time, 
-                          slow.radius = params$features$slows$slow.radius,
-                          producttimepoint.time.points = res.products$producttimepoint.time.points,
-                          full.images = params$full.images,
-                          save.data = params$save.data, 
-                          i = i)
-    data<-  res.slows$data
+    # res.stops <- getStops(data = res.cross$data,
+    #                       input.data = res$input.data,
+    #                       gg = res.cross$gg.cross,
+    #                       stop.time = params$features$stops$stop.time,
+    #                       stop.radius = params$features$stops$stop.radius,
+    #                       full.images = params$full.images,
+    #                       productsbox = res$productbox,
+    #                       save.data = params$save.data,
+    #                       i = i)
+    # 
+    # 
+    # 
+    # res.slows <- getSlows(data = res.products$data, 
+    #                       input.data = res$input.data,
+    #                       gg = res.products$gg.products,
+    #                       stop.points = res.stops$stop.points, 
+    #                       slow.time = params$features$slows$slow.time, 
+    #                       slow.radius = params$features$slows$slow.radius,
+    #                       producttimepoint.time.points = res.products$producttimepoint.time.points,
+    #                       full.images = params$full.images,
+    #                       save.data = params$save.data, 
+    #                       i = i)
+    data<-  res$cross$data
     
  
       if(params$full.images){
@@ -126,11 +135,21 @@ for(i in 1 : length(data.files)){
       productsbox <- params$features$products1
       productslocation <- params$features$products2
       
+      
+      n.stops<-res.speed$n.stops
+      n.slows<-res.speed$n.slows
+      ggsave(paste0('output/png/', params$output.dir, '/', JSONfile, '.png'), 
+             res.cross$gg.cross, width = 37.5, height = 21, units = 'cm')
+      
 
       
       #JSONfile <- substr(JSONfile, 1, 21)
-      ggsave(paste0('output/png/', params$output.dir, '/', JSONfile, '.png'), 
-      res.slows$gg.slows, width = 37.5, height = 21, units = 'cm')
+      # ggsave(paste0('output/png/', params$output.dir, '/', JSONfile, '.png'), 
+      # res.slows$gg.slows, width = 37.5, height = 21, units = 'cm')
+      
+      ggsave(paste0('output/png/', params$output.dir, '/', JSONfile,'speed', '.png'), 
+      speed.plot(res$input.data,res.speed$log), width = 40, height = 7, units = 'cm')
+      
       
       # merge data from other excel sheets with other test results
       Excel.personal <- readxl::read_excel(path = file.path("input", params$input.dir, data.files2), 
@@ -152,12 +171,10 @@ for(i in 1 : length(data.files)){
       
       write.csv2(datamerged, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
       
-      event.log<-rbind(res.slows$slow.log,res.stops$stop.log) %>%
-        arrange(begin)
+      # event.log<-rbind(res.slows$slow.log,res.stops$stop.log) %>%
+      #   arrange(begin)
       
-      write.csv2(event.log, file = paste0("output/logs/log_",data$ID[i], ".csv"), row.names = FALSE)
-      
-      
+      write.csv2(res.speed$log, file = paste0("output/logs/log_",data$ID[i], ".csv"), row.names = FALSE)
     }
   }
 }

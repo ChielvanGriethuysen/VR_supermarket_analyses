@@ -37,7 +37,7 @@ WalkpastProduct<-function(data,
       gg.products<- gg.products+  geom_rect(data = productbox2,
                                             mapping = aes(xmin = xmin, xmax = xmax,
                                                           ymin = zmin, ymax = zmax,
-                                                          colour = colour, x = x, y = y),
+                                                          ),
                                             fill= "yellow",
                                             alpha = .2)+
         geom_point(data = productslocation2, 

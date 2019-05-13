@@ -37,7 +37,7 @@ getStops <- function(data, input.data, gg,
   #####
   
   n.stops <- nrow(stop)
-  stop.pos <- FootPosition[stop$begin, ]
+  stop.pos <- FootPosition[stop$start, ]
   
   
   a <- apply(stop.pos[, c(1, 3)], 1, Checkstopbeforeitem, productsbox = productsbox)
@@ -67,7 +67,7 @@ getStops <- function(data, input.data, gg,
   #split slows per third.
   
   
-  stoppointstibble<-tibble(stoppoints=stop$begin)
+  stoppointstibble<-tibble(stoppoints=stop$start)
   split1<-which.min(abs(time - last(time)/3)) 
   split2<-which.min(abs(time - (last(time)/3*2)))
   

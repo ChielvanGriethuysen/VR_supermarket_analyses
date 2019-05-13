@@ -133,15 +133,15 @@ getCrossings = function(data, input.data, gg,
     if(full.images && n.crossings>0){
       gg.cross <- gg +
         geom_point(data = crossings.pos,
-                   aes(x = x, y = -z, size = 2),
+                   aes(x = x, y = -z), size= 3.5,
                    col = 'blue') +
         geom_text(aes(y = -48, x = 4, 
                       label = paste("N crossings =", n.crossings, "(", n.crossings.out.aisles, ")" )),
-                  colour = 'blue')
+                  colour = 'blue',size=5)
     }else{
       gg.cross<-gg+ geom_text(aes(y = -48, x = 4, 
                                   label = paste("N crossings =", n.crossings, "(", n.crossings.out.aisles, ")" )),
-                              colour = 'blue')
+                              colour = 'blue',size= 5)
     }
     
 

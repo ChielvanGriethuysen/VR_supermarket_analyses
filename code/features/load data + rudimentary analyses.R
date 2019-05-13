@@ -233,7 +233,7 @@ runFirstAnalyses <- function(JSONfile,
   
   
   # Make and save plot of raw walking path
-  ggpath <- ggplot() + 
+  gg <- ggplot() + 
     #ylim(-53, -7) + xlim(0, 29) +
     scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
     scale_y_continuous(limits = c(-50, -2.5), expand=c(0,0)) +
@@ -241,9 +241,6 @@ runFirstAnalyses <- function(JSONfile,
                                  width = unit(1, "npc"), 
                                  height = unit(1, "npc")), 
                       -Inf, Inf, -Inf, Inf) +
-    geom_path(data = input.data, 
-              mapping = aes(x = x, y = -z, color = 1:length(x)),
-              arrow = arrow(length = unit(5, "points"))) +
     #    coord_fixed() + 
     coord_flip() +
     theme(legend.position = "none",
@@ -254,6 +251,10 @@ runFirstAnalyses <- function(JSONfile,
                                 "\n Walking route")), 
               size = 5) + 
     geom_hline(yintercept = -45.5)
+  
+  ggpath<-gg+ geom_path(data = input.data, 
+                        mapping = aes(x = x, y = -z, color = 1:length(x)),
+                        arrow = arrow(length = unit(4, "points")))
   
   ggspeed <- ggplot() + 
     #ylim(-53, -7) + xlim(0, 29) +
