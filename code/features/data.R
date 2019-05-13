@@ -1,0 +1,53 @@
+data.basic<-function(data, input.data,i){
+  data$name[i] <- JSONfile
+  data$ID[i]<-substr(JSONfile,1,6)
+  data$total.time[i] <- last(input.data$time) - input.data$time[1]
+  data$total.distance[i] <- sum(input.data$dist)
+  data$n.datapoints[i] <- length(input.data$time)
+  data$datapoints.per.second[i] <- length(input.data$time) / (last(input.data$time) - input.data$time[1])
+  data$average.speed[i]<- data$total.distance[i] / data$total.time[i]
+  
+  data$max.difference.between.points[i] <-  max(abs(diff(input.data$dist)))
+  data$qt95.difference.between.points[i] <-quantile(abs(diff(input.data$dist)), probs = 0.95)
+  data$qt99.difference.between.points[i]  <-quantile(abs(diff(input.data$dist)), probs = 0.99)
+  data$max.difference.between.timepoints[i] <- max(diff(input.data$time))
+  data$qt95.difference.between.timepoints[i] <- quantile(diff(input.data$time),probs = 0.95)
+  data$qt99.difference.between.timepoints[i]<- quantile(diff(input.data$time),probs = 0.99)
+  
+  return(data)
+}
+
+data.VRlog<-function(data, Excel, i){
+  data$Hit_Totaal[i]<-filter(Excel, ID== data$ID[i])$Hit_Totaal
+  data$Avatars[i]<- filter(Excel, ID== data$ID[i])$Avatars
+  data$VR_aborted[i]<-filter(Excel, ID== data$ID[i])$VR_aborted
+  data$Tijd[i]<-filter(Excel, ID== data$ID[i])$Tijd
+  data$Interference[i]<-filter(Excel, ID== data$ID[i])$Interference
+  data$Hit_1[i]<-   filter(Excel, ID== data$ID[i])$Hit_1
+  data$Hit_2[i]<-   filter(Excel, ID== data$ID[i])$Hit_2
+  data$Hit_3[i]<-   filter(Excel, ID== data$ID[i])$Hit_3
+  data$Hit_4[i]<-   filter(Excel, ID== data$ID[i])$Hit_4
+  data$Hit_5[i]<-   filter(Excel, ID== data$ID[i])$Hit_5
+  data$Hit_6[i]<-   filter(Excel, ID== data$ID[i])$Hit_6
+  data$Hit_7[i]<-   filter(Excel, ID== data$ID[i])$Hit_7
+  data$Hit_8[i]<-   filter(Excel, ID== data$ID[i])$Hit_8
+  data$Tijd_H1[i]<- filter(Excel, ID== data$ID[i])$Tijd_H1
+  data$Tijd_H2[i]<- filter(Excel, ID== data$ID[i])$Tijd_H2
+  data$Tijd_H3[i]<- filter(Excel, ID== data$ID[i])$Tijd_H3
+  data$Tijd_H4[i]<- filter(Excel, ID== data$ID[i])$Tijd_H4
+  data$Tijd_H5[i]<- filter(Excel, ID== data$ID[i])$Tijd_H5
+  data$Tijd_H6[i]<- filter(Excel, ID== data$ID[i])$Tijd_H6
+  data$Tijd_H7[i]<- filter(Excel, ID== data$ID[i])$Tijd_H7
+  data$Tijd_H8[i]<- filter(Excel, ID== data$ID[i])$Tijd_H8
+  data$FA_Totaal[i]<-filter(Excel, ID== data$ID[i])$FA_Totaal
+  data$FA_Time[i]<- filter(Excel, ID== data$ID[i])$FA_Time
+  data$Kassa[i]<-   filter(Excel, ID== data$ID[i])$Kassa
+  
+  
+  
+  return(data)
+  
+}
+
+  
+  

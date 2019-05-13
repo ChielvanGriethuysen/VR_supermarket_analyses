@@ -181,35 +181,51 @@ datapoint.add.label<-function(input.data, log){
   
 }
 
-
-# nice.plot<-function(data,start, stop){
-#   
-#   stops<-calc.speed.discretisation( data)%>%add.times.location(data)%>%filter(time.spend>2)
-#   walking<-calc.speed.discretisation(data,lowerinequations = FALSE) %>%add.times.location(data) %>% filter(time.spend>1)
-#   stops<-stops%>%filter(start>start , end<stop)
-#   walking<-walking%>% filter(start>start,end<=stop)
-#   
-#   #data<-data.frame(data,types=expandstops(stops,nrow(data)))
-# 
-#   plot<-ggplot()+
-#     geom_point(data[start:stop,], mapping =  aes(time, speed),size=0.75)+
-#     geom_hline(yintercept=0.15, color="red") +
-#     ylim(0,0.6)
-#   
-#   if(nrow(stops)>0){
-#     stops$types<-"Stop"
-#     plot<-plot+
-#       geom_rect(stops,mapping =  aes(xmin=start.time,xmax=stop.time,ymin=0,ymax=0.15, fill= types),alpha=0.5)
-#   }
-#   if(nrow(walking)>0){
-#     walking$types<-"Walking"
-#     plot<-plot+
-#       geom_rect(walking,mapping =  aes(xmin=start.time,xmax=stop.time,ymin=0.4,ymax=0.6, fill= types),alpha=0.5)
-#   }
-# 
-# 
-#   
-#   plot
-# }
+add.npo.and.persenal.data<-function(data,params, data.file ){
+  
+  
+  # merge data from other excel sheets with other test results
+  Excel.personal <- readxl::read_excel(path = file.path("input", params$input.dir, data.file),
+                                       sheet = params$sheet.excel2,
+                                       range = paste0(params$range.personal, params$n.row.excel)) %>%
+    mutate(ID = as.character(ID))
+  
+  Excel.NPO<-readxl::read_excel(path  = file.path("input", params$input.dir, data.file),
+                                sheet = params$sheet.excel3,
+                                range = paste0(params$range.NPO, params$n.row.excel))%>%
+    mutate(ID = as.character(ID))
+  
+  # for some reason distance doesnt really work yet so it is calculated here
+  datamerged <-
+    left_join(data, select(Excel.personal, -VR_aborted, -Avatars), by = "ID" ) %>%
+    left_join(select(Excel.NPO, -education, -age), by = "ID" ) %>%
+    mutate(distance = total.time*average.speed)
+  return(datamerged)
+}
+#calculate box around products, used to determine if person is doing somting close to the product
+calc.productbox<- function(products){
+  data.frame(xmin = rep(NA, nrow(products)),
+             xmax = rep(NA, nrow(products)),
+             zmin = rep(NA, nrow(products)),
+             zmax = rep(NA, nrow(products)),
+             up.down.side= products$up.down.side,
+             announced = products$announced,
+             productnumber =  products$productnumber,
+             x = products$x,
+             y = products$z,
+             colour = products$colour) %>%
+    mutate(xmin = ifelse(up.down.side == "up", products$x-products$height,
+                         ifelse(up.down.side =="down", products$x,
+                                products$x-.5*products$height))) %>% 
+    mutate(xmax = ifelse(up.down.side == "up", products$x,
+                         ifelse(up.down.side == "down",products$x+products$height,
+                                products$x+.5*products$height)))%>%
+    mutate(zmin = ifelse(up.down.side == "sideleft", products$z-products$width, 
+                         ifelse(up.down.side == "sideright",  products$z,
+                                products$z-.5*products$width))) %>%
+    mutate(zmax = ifelse(up.down.side == "sideleft", products$z, 
+                         ifelse(up.down.side == "sideright",  products$z+products$width,
+                                products$z+.5*products$width)))
+}
 
 
