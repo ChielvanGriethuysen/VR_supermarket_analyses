@@ -33,10 +33,10 @@ data.files2 <- list.files(
 )
 
 # load the excelsheet with the hits of the respondents
-Excel<-readxl::read_excel(path= file.path("input", params$input.dir, data.files2), 
-                                          sheet=params$sheet.excel,
-                                          n_max=params$n.row.excel)%>%
-  mutate(ID = as.character(ID))
+# Excel<-readxl::read_excel(path= file.path("input", params$input.dir, data.files2), 
+#                                           sheet=params$sheet.excel,
+#                                           n_max=params$n.row.excel)%>%
+#   mutate(ID = as.character(ID))
 
 
 
@@ -115,7 +115,7 @@ for(i in 1 : length(data.files)){
     #                       full.images = params$full.images,
     #                       save.data = params$save.data, 
     #                       i = i)
-    data<-  res$cross$data
+    data<-  res.cross$data
     
  
       if(params$full.images){
@@ -128,10 +128,10 @@ for(i in 1 : length(data.files)){
       aisles2 <- params$features$aisles2
       n.crossings <- res.cross$n.crossings
       stop.radius <- params$features$stops$stop.radius
-      n.stops <- res.stops$n.stops
-      n.stops.before.item<-res.stops$n.stops.before.item
-      n.slows <- res.slows$n.slows
-      n.slows.before.item<-res.slows$n.slows.before.item
+      #n.stops <- res.stops$n.stops
+      #n.stops.before.item<-res.stops$n.stops.before.item
+      #n.slows <- res.slows$n.slows
+      #n.slows.before.item<-res.slows$n.slows.before.item
       productsbox <- params$features$products1
       productslocation <- params$features$products2
       
@@ -152,29 +152,29 @@ for(i in 1 : length(data.files)){
       
       
       # merge data from other excel sheets with other test results
-      Excel.personal <- readxl::read_excel(path = file.path("input", params$input.dir, data.files2), 
-                                           sheet = params$sheet.excel2,
-                                           range = paste0(params$range.personal, params$n.row.excel)) %>%
-        mutate(ID = as.character(ID))
-      
-      Excel.NPO<-readxl::read_excel(path  = file.path("input", params$input.dir, data.files2), 
-                                    sheet = params$sheet.excel3,
-                                    range = paste0(params$range.NPO, params$n.row.excel))%>%
-        mutate(ID = as.character(ID))
+      # Excel.personal <- readxl::read_excel(path = file.path("input", params$input.dir, data.files2), 
+      #                                      sheet = params$sheet.excel2,
+      #                                      range = paste0(params$range.personal, params$n.row.excel)) %>%
+      #   mutate(ID = as.character(ID))
+      # 
+      # Excel.NPO<-readxl::read_excel(path  = file.path("input", params$input.dir, data.files2), 
+      #                               sheet = params$sheet.excel3,
+      #                               range = paste0(params$range.NPO, params$n.row.excel))%>%
+      #   mutate(ID = as.character(ID))
       
       
       # for some reason distance doesnt really work yet so it is calculated here
-      datamerged <- 
-        left_join(data, select(Excel.personal, -VR_aborted, -Avatars), by = "ID" ) %>%
-        left_join(select(Excel.NPO, -education, -age), by = "ID" ) %>% 
-        mutate(distance = total.time*average.speed)
+      # datamerged <- 
+      #   left_join(data, select(Excel.personal, -VR_aborted, -Avatars), by = "ID" ) %>%
+      #   left_join(select(Excel.NPO, -education, -age), by = "ID" ) %>% 
+      #   mutate(distance = total.time*average.speed)
       
-      write.csv2(datamerged, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
+      #write.csv2(datamerged, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
       
       # event.log<-rbind(res.slows$slow.log,res.stops$stop.log) %>%
       #   arrange(begin)
       
-      write.csv2(res.speed$log, file = paste0("output/logs/log_",data$ID[i], ".csv"), row.names = FALSE)
+      write.csv2(res.speed$log, file = paste0("output/logs/",strsplit(JSONfile,"_")[[1]][1],"_log", ".csv"), row.names = FALSE)
     }
   }
 }

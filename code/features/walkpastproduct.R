@@ -90,7 +90,7 @@ WalkpastProduct<-function(data,
       colnames(times.through.productbox)[1:3] <- c("productnumber", "product", "Entry.time.point")
       times.through.productbox$productnumber <- factor(times.through.productbox$productnumber, levels = productbox2$productnumber)
     }
-  }
+  
   
   data[i,]<-mutate(data[i,],n.box.P1= table(times.through.productbox$productnumber)[1],
                    n.box.P2= table(times.through.productbox$productnumber)[2],
@@ -136,7 +136,11 @@ WalkpastProduct<-function(data,
                         times.through.productbox=times.through.productbox,
                         walked.past.not.picked.up=walked.past.not.picked.up,
                         n.walked.past.not.picked.up=n.walked.past.not.picked.up)
-  
+  }
+  else{
+    res.products  <- list(gg.products = gg.products,
+                          data = data)
+  }
   return(res.products)  
 }  
 

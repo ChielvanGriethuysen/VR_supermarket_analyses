@@ -21,7 +21,7 @@ params <- list(
   # This ensures the features and the images shown always correspond.
   raw.images    = TRUE,     # Images with just the path
   full.images   = TRUE,     # Images with path + aisles, stops, crosses, etc.
-  save.data     = TRUE,     # should stops, slows etc. be saved.
+  save.data     = FALSE,     # should stops, slows etc. be saved.
   save.to.excel = FALSE,    # should stops, slows etc. be saved.to an excel file
   make.gif      = FALSE,    # Gif of a path (DOES NOT WORK RIGHT NOW)
   
