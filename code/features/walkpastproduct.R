@@ -36,7 +36,7 @@ WalkpastProduct<-function(data,
     suppressWarnings(
       gg.products<- gg.products+  geom_rect(data = productbox2,
                                             mapping = aes(xmin = xmin, xmax = xmax,
-                                                          ymin = zmin, ymax = zmax,
+                                                          ymin = zmin, ymax = zmax
                                                           ),
                                             fill= "yellow",
                                             alpha = .2)+
@@ -66,12 +66,12 @@ WalkpastProduct<-function(data,
     gg.products <- gg
   }
   Checkwalkinproductbox <- function(position, productbox){
-    position[1] > productbox$xmin & position[1] < productbox$xmax &
-      -position[2] > productbox$zmin & -position[2] < productbox$zmax
+    position$x > productbox$xmin & position$x < productbox$xmax &
+      -position$z > productbox$zmin & -position$z < productbox$zmax
   }
   
   
-  a <- apply(input.data[, 2:4], 1, Checkwalkinproductbox, productbox = productbox2)
+  a <- apply(input.data[, c(2,4)], 1, Checkwalkinproductbox, productbox = productbox2)
   t <- which(a, arr.ind = TRUE)
   producttimepoint.time.points <- t[, 2]
    
