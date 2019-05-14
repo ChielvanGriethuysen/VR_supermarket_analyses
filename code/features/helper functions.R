@@ -181,27 +181,6 @@ datapoint.add.label<-function(input.data, log){
   
 }
 
-add.npo.and.persenal.data<-function(data,params, data.file ){
-  
-  
-  # merge data from other excel sheets with other test results
-  Excel.personal <- readxl::read_excel(path = file.path("input", params$input.dir, data.file),
-                                       sheet = params$sheet.excel2,
-                                       range = paste0(params$range.personal, params$n.row.excel)) %>%
-    mutate(ID = as.character(ID))
-  
-  Excel.NPO<-readxl::read_excel(path  = file.path("input", params$input.dir, data.file),
-                                sheet = params$sheet.excel3,
-                                range = paste0(params$range.NPO, params$n.row.excel))%>%
-    mutate(ID = as.character(ID))
-  
-  # for some reason distance doesnt really work yet so it is calculated here
-  datamerged <-
-    left_join(data, select(Excel.personal, -VR_aborted, -Avatars), by = "ID" ) %>%
-    left_join(select(Excel.NPO, -education, -age), by = "ID" ) %>%
-    mutate(distance = total.time*average.speed)
-  return(datamerged)
-}
 #calculate box around products, used to determine if person is doing somting close to the product
 calc.productbox<- function(products){
   data.frame(xmin = rep(NA, nrow(products)),
@@ -227,5 +206,77 @@ calc.productbox<- function(products){
                          ifelse(up.down.side == "sideright",  products$z+products$width,
                                 products$z+.5*products$width)))
 }
+
+box.check<-function(position, box.list){
+  position[1] > box.list$xmin & position[1] < box.list$xmax &
+    -position[2] > box.list$zmin & -position[2] < box.list$zmax
+}
+
+
+calc.box.feature<-function(input.data, box){
+  
+  # a is a matrix with [n.aisles, n.time points] with T or F.
+  # T indicating that timepoint was spent in that aisle
+  a <- apply(input.data[, c(2, 4)], 1, box.check, box.list = box)
+  # t is a matrix with 2 columns. [, 1] = aisle number and [, 2] = time point
+  t <- which(a, arr.ind = TRUE)
+  t<-data.frame(t)
+  # order.of.visiting is a list containging the entering points of an aisles
+  start.points<-t[t[,1] != lag(t[,1], default = !t[1,1]),]
+  stop.points<-t[t[,1] != lead(t[,1], default = !t[1,1]),]
+  
+  order.of.visiting<-data.frame(id= start.points$row, start=start.points$col,stop=stop.points$col)
+  order.of.visiting<- add.times.location(order.of.visiting,input.data)
+  return(order.of.visiting)
+}
+productbox.label.add<-function(data, input.data,box){
+  
+  
+  #add labels and aisles names
+  data$name<-box$productnumber[data$id]
+  
+  data$name<-factor(data$name, levels = box$productnumber)
+  return(data)
+}
+
+
+aisles.label.add<-function(order.of.visiting, input.data, aisles){
+
+  #add label
+  if(aisles$type[order.of.visiting[1,1]]== "main"){
+    label.list<- c("main")
+  }else{
+    label.list<- c("random start")
+  }
+  
+  for (j in 2:(nrow(order.of.visiting)-1)) {
+    if(aisles$type[order.of.visiting[j,1]]== "main"){
+      label.list<-c(label.list,"main")
+    }else if(order.of.visiting[j-1,1]!= order.of.visiting[j+1,1]){
+      label.list<-c(label.list,"walk through")
+    }else{
+      label.list<-c(label.list,"same side in out")
+    }
+  }
+  if(aisles$type[order.of.visiting[nrow(order.of.visiting),1]]== "main"){
+    label.list<- c(label.list,"main")
+  }else{
+    label.list<- c(label.list,"random stop")
+  }
+  #add labels and aisles names
+  order.of.visiting$label<-label.list
+  order.of.visiting$aisles.name<-aisles$aisle.names[order.of.visiting$id]
+  
+  order.of.visiting$aisles.name<-factor(order.of.visiting$aisles.name, levels = aisles$aisle.names)
+  return(order.of.visiting)
+}
+
+
+
+
+
+
+
+
 
 

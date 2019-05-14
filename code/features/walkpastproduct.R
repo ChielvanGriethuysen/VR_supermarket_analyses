@@ -65,82 +65,53 @@ WalkpastProduct<-function(data,
   } else {
     gg.products <- gg
   }
-  Checkwalkinproductbox <- function(position, productbox){
-    position$x > productbox$xmin & position$x < productbox$xmax &
-      -position$z > productbox$zmin & -position$z < productbox$zmax
-  }
   
-  
-  a <- apply(input.data[, c(2,4)], 1, Checkwalkinproductbox, productbox = productbox2)
-  t <- which(a, arr.ind = TRUE)
-  producttimepoint.time.points <- t[, 2]
+  # get data about visiting product boxes
+  box.data<-calc.box.feature(input.data,productbox2)
+  box.data<-productbox.label.add(box.data,input.data,productbox2)
    
   if(save.data){
+  
+  box.summarised<-box.data %>% group_by(name) %>%
+    summarise(time=sum(time.spend),n=n()) %>%
+    complete(name,fill = list(time=0,n=0))
     
-    if(length(producttimepoint.time.points)==0){
-      time.in.productbox= array(0)
-      times.through.productbox <- data.frame(a=0, b=0, d=0, e=0)
-      colnames(times.through.productbox)[1:4] <- c("productnumber", "product", "Entry.time.point", "time.in.productbox")
-      times.through.productbox$productnumber <- factor(times.through.productbox$productnumber, levels = productbox2$productnumber)
-      
-    }else{
-      time.in.productbox <- input.data$time[t[c(diff(t[,1]) != 0, T), 2]] - input.data$time[t[c(T, diff(t[,1]) != 0), 2]] 
-      times.through.productbox  <- matrix(t[c(TRUE, diff(t[,1]) != 0), ], ncol=2)
-      times.through.productbox <- data.frame(productbox2$productnumber[ as.data.frame(times.through.productbox)[, 1]], times.through.productbox, time.in.productbox)
-      colnames(times.through.productbox)[1:3] <- c("productnumber", "product", "Entry.time.point")
-      times.through.productbox$productnumber <- factor(times.through.productbox$productnumber, levels = productbox2$productnumber)
-    }
+  data[i,]<-mutate(data[i,],
+                   n.box.P1= box.summarised$n[1],
+                   n.box.P2= box.summarised$n[2],
+                   n.box.P3= box.summarised$n[3],
+                   n.box.P4= box.summarised$n[4],
+                   n.box.P5= box.summarised$n[5],
+                   n.box.P6= box.summarised$n[6],
+                   n.box.P7= box.summarised$n[7],
+                   n.box.P8= box.summarised$n[8])
+  
+  data[i,]<-mutate(data[i,],time.box.P1= box.summarised$time[1],
+                   time.box.P2= box.summarised$time[2],
+                   time.box.P3= box.summarised$time[3],
+                   time.box.P4= box.summarised$time[4],
+                   time.box.P5= box.summarised$time[5],
+                   time.box.P6= box.summarised$time[6],
+                   time.box.P7= box.summarised$time[7],
+                   time.box.P8= box.summarised$time[8])
+
   
   
-  data[i,]<-mutate(data[i,],n.box.P1= table(times.through.productbox$productnumber)[1],
-                   n.box.P2= table(times.through.productbox$productnumber)[2],
-                   n.box.P3= table(times.through.productbox$productnumber)[3],
-                   n.box.P4= table(times.through.productbox$productnumber)[4],
-                   n.box.P5= table(times.through.productbox$productnumber)[5],
-                   n.box.P6= table(times.through.productbox$productnumber)[6],
-                   n.box.P7= table(times.through.productbox$productnumber)[7],
-                   n.box.P8= table(times.through.productbox$productnumber)[8])
-  
-  
-  product.times <- tapply(times.through.productbox$time.in.productbox, 
-                          list(Category = times.through.productbox$productnumber), 
-                          FUN = sum)
-  
-  product.times[is.na(product.times)] <- 0
-  
-  walked.past.not.picked.up1<-times.through.productbox$product %in% plyr::join(x=mutate(productslocation2, productnumber2= substr(productnumber,2,2)), 
+  #todo, make this code more readable
+  walked.past.not.picked.up1<-box.data$id %in% plyr::join(x=mutate(productslocation2, productnumber2= substr(productnumber,2,2)), 
                                                                                y=mutate(rownames_to_column(as_tibble(as.character(unlist(select(data[i,],Hit_1:Hit_8)))), var= "hit"), productnumber2=value),
                                                                                by= "productnumber2")$value
   
-  walked.past.not.picked.up<-times.through.productbox$product[walked.past.not.picked.up1==F]
-  
+  walked.past.not.picked.up<-box.data$product[walked.past.not.picked.up1==F]
   n.walked.past.not.picked.up<-length(walked.past.not.picked.up)
-  
-  data[i,]<-mutate(data[i,],time.box.P1= product.times[1],
-                   time.box.P2= product.times[2],
-                   time.box.P3= product.times[3],
-                   time.box.P4= product.times[4],
-                   time.box.P5= product.times[5],
-                   time.box.P6= product.times[6],
-                   time.box.P7= product.times[7],
-                   time.box.P8= product.times[8])
   
   data$n.walked.past.not.picked.up[i]<-n.walked.past.not.picked.up
   data$n.walked.past.not.picked.up.unique[i]<-length(unique(walked.past.not.picked.up))
   
   
+  }
   res.products  <- list(gg.products = gg.products,
-                        data = data, 
-                        time.in.productbox=time.in.productbox,
-                        producttimepoint.time.points=producttimepoint.time.points,
-                        times.through.productbox=times.through.productbox,
-                        walked.past.not.picked.up=walked.past.not.picked.up,
-                        n.walked.past.not.picked.up=n.walked.past.not.picked.up)
-  }
-  else{
-    res.products  <- list(gg.products = gg.products,
                           data = data)
-  }
   return(res.products)  
 }  
 

@@ -48,6 +48,26 @@ data.VRlog<-function(data, Excel, i){
   return(data)
   
 }
-
+add.npo.and.persenal.data<-function(data,params, data.file ){
+  
+  
+  # merge data from other excel sheets with other test results
+  Excel.personal <- readxl::read_excel(path = file.path("input", params$input.dir, data.file),
+                                       sheet = params$sheet.excel2,
+                                       range = paste0(params$range.personal, params$n.row.excel)) %>%
+    mutate(ID = as.character(ID))
+  
+  Excel.NPO<-readxl::read_excel(path  = file.path("input", params$input.dir, data.file),
+                                sheet = params$sheet.excel3,
+                                range = paste0(params$range.NPO, params$n.row.excel))%>%
+    mutate(ID = as.character(ID))
+  
+  # for some reason distance doesnt really work yet so it is calculated here
+  datamerged <-
+    left_join(data, select(Excel.personal, -VR_aborted, -Avatars), by = "ID" ) %>%
+    left_join(select(Excel.NPO, -education, -age), by = "ID" ) %>%
+    mutate(distance = total.time*average.speed)
+  return(datamerged)
+}
   
   
