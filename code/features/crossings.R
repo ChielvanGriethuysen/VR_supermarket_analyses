@@ -12,7 +12,7 @@ getCrossings = function(data, input.data, gg,
 
   
   #skip points, if to close to each other, to speed op crossing finding
-  move_data<-skippoints(input.data,distance = 1)
+  move_data<-skippoints(input.data,distance = 0.5)
   
   FootPosition<- move_data[,2:4]
   time<- move_data[,1]
@@ -22,102 +22,54 @@ getCrossings = function(data, input.data, gg,
   #A crossings consists of 4 time points (a, a+1, b, b+1), both a and b ares saved.
   #Only a is used to calculate n crossings and plot them.
   #b can be used in the future to calculate the angle.
-  crossings <- t(unname(as.data.frame(crossings)))
+  crossings <- data.frame(t(unname(as.data.frame(crossings))))
   colnames(crossings) <- c("First Time point", "Second Time point")
   
+  if (crossings[1,1]==0) {
+    crossings<-crossings[-1,]
+  }
   
-  cross.points1 <- crossings[, 1]
-
-
   
-  if(length(cross.points1) > 1){ # If crossings exist
-    cross.points1 <- cross.points1[-1]
-    cross.time <- time[cross.points1]
-    
-    # Remove crossings which are cross.lag2 removed from a previous crossing
-    l = 1 #Select first crossing
-    if(length(cross.time) > 1){ #If there are at least 2 crossing
-      d <- diff(cross.time)
-      k = 0
-      for(ii in 1:length(d)){
-        if(ii > k){ # Don't look at crossings that have been skipped
-          k = ii
-          if(d[ii] < cross.lag2){
-            dd = d[ii]
-            while(dd < cross.lag2 & k < length(d)){ #Stop when there is more than lag between two crossings
-              k = k + 1
-              dd = dd + d[k]
-            }
-            if(dd < cross.lag2) # Stop if no crossings left
-              break
-          }
-          
-          l <- c(l, k + 1)
-        }
+  #remove crossings if the two points are to close
+  if(nrow(crossings)>0){
+    r<-c()
+    #remove crossings if the next one is to close
+    k<-1
+    while (k<nrow(crossings)) {
+      l<-k+1
+      while (l<nrow(crossings) &&
+                    time[crossings[l,1]]-time[crossings[k,1]]< cross.lag2) {
+        l<-l+1
       }
+      r<-c(r,k)
+      k<-l
     }
+    crossings<-crossings[r,]
+    crossings.pos<- FootPosition[crossings[,1],-2]
+    #find crossings in shopping aisles
+    a<- apply(crossings.pos , 1, box.check, box.list=aisles %>%filter(type== "shopping"))
+    t<- which(a, arr.ind = TRUE)
+    crossings.shopping<-crossings[t[,2],]
+    #find crossings in main aisles
+    a<- apply(crossings.pos , 1, box.check, box.list=aisles %>%filter(type== "main"))
+    t<- which(a, arr.ind = TRUE)
+    crossings.main<-crossings[t[,2],]
     
-    
-    cross.points1 <- cross.points1[l]
-    n.crossings <- length(cross.points1)
-    crossings.pos <- FootPosition[cross.points1, ]
-    
+    n.crossings<- length(crossings.main)+length(crossings.shopping)
     data$n.crossings[i] <- n.crossings
-  
-    # if there is no crossings just assign 0
-    } else {
+    n.crossings.shopping<- length(crossings.shopping)
+  }
+  else{
+    n.crossings<- 0
     data$n.crossings[i] <- 0
-    n.crossings<-0
-    }
-    
-    # now do the same for crossing that take place in a shopping aisle.
-    cross.points2 <- crossings[, 1]
-    cross.points2 <- cross.points2[!cross.points2 %in% shopping.aisle.time.points] 
-    
-    if(length(cross.points2) > 1){ # If crossings exist
-      cross.points2 <- cross.points2[-1]
-      cross.time2 <- time[cross.points2]
-      
-      # Remove crossings which are cross.lag2 removed from a previous crossing
-      l = 1 #Select first crossing
-      if(length(cross.time2) > 1){ #If there are at least 2 crossing
-        d <- diff(cross.time2)
-        k = 0
-        for(ii in 1:length(d)){
-          if(ii > k){ # Don't look at crossings that have been skipped
-            k = ii
-            if(d[ii] < cross.lag2){
-              dd = d[ii]
-              while(dd < cross.lag2 & k < length(d)){ #Stop when there is more than lag between two crossings
-                k = k + 1
-                dd = dd + d[k]
-              }
-              if(dd < cross.lag2) # Stop if no crossings left
-                break
-            }
-            
-            l <- c(l, k + 1)
-          }
-        }
-      }
-      
-      
-      cross.points2 <- cross.points2[l]
-      n.crossings.out.aisles <- length(cross.points2)
-      crossings.pos.out.aisles <- FootPosition[cross.points2, ]
-      data$n.crossings.outside.aisles[i] <- n.crossings.out.aisles
-    
-      # if there is no crossings just assign 0
-      
-    } else {
-      data$n.crossings.outside.aisles[i] <- 0
-      n.crossings.out.aisles<-0
-      }
-    
+    n.crossings.shopping<- 0
+  }
+
+
     
     #split slows per third.
     
-    crosspointstibble<-tibble(crosspoints=cross.points1)
+    crosspointstibble<-tibble(crosspoints=crossings[,1])
     split1<-which.min(abs(time - last(time)/3)) 
     split2<-which.min(abs(time - (last(time)/3*2)))
     
@@ -136,11 +88,11 @@ getCrossings = function(data, input.data, gg,
                    aes(x = x, y = -z), size= 3.5,
                    col = 'blue') +
         geom_text(aes(y = -48, x = 4, 
-                      label = paste("N crossings =", n.crossings, "(", n.crossings.out.aisles, ")" )),
+                      label = paste("N crossings =", n.crossings, "(", n.crossings.shopping, ")" )),
                   colour = 'blue',size=5)
     }else{
       gg.cross<-gg+ geom_text(aes(y = -48, x = 4, 
-                                  label = paste("N crossings =", n.crossings, "(", n.crossings.out.aisles, ")" )),
+                                  label = paste("N crossings =", n.crossings, "(", n.crossings.shopping, ")" )),
                               colour = 'blue',size= 5)
     }
     
@@ -149,8 +101,7 @@ getCrossings = function(data, input.data, gg,
   res.cross <- list(gg.cross = gg.cross, 
                     data = data, 
                     n.crossings = n.crossings,
-                    cross.points.all=cross.points1,
-                    cross.points.out.aisles=cross.points2)
+                    cross.points.all=crossings)
   
   return(res.cross)
 }
