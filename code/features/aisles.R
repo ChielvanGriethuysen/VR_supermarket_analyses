@@ -26,7 +26,7 @@ getAisleTimes <- function(data, input.data, gg,
     gg.aisles <- gg
   }
   
-  aisles.data<-calc.aisles.feature(input.data,aisles)
+  aisles.data<-calc.box.feature(input.data,aisles)
   aisles.data<-aisles.label.add(aisles.data,input.data,aisles)
   
   # data[i,]$n.walked.through.aisles<-nrow(walk.through)
