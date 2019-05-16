@@ -154,6 +154,9 @@ runFirstAnalyses <- function(JSONfile,
   
   # put data in one dataframe
   input.data<-data.frame(dat[[1]]$m_PupilTime,dat[[1]]$m_FootPosition)
+  input.look<-dat$tracking_data$m_PositionLeftObject
+
+  
   names(input.data)[1]<- "time"
   
   # Remove duplicate data (speeds up all analyses)
@@ -166,15 +169,17 @@ runFirstAnalyses <- function(JSONfile,
   first <- first(which(input.data$z < 45.5 & input.data$z >10))
   if(first > 1){
     input.data<-input.data[-1:-first,]
+    input.look<-input.look[-1:-first,]
   }
   
   # Remove all datapoints after end of the task
   last <- last(which(input.data$z < 45.5))
   if(last < nrow(input.data)){
     input.data<-input.data[-last:-nrow(input.data),]
+    input.look<-input.look[-last:-nrow(input.look),]
   }
   row.names(input.data) <- 1:nrow(input.data)
-
+  input.look<-input.look[input.look$x>0,]
   #add speed and distance to dataframe and calculate total distance
   x.change <- diff(input.data$x, 1)
   y.change <- diff(input.data$z, 1)
@@ -246,6 +251,7 @@ runFirstAnalyses <- function(JSONfile,
                                 "\n Walking route")), 
               size = 5) + 
     geom_hline(yintercept = -45.5)
+  gglook<- ggpath+ geom_point(data=input.look, mapping= aes(x=x, y=-z), colour="orange", alpha= 0.2)
   
   # Save if required
   if(params$raw.images){
@@ -258,6 +264,9 @@ runFirstAnalyses <- function(JSONfile,
            width = 37.5, height = 21, units = 'cm')
     ggsave(paste0('output/png/', params$output.dir, '/',
                   JSONfile, '_RAWspeed.png'), ggspeed, 
+           width = 37.5, height = 21, units = 'cm')
+    ggsave(paste0('output/png/', 'Look', '/',
+                  JSONfile, '_RAW.png'), gglook, 
            width = 37.5, height = 21, units = 'cm')
     
   }
