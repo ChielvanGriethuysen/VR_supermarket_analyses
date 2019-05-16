@@ -68,7 +68,7 @@ for(i in 1 : length(data.files)){
                                     input.data = res$input.data,
                                     gg = res.aisles$gg,
                                     products =  res$productbox,
-                                    products2 = params$features$products, 
+                                    products2 = res$products, 
                                     full.images = params$full.images,
                                     save.data = params$save.data,
                                     i = i)

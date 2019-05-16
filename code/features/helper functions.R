@@ -191,7 +191,7 @@ calc.productbox<- function(products){
              announced = products$announced,
              productnumber =  products$productnumber,
              x = products$x,
-             y = products$z,
+             z = products$z,
              colour = products$colour) %>%
     mutate(xmin = ifelse(up.down.side == "up", products$x-products$height,
                          ifelse(up.down.side =="down", products$x,

@@ -263,17 +263,24 @@ runFirstAnalyses <- function(JSONfile,
   }
   
   # create product box
-  productbox<- calc.productbox(params$features$products)
+  if(str_detect(dat$dataHeader$m_SupermarketName,"Nemo B")){
+    productbox<- calc.productbox(params$products$nemo_b)
+    products<- params$products$nemo_b
+  }else{
+    productbox<- calc.productbox(params$products$nemo_a)
+    products<-params$products$nemo_a
+  }
+  
+  
+
   
   
   res <- list(dat = dat,
               gg = ggpath, 
               input.data= input.data,
               data = data,
-              x.change=x.change,
-              y.change=y.change,
-              distance.between.points=distance.between.points,
-              productbox = productbox)
+              productbox = productbox,
+              products= products)
   
   return(res)
 }
