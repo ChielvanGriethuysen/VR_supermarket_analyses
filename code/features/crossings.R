@@ -55,9 +55,9 @@ getCrossings = function(data, input.data, gg,
     t<- which(a, arr.ind = TRUE)
     crossings.main<-crossings[t[,2],]
     
-    n.crossings<- length(crossings.main)+length(crossings.shopping)
+    n.crossings<- nrow(crossings.main)+nrow(crossings.shopping)
     data$n.crossings[i] <- n.crossings
-    n.crossings.shopping<- length(crossings.shopping)
+    n.crossings.shopping<- nrow(crossings.shopping)
   }
   else{
     n.crossings<- 0

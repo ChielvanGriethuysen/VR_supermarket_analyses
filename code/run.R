@@ -78,6 +78,7 @@ for(i in 1 : length(data.files)){
                                     gg=res.products$gg.products,
                                     stop.params = params$features$stops,
                                     walk.params = params$features$walk,
+                                    aisles= params$features$aisles,
                                     i=i)
     
     res.cross <- getCrossings(data = res.speed$data,
@@ -92,6 +93,8 @@ for(i in 1 : length(data.files)){
 
     data<-  res.cross$data
     
+    looking.plot.stop(res.speed$log, res$input.data, res$input.look, JSONfile, res.cross$gg)
+    looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, res.cross$gg)
  
       if(params$full.images){
       if( ! file.exists(paste0('output/png/', params$output.dir))){

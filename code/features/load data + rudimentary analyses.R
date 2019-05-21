@@ -179,7 +179,7 @@ runFirstAnalyses <- function(JSONfile,
     input.look<-input.look[-last:-nrow(input.look),]
   }
   row.names(input.data) <- 1:nrow(input.data)
-  input.look<-input.look[input.look$x>0,]
+  row.names(input.look) <- 1:nrow(input.look)
   #add speed and distance to dataframe and calculate total distance
   x.change <- diff(input.data$x, 1)
   y.change <- diff(input.data$z, 1)
@@ -187,6 +187,8 @@ runFirstAnalyses <- function(JSONfile,
   speed<-c(0,distance.between.points/diff(input.data$t,1))
   input.data<- data.frame(input.data, speed,c(mean(distance.between.points),distance.between.points))
   names(input.data)[6]<- "dist"
+  
+  input.data<-data.frame(input.data,input.look)
   
   
   # Save results of basic analyses
@@ -251,7 +253,7 @@ runFirstAnalyses <- function(JSONfile,
                                 "\n Walking route")), 
               size = 5) + 
     geom_hline(yintercept = -45.5)
-  gglook<- ggpath+ geom_point(data=input.look, mapping= aes(x=x, y=-z), colour="orange", alpha= 0.2)
+  #gglook<- ggpath+ geom_point(data=input.look, mapping= aes(x=x, y=-z), colour="orange", alpha= 0.2)
   
   # Save if required
   if(params$raw.images){
@@ -262,16 +264,14 @@ runFirstAnalyses <- function(JSONfile,
     ggsave(paste0('output/png/', params$output.dir, '/',
                   JSONfile, '_RAW.png'), ggpath, 
            width = 37.5, height = 21, units = 'cm')
-    ggsave(paste0('output/png/', params$output.dir, '/',
-                  JSONfile, '_RAWspeed.png'), ggspeed, 
-           width = 37.5, height = 21, units = 'cm')
-    ggsave(paste0('output/png/', 'Look', '/',
-                  JSONfile, '_RAW.png'), gglook, 
-           width = 37.5, height = 21, units = 'cm')
+    # ggsave(paste0('output/png/', params$output.dir, '/',
+    #               JSONfile, '_RAWspeed.png'), ggspeed, 
+    #        width = 37.5, height = 21, units = 'cm')
+
     
   }
   
-  # create product box
+  # create product box based on suppermarket
   if(str_detect(dat$dataHeader$m_SupermarketName,"Nemo B")){
     productbox<- calc.productbox(params$products$nemo_b)
     products<- params$products$nemo_b
@@ -287,6 +287,7 @@ runFirstAnalyses <- function(JSONfile,
   res <- list(dat = dat,
               gg = ggpath, 
               input.data= input.data,
+              input.look= input.look,
               data = data,
               productbox = productbox,
               products= products)

@@ -1,3 +1,4 @@
+#give a subset of the data where the points are a certain distance apart
 skippoints<-function(data, distance){
   curent.dist<-0
   filltered.points<-c()
@@ -12,7 +13,7 @@ skippoints<-function(data, distance){
   data[filltered.points,1:4]
   
 }
-
+# calculate distance covert between two data points
 subdistance<-function(FootPosition, start, stop){
   curent.dist<-0
   x.change <- diff(FootPosition$x, 1)
@@ -22,7 +23,7 @@ subdistance<-function(FootPosition, start, stop){
   sum(distance.between.points[start:stop])
   
 }
-
+#old stop function
 speedfeature<- function(input.data, break.time, radius, skippoints=c()){
   FootPosition<-input.data[,2:4]
   time<-input.data[,1]
@@ -112,7 +113,7 @@ add.times.location<- function(points, input.data){
   points$relative.speed<-points$relative.dist/points$time.spend
   return(points)
 }
-
+# make parts thate are above or below a certain speed, merge these parts if they are close to each other to deal with data errors and small movements
 calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequations=TRUE){
   candidates <-output<- data.frame(start = numeric(), stop = numeric())
   j<-1
@@ -149,7 +150,6 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
       }
       i<-i+1
     }
-    
   }
   #if parts are to short afther each other then combine them
   k<-1
@@ -169,7 +169,7 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
   }
   output
 }
-#add the type to eache datapoint
+#add the label to eache datapoint based on a log file
 datapoint.add.label<-function(input.data, log){
   
   label<-rep("none",nrow(input.data))
@@ -206,13 +206,28 @@ calc.productbox<- function(products){
                          ifelse(up.down.side == "sideright",  products$z+products$width,
                                 products$z+.5*products$width)))
 }
-
+# check if a position is in one of the boxes of a box list
 box.check<-function(position, box.list){
   position[1] > box.list$xmin & position[1] < box.list$xmax &
     -position[2] > box.list$zmin & -position[2] < box.list$zmax
 }
+# calculates for stops in which aisles they where made
+calc.stop.box<- function(log, box){
+  
+  a<-apply(data.frame(log$x.start,log$z.start), 1, box.check, box.list=box)
+  t <- which(a, arr.ind = TRUE)
+  t<- data.frame(t)
 
-
+  res.type<- rep("none", nrow(log))
+  res.name<- rep("none", nrow(log))
+  
+  for (i in 1:nrow(t)) {
+    res.type[t[i,2]]<- as.character(box$type[ t[i,1]])
+    res.name[t[i,2]]<- as.character(box$aisle.names[t[i,1]])
+  }
+  data.frame(aisles.type=res.type, aisles.name= res.name)
+}
+#calculate the moments somone enters end exitst a box( aisles or product box), add information on time and location
 calc.box.feature<-function(input.data, box){
   
   # a is a matrix with [n.aisles, n.time points] with T or F.
@@ -229,6 +244,7 @@ calc.box.feature<-function(input.data, box){
   order.of.visiting<- add.times.location(order.of.visiting,input.data)
   return(order.of.visiting)
 }
+# add productbox name to product box log
 productbox.label.add<-function(data, input.data,box){
   
   
@@ -239,7 +255,7 @@ productbox.label.add<-function(data, input.data,box){
   return(data)
 }
 
-
+# add the type of walking behaviour in an aisles and the aisles name
 aisles.label.add<-function(order.of.visiting, input.data, aisles){
 
   #add label
@@ -270,6 +286,23 @@ aisles.label.add<-function(order.of.visiting, input.data, aisles){
   order.of.visiting$aisles.name<-factor(order.of.visiting$aisles.name, levels = aisles$aisle.names)
   return(order.of.visiting)
 }
+#returns a subset of the data, which is part of the log subsets
+log.subset<- function(data, log, rev= FALSE){
+  subset<-rep(FALSE, nrow(data))
+  
+  for (i in 1:nrow(log)) {
+    subset[log$start[i]:log$stop[i]]<-TRUE
+  }
+  
+  if(rev){
+    data[!subset,]
+  }
+  else{
+    data[subset,]
+  }
+
+}
+
 
 
 

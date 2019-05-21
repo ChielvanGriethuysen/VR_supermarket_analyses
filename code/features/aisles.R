@@ -84,6 +84,7 @@ getAisleTimes <- function(data, input.data, gg,
   
   res.aisles <- list(gg.aisles = gg.aisles,
                      data = data,
+                     log= aisles.data,
                      shopping.aisle.time.points=shopping.aisle.time.points)
   return(res.aisles)
 }
