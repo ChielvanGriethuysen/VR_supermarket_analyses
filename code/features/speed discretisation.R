@@ -30,7 +30,7 @@ speeddiscretisation<-function(data, input.data, aisles.log, gg,
   #combine to one dataframe
   log<-rbind(slows,stops,walks)
   log<- log %>% arrange(start)
-  log<- cbind(log, calc.stop.box(log, aisles))
+  log<- cbind(log, calc.spot.event.in.box(log, aisles))
   
   # count occurrences
   n.slows=sum(log$label=="slow")
