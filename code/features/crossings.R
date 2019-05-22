@@ -23,8 +23,8 @@ getCrossings = function(data, input.data, gg,
   #Only a is used to calculate n crossings and plot them.
   #b can be used in the future to calculate the angle.
   crossings <- data.frame(t(unname(as.data.frame(crossings))))
-  colnames(crossings) <- c("First Time point", "Second Time point")
-  
+  #colnames(crossings) <- c("First Time point", "Second Time point")
+  colnames(crossings) <- c("start", "stop")
   if (crossings[1,1]==0) {
     crossings<-crossings[-1,]
   }
@@ -44,20 +44,19 @@ getCrossings = function(data, input.data, gg,
       r<-c(r,k)
       k<-l
     }
-    crossings<-crossings[r,]
-    crossings.pos<- FootPosition[crossings[,1],-2]
-    #find crossings in shopping aisles
-    a<- apply(crossings.pos , 1, box.check, box.list=aisles %>%filter(type== "shopping"))
-    t<- which(a, arr.ind = TRUE)
-    crossings.shopping<-crossings[t[,2],]
-    #find crossings in main aisles
-    a<- apply(crossings.pos , 1, box.check, box.list=aisles %>%filter(type== "main"))
-    t<- which(a, arr.ind = TRUE)
-    crossings.main<-crossings[t[,2],]
     
-    n.crossings<- nrow(crossings.main)+nrow(crossings.shopping)
-    data$n.crossings[i] <- n.crossings
-    n.crossings.shopping<- nrow(crossings.shopping)
+    crossings<-crossings[r,]
+    crossings<- add.times.location(crossings, move_data)
+    crossings<-crossings[,1:9]
+    colnames(crossings)[5]<-"time.between"
+    crossings<- cbind(crossings, calc.spot.event.in.box(crossings, aisles))
+    
+    crossings.pos<- FootPosition[crossings[,1],-2]
+    
+    
+    n.crossings<- crossings %>% filter(aisles.type!= "none") %>% nrow()
+    data$n.crossings[i] <- crossings %>% nrow()
+    n.crossings.shopping<- crossings %>% filter(aisles.type== "shopping") %>%nrow()
   }
   else{
     n.crossings<- 0
@@ -69,17 +68,17 @@ getCrossings = function(data, input.data, gg,
     
     #split slows per third.
     
-    crosspointstibble<-tibble(crosspoints=crossings[,1])
-    split1<-which.min(abs(time - last(time)/3)) 
-    split2<-which.min(abs(time - (last(time)/3*2)))
-    
-    cross.1st.1.3rd<-nrow(filter(crosspointstibble, crosspoints<split1))
-    cross.2nd.1.3rd<-nrow(filter(crosspointstibble, crosspoints>split1 & crosspoints<split2))
-    cross.3rd.1.3rd<-nrow(filter(crosspointstibble, crosspoints>split2))
-  
-    data$cross.1st.1.3rd[i]<-cross.1st.1.3rd
-    data$cross.2nd.1.3rd[i]<-cross.2nd.1.3rd
-    data$cross.3rd.1.3rd[i]<-cross.3rd.1.3rd
+    # crosspointstibble<-tibble(crosspoints=crossings[,1])
+    # split1<-which.min(abs(time - last(time)/3)) 
+    # split2<-which.min(abs(time - (last(time)/3*2)))
+    # 
+    # cross.1st.1.3rd<-nrow(filter(crosspointstibble, crosspoints<split1))
+    # cross.2nd.1.3rd<-nrow(filter(crosspointstibble, crosspoints>split1 & crosspoints<split2))
+    # cross.3rd.1.3rd<-nrow(filter(crosspointstibble, crosspoints>split2))
+    # 
+    # data$cross.1st.1.3rd[i]<-cross.1st.1.3rd
+    # data$cross.2nd.1.3rd[i]<-cross.2nd.1.3rd
+    # data$cross.3rd.1.3rd[i]<-cross.3rd.1.3rd
 
     # add the crossings to the plot
     if(full.images && n.crossings>0){
@@ -100,6 +99,7 @@ getCrossings = function(data, input.data, gg,
      
   res.cross <- list(gg.cross = gg.cross, 
                     data = data, 
+                    log= crossings,
                     n.crossings = n.crossings,
                     cross.points.all=crossings)
   

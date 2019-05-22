@@ -212,7 +212,7 @@ box.check<-function(position, box.list){
     -position[2] > box.list$zmin & -position[2] < box.list$zmax
 }
 # calculates for stops in which aisles they where made
-calc.stop.box<- function(log, box){
+calc.spot.event.in.box<- function(log, box){
   
   a<-apply(data.frame(log$x.start,log$z.start), 1, box.check, box.list=box)
   t <- which(a, arr.ind = TRUE)
