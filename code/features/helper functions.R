@@ -302,6 +302,19 @@ log.subset<- function(data, log, rev= FALSE){
   }
 
 }
+add.stops.to.aisles.log<- function(stops, aisles){
+  aisles$n.stops<- numeric(nrow(aisles))
+  
+  for(i in 1:nrow(aisles)){
+    for(j in 1:nrow(stops)){
+      if(aisles$start[i]<stops$start[j]&& aisles$stop[i]>stops$stop[j]){
+        aisles$n.stops[i]<- aisles$n.stops[i]+1
+      }
+    }
+  }
+  
+  return(aisles)
+}
 
 
 

@@ -2,7 +2,7 @@
 #
 # Last edited 9-5-2019 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
-speeddiscretisation<-function(data, input.data, gg,
+speeddiscretisation<-function(data, input.data, aisles.log, gg,
                               stop.params, walk.params,
                               aisles, i){
   #get all mearged discretisations of the speed
@@ -23,7 +23,6 @@ speeddiscretisation<-function(data, input.data, gg,
   walks<-walks %>% filter(time.spend>walk.params$walk.minimum.duration)
   
   #add labels
-  
   slows$label<-rep("slow", nrow(slows))
   stops$label<-rep("stop", nrow(stops))
   walks$label<-rep("walk", nrow(walks))
@@ -31,13 +30,17 @@ speeddiscretisation<-function(data, input.data, gg,
   #combine to one dataframe
   log<-rbind(slows,stops,walks)
   log<- log %>% arrange(start)
-  
   log<- cbind(log, calc.stop.box(log, aisles))
+  
   # count occurrences
   n.slows=sum(log$label=="slow")
   n.stops=sum(log$label=="stop")
+  
   # add labels to path data
   discretised.path<-datapoint.add.label(input.data,log)
+  
+  # add stops to ailes log
+  aisles.log<- add.stops.to.aisles.log(stops, aisles.log)
   
   
   #print plot slows and stops in plot
@@ -58,6 +61,7 @@ speeddiscretisation<-function(data, input.data, gg,
 
   
   speed.res<-list(log = log,
+                  aisles.log= aisles.log,
                   data = data,
                   gg = gg,
                   n.slows=n.slows,

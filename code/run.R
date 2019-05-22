@@ -74,6 +74,7 @@ for(i in 1 : length(data.files)){
                                     i = i)
     
     res.speed<- speeddiscretisation(data = res.products$data,
+                                    aisles.log<- res.aisles$log,
                                     input.data = res$input.data,
                                     gg=res.products$gg.products,
                                     stop.params = params$features$stops,
@@ -90,6 +91,10 @@ for(i in 1 : length(data.files)){
                               cross.lag2 = params$features$cross$cross.lag2,
                               full.images = params$full.images,
                               i = i)
+    
+    res.look<- getLookings( aisles.log= res.aisles$log,
+                            input.look= res$input.look,
+                            aisles = params$features$aisles)
 
     data<-  res.cross$data
     
@@ -122,7 +127,7 @@ for(i in 1 : length(data.files)){
       
       #plot the speed, with categories of stop/slow/walk
       ggsave(paste0('output/png/', params$output.dir, '/', JSONfile,'speed', '.png'), 
-      speed.plot(res$input.data,res.speed$log), width = 40, height = 7, units = 'cm')
+      speed.plot(res$input.data,res.speed$log, res.aisles$log), width = 40, height = 7, units = 'cm')
       
       #write the log with the timestemsp of events
       write.csv2(res.speed$log, file = paste0("output/logs/",strsplit(JSONfile,"_")[[1]][1],"_log", ".csv"), row.names = FALSE)
