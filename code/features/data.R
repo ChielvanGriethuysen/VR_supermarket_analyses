@@ -69,5 +69,17 @@ add.npo.and.persenal.data<-function(data,params, data.file ){
     mutate(distance = total.time*average.speed)
   return(datamerged)
 }
+
+export.logs<- function(Jsonfile, log.list){
+  file <- paste0("output/logs/",strsplit(JSONfile,"_")[[1]][1],"_log",".xlsx")
+  
+  write.xlsx2(log.list$aisles.log,      file = file, sheetName = "aisles")
+  write.xlsx2(log.list$speed.log,       file = file, sheetName = "speed", append = TRUE)
+  write.xlsx2(log.list$crossings.log,   file = file, sheetName = "crossings", append = TRUE)
+  write.xlsx2(log.list$products.log,    file = file, sheetName = "products", append = TRUE)
+  write.xlsx2(log.list$walked.past.log, file = file, sheetName = "walked.past", append = TRUE)
+  write.xlsx2(log.list$products.hit.log,file = file, sheetName = "hit", append = TRUE)
+  
+}
   
   

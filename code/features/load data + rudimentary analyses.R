@@ -126,7 +126,7 @@ createDataFrame <- function(data.files){
   return(data)
 }
 
-runFirstAnalyses <- function(JSONfile,
+runFirstAnalyses <- function(JSONfile,input.log,
                              Excel,
                              image,
                              params,
@@ -151,11 +151,13 @@ runFirstAnalyses <- function(JSONfile,
     dat <- fromJSON(readLines(paste0('input/', params$input.dir, '/', JSONfile)),
                     simplifyDataFrame = TRUE)
   )
+  suppressWarnings(
+    product.log <- xmlToDataFrame(paste0('input/', params$input.dir, '/', input.log))
+  )
   
   # put data in one dataframe
   input.data<-data.frame(dat[[1]]$m_PupilTime,dat[[1]]$m_FootPosition)
   input.look<-dat$tracking_data$m_PositionLeftObject
-
   
   names(input.data)[1]<- "time"
   
@@ -279,15 +281,15 @@ runFirstAnalyses <- function(JSONfile,
     productbox<- calc.productbox(params$products$nemo_a)
     products<-params$products$nemo_a
   }
-  
-  
-
-  
+  # put the hit log in a dataframe, filter on products from the product list
+  product.log<- product.hit.log(product.log)
+  product.hits<- check.product.hit(product.log, products)
   
   res <- list(dat = dat,
               gg = ggpath, 
               input.data= input.data,
               input.look= input.look,
+              product.hits= product.hits,
               data = data,
               productbox = productbox,
               products= products)

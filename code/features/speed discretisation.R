@@ -2,7 +2,7 @@
 #
 # Last edited 9-5-2019 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
-speeddiscretisation<-function(data, input.data, aisles.log, gg,
+speeddiscretisation<-function(data, input.data, aisles.log,hits.log, gg,
                               stop.params, walk.params,
                               aisles, i){
   #get all mearged discretisations of the speed
@@ -42,6 +42,8 @@ speeddiscretisation<-function(data, input.data, aisles.log, gg,
   # add stops to ailes log
   aisles.log<- add.stops.to.aisles.log(stops, aisles.log)
   
+  # add if a product was hit, if so, which(first and second) one and the ammount of hits for the case that there are more
+  log<- hit.stop(hits.log,log)
   
   #print plot slows and stops in plot
   gg<-gg+   geom_point(data = discretised.path[discretised.path$label=="stop",], 
@@ -60,7 +62,7 @@ speeddiscretisation<-function(data, input.data, aisles.log, gg,
     
 
   
-  speed.res<-list(log = log,
+  speed.res<-list(speed.log = log,
                   aisles.log= aisles.log,
                   data = data,
                   gg = gg,

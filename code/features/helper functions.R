@@ -102,12 +102,13 @@ add.times.location<- function(points, input.data){
   points$z.start<-input.data$z[points$start]
   points$x.stop<-input.data$x[points$stop]
   points$z.stop<-input.data$z[points$stop]
-  points$absolute.dist<- 0
+  points$absolute.dist<- numeric(nrow(points))
   points$relative.dist<-sqrt((points$x.start-points$x.stop)^2+(points$z.start-points$z.stop)^2)
 
-  
-  for(i in 1:nrow(points)){
-    points$absolute.dist[i]<- sum(input.data$dist[points$start[i]:points$stop[i]])
+  if(nrow(points)>0){
+    for(i in 1:nrow(points)){
+      points$absolute.dist[i]<- sum(input.data$dist[points$start[i]:points$stop[i]])
+    }
   }
   points$absolute.speed<-points$absolute.dist/points$time.spend
   points$relative.speed<-points$relative.dist/points$time.spend
@@ -264,14 +265,15 @@ aisles.label.add<-function(order.of.visiting, input.data, aisles){
   }else{
     label.list<- c("random start")
   }
-  
-  for (j in 2:(nrow(order.of.visiting)-1)) {
-    if(aisles$type[order.of.visiting[j,1]]== "main"){
-      label.list<-c(label.list,"main")
-    }else if(order.of.visiting[j-1,1]!= order.of.visiting[j+1,1]){
-      label.list<-c(label.list,"walk through")
-    }else{
-      label.list<-c(label.list,"same side in out")
+  if(nrow(order.of.visiting)>2){
+    for (j in 2:(nrow(order.of.visiting)-1)) {
+      if(aisles$type[order.of.visiting[j,1]]== "main"){
+        label.list<-c(label.list,"main")
+      }else if(order.of.visiting[j-1,1]!= order.of.visiting[j+1,1]){
+        label.list<-c(label.list,"walk through")
+      }else{
+        label.list<-c(label.list,"same side in out")
+      }
     }
   }
   if(aisles$type[order.of.visiting[nrow(order.of.visiting),1]]== "main"){
@@ -289,9 +291,10 @@ aisles.label.add<-function(order.of.visiting, input.data, aisles){
 #returns a subset of the data, which is part of the log subsets
 log.subset<- function(data, log, rev= FALSE){
   subset<-rep(FALSE, nrow(data))
-  
-  for (i in 1:nrow(log)) {
-    subset[log$start[i]:log$stop[i]]<-TRUE
+  if(nrow(log)>0){
+    for (i in 1:nrow(log)) {
+      subset[log$start[i]:log$stop[i]]<-TRUE
+    }
   }
   
   if(rev){
@@ -316,10 +319,66 @@ add.stops.to.aisles.log<- function(stops, aisles){
   return(aisles)
 }
 
+product.hit.log<- function(logs){
+  logs<-logs  %>% filter(apply(logs,2, str_detect, pattern= "HIT"))%>% 
+    separate(SesionLog, c("time","Product"), sep = "- HIT product #")%>% 
+    separate(Product, c("product", "rest"), sep = c("\\|\\| X:"),extra = "merge")%>% 
+    separate(rest, c("x", "rest"), sep = c("\\|\\| Y:"),extra = "merge")%>% 
+    separate(rest, c("y", "z"), sep = c("\\|\\| Z:"),extra = "merge")
+  
+  hour<- logs$time %>% str_sub(2,3)%>% as.numeric()
+  minutes<- logs$time %>% str_sub(5,6)%>% as.numeric()
+  seconds<- logs$time %>% str_sub(8,9)%>% as.numeric()
+  rest<- logs$time %>% str_sub(11,13)%>% as.numeric()
+  
+  time<- hour*60*60+minutes*60+seconds+rest/1000
+  logs$time<- time
+  
+  logs[,3:5]<- sapply (logs[,3:5], as.numeric)
+  return(logs)
+  
+}
 
+check.product.hit<- function(hit.log, products){
+  
+  products$z<- -products$z
+  res<- data.frame(prod_id= as.numeric(),name.product= as.character(), name.hit= as.character(),
+                   x.product=as.numeric(),z.product=as.numeric(), 
+                   x.hit=as.numeric(),z.hit=as.numeric(),time=numeric(), d= numeric())
+  
+  for (i in 1:nrow(hit.log)) {
+    pos.log<- hit.log[i,c(3,5)]
+    for(j in 1:nrow(products)){
+      pos.product<- products[j,1:2]
+      d<- dist(rbind(pos.log, pos.product))
+      if(d<0.5)
+      {
+        res<-rbind(res,data.frame(prod_id= j,name.product= products$productnumber[j], name.hit= hit.log$product[i],
+                                  x.product=pos.product$x,z.product=pos.product$z, 
+                                  x.hit=pos.log$x,z.hit=pos.log$z,time= hit.log$time[i], d=as.numeric(d)))
+      }
+    }
+  }
+  return(res)
+  
+}
 
-
-
+hit.stop<- function(hits, stops){
+  stops$hit_2<-stops$hit_1<- "none"
+  stops$n_hit<-0
+  for (i in 1:nrow(stops)) {
+    item<-which(between(hits$time, stops$start.time[i],stops$stop.time[i]))
+    if (length(item)==1){
+      stops$hit_1[i]<- hits$prod_id[item]
+      stops$n_hit[i]<-1
+    }else if(length(item)>1){
+      stops$hit_1[i]<- hits$prod_id[item[1]]
+      stops$hit_2[i]<- hits$prod_id[item[2]]
+      stops$n_hit[i]<- length(item)
+    }
+  }
+  return(stops)
+}
 
 
 

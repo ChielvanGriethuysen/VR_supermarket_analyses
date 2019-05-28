@@ -10,6 +10,7 @@ WalkpastProduct<-function(data,
                           gg,
                           products,
                           products2,
+                          hit.log,
                           full.images, 
                           save.data, 
                           i){
@@ -42,7 +43,7 @@ WalkpastProduct<-function(data,
                                             alpha = .2)+
         geom_point(data = productslocation2, 
                    mapping = aes(x = x, y = z, 
-                                 fill= factor(substr(productslocation2$productnumber, 2,2)  %in% unlist(select(data[i,],Hit_1:Hit_8)), levels=c(T,F))),
+                                 fill= factor(productslocation2$productnumber %in% hit.log$name.product)),
                    color= "red", size= 8, shape=21)+
         scale_fill_manual(values= cols)+
         geom_text(data = productslocation2, 
@@ -51,15 +52,15 @@ WalkpastProduct<-function(data,
                   color= "black")+
         geom_point(data = productslocation2, 
                    mapping = aes(x = x+.7, y = z+.3),
-                   colour= "white", size=4)+
-        geom_text(data = plyr::join(x=mutate(productslocation2, productnumber2= substr(productnumber,2,2)), 
-                                    y=mutate(rownames_to_column(as_tibble(as.character(unlist(select(data[i,],Hit_1:Hit_8)))), var= "hit"), productnumber2=value),
-                                    by= "productnumber2"), 
-                  mapping = aes(x = x, y = z, 
-                                label = plyr::join(x=mutate(productslocation2, productnumber2= substr(productnumber,2,2)), 
-                                                   y=mutate(rownames_to_column(as_tibble(as.character(unlist(select(data[i,],Hit_1:Hit_8)))), var= "hit"), productnumber2=value),
-                                                   by= "productnumber2")$hit),
-                  color= "black", nudge_x= .7, nudge_y = .3, size=3)
+                   colour= "white", size=4)#+
+        # geom_text(data = plyr::join(x=mutate(productslocation2, productnumber2= substr(productnumber,2,2)), 
+        #                             y=mutate(rownames_to_column(as_tibble(as.character(unlist(select(data[i,],Hit_1:Hit_8)))), var= "hit"), productnumber2=value),
+        #                             by= "productnumber2"), 
+        #           mapping = aes(x = x, y = z, 
+        #                         label = plyr::join(x=mutate(productslocation2, productnumber2= substr(productnumber,2,2)), 
+        #                                            y=mutate(rownames_to_column(as_tibble(as.character(unlist(select(data[i,],Hit_1:Hit_8)))), var= "hit"), productnumber2=value),
+        #                                            by= "productnumber2")$hit),
+        #           color= "black", nudge_x= .7, nudge_y = .3, size=3)
       
     )
   } else {
@@ -98,20 +99,14 @@ WalkpastProduct<-function(data,
   
   
   #todo, make this code more readable
-  walked.past.not.picked.up1<-box.data$id %in% plyr::join(x=mutate(productslocation2, productnumber2= substr(productnumber,2,2)), 
-                                                                               y=mutate(rownames_to_column(as_tibble(as.character(unlist(select(data[i,],Hit_1:Hit_8)))), var= "hit"), productnumber2=value),
-                                                                               by= "productnumber2")$value
+  walked.past.not.picked.up1<-box.data$id %in% hit.log$prod_id
   
-  walked.past.not.picked.up<-box.data$product[walked.past.not.picked.up1==F]
-  n.walked.past.not.picked.up<-length(walked.past.not.picked.up)
-  
-  data$n.walked.past.not.picked.up[i]<-n.walked.past.not.picked.up
-  data$n.walked.past.not.picked.up.unique[i]<-length(unique(walked.past.not.picked.up))
-  
-  
+  walked.past.not.picked.up<-box.data[walked.past.not.picked.up1==F,]
   }
   res.products  <- list(gg.products = gg.products,
-                          data = data)
+                          data = data,
+                        log= box.data,
+                        log.walked.past= walked.past.not.picked.up)
   return(res.products)  
 }  
 

@@ -4,7 +4,7 @@
 
 # preamble ----------------------------------------------------------------
 packages <- c("jsonlite", "tidyverse", "png", "ggforce",
-              "ggalt", "Rcpp", "grid", "gganimate")
+              "ggalt", "Rcpp", "grid", "gganimate","XML", "DescTools", "xlsx")
 
 lapply(packages, require, character.only = TRUE)
 
@@ -24,6 +24,12 @@ data.files <- list.files(
   pattern = 'json',
   full.names = FALSE
 )
+data.logs <- list.files(
+  path = file.path("input", params$input.dir),
+  pattern = 'Log.xml',
+  full.names = FALSE
+)
+
 
 # get the excel sheet
 data.files2 <- list.files(
@@ -47,8 +53,11 @@ data <- createDataFrame(data.files)
 # loop over all the participants 
 for(i in 1 : length(data.files)){
   JSONfile <- data.files[i]
+  input.log<- data.logs[i]
   
-  res <- runFirstAnalyses(JSONfile = JSONfile, Excel=Excel, 
+  res <- runFirstAnalyses(JSONfile = JSONfile, 
+                          input.log = input.log,
+                          Excel=Excel, 
                           image = image, 
                           params= params,
                           data = data,
@@ -68,13 +77,15 @@ for(i in 1 : length(data.files)){
                                     input.data = res$input.data,
                                     gg = res.aisles$gg,
                                     products =  res$productbox,
-                                    products2 = res$products, 
+                                    products2 = res$products,
+                                    hit.log = res$product.hits,
                                     full.images = params$full.images,
                                     save.data = params$save.data,
                                     i = i)
     
     res.speed<- speeddiscretisation(data = res.products$data,
-                                    aisles.log<- res.aisles$log,
+                                    aisles.log=res.aisles$log,
+                                    hits.log= res$product.hits,
                                     input.data = res$input.data,
                                     gg=res.products$gg.products,
                                     stop.params = params$features$stops,
@@ -98,7 +109,7 @@ for(i in 1 : length(data.files)){
 
     data<-  res.cross$data
     
-    looking.plot.stop(res.speed$log, res$input.data, res$input.look, JSONfile, res.cross$gg)
+    looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile, res.cross$gg)
     looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, res.cross$gg)
  
       if(params$full.images){
@@ -127,10 +138,17 @@ for(i in 1 : length(data.files)){
       
       #plot the speed, with categories of stop/slow/walk
       ggsave(paste0('output/png/', params$output.dir, '/', JSONfile,'speed', '.png'), 
-      speed.plot(res$input.data,res.speed$log, res.aisles$log), width = 40, height = 7, units = 'cm')
+      speed.plot(res$input.data,res.speed$speed.log, res.aisles$log), width = 40, height = 7, units = 'cm')
       
       #write the log with the timestemsp of events
-      write.csv2(res.speed$log, file = paste0("output/logs/",strsplit(JSONfile,"_")[[1]][1],"_log", ".csv"), row.names = FALSE)
+      log.list<- list(aisles.log= res.speed$aisles.log, 
+                      speed.log= res.speed$speed.log, 
+                      crossings.log= res.cross$log, 
+                      products.log= res.products$log, 
+                      walked.past.log= res.products$log.walked.past, 
+                      products.hit.log= res$product.hits)
+      export.logs(Jsonfile= Jsonfile, 
+                  log.list= log.list)
     }
   }
 }
