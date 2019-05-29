@@ -107,22 +107,7 @@ for(i in 1 : length(data.files)){
     
     
       if(params$full.images){
-      # if( ! file.exists(paste0('output/png/', params$output.dir))){
-      #   dir.create(paste0('output/png/', params$output.dir))
-      # }
-      # # Save variables required for ggplot in global environment 
-      # # (ggplot cannot handle variables created in functions)
-      # aisles <- params$features$aisles
-      # aisles2 <- params$features$aisles2
-      # n.crossings <- res.cross$n.crossings
-      # stop.radius <- params$features$stops$stop.radius
-      # productsbox <- params$features$products1
-      # productslocation <- params$features$products2
-      # n.stops<-res.speed$n.stops
-      # n.slows<-res.speed$n.slows
-      # ggsave(paste0('output/png/', params$output.dir, '/', JSONfile, '.png'), 
-      #        res.cross$gg.cross, width = 37.5, height = 21, units = 'cm')
-      
+
       
       #add the npo and persenal data to the export
       if(params$external.excel){
