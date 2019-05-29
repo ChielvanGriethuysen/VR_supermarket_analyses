@@ -182,6 +182,7 @@ runFirstAnalyses <- function(JSONfile,input.log,
   }
   row.names(input.data) <- 1:nrow(input.data)
   row.names(input.look) <- 1:nrow(input.look)
+  
   #add speed and distance to dataframe and calculate total distance
   x.change <- diff(input.data$x, 1)
   y.change <- diff(input.data$z, 1)
@@ -190,7 +191,7 @@ runFirstAnalyses <- function(JSONfile,input.log,
   input.data<- data.frame(input.data, speed,c(mean(distance.between.points),distance.between.points))
   names(input.data)[6]<- "dist"
   
-  input.data<-data.frame(input.data,input.look)
+  #input.data<-data.frame(input.data,input.look)
   
   
   # Save results of basic analyses
@@ -198,79 +199,6 @@ runFirstAnalyses <- function(JSONfile,input.log,
   if(params$external.excel){
     #add VRlog data
     data<-data.VRlog(data,Excel,i)
-  }
-  
-  #skip points to better view the speed on the path
-  subpoints<- skippoints(input.data,0.2)
-  #calculate speed for skiped points
-  x.change <- diff(subpoints$x, 1)
-  y.change <- diff(subpoints$z, 1)
-  distance.between.subpoints<-sqrt(x.change^2 + y.change^2)
-  speed<- distance.between.subpoints/diff(subpoints$time)
-  speed<- c(mean(speed),speed)
-  
-  
-  # Make and save plot of raw walking path
-  gg <- ggplot() + 
-    #ylim(-53, -7) + xlim(0, 29) +
-    scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
-    scale_y_continuous(limits = c(-50, -2.5), expand=c(0,0)) +
-    annotation_custom(rasterGrob(image, 
-                                 width = unit(1, "npc"), 
-                                 height = unit(1, "npc")), 
-                      -Inf, Inf, -Inf, Inf) +
-    #    coord_fixed() + 
-    coord_flip() +
-    theme(legend.position = "none",
-          plot.margin = margin(0, 0, 0, 0, "cm")) +
-    geom_text(aes(y = -12, x = 2, 
-                  label = paste("Person", 
-                                substr(JSONfile[i], 1, 5),
-                                "\n Walking route")), 
-              size = 5) + 
-    geom_hline(yintercept = -45.5)
-  
-  ggpath<-gg+ geom_path(data = input.data, 
-                        mapping = aes(x = x, y = -z, color = 1:length(x)),
-                        arrow = arrow(length = unit(4, "points")))
-  
-  ggspeed <- ggplot() + 
-    #ylim(-53, -7) + xlim(0, 29) +
-    scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
-    scale_y_continuous(limits = c(-50, -2.5), expand=c(0,0)) +
-    annotation_custom(rasterGrob(image, 
-                                 width = unit(1, "npc"), 
-                                 height = unit(1, "npc")), 
-                      -Inf, Inf, -Inf, Inf) +
-    geom_path(data = subpoints, 
-              mapping = aes(x = x, y = -z, color = speed),
-              arrow = arrow(length = unit(5, "points"))) +
-    scale_colour_gradient(low = "red", high = "yellow") +
-    #    coord_fixed() + 
-    coord_flip() +
-    theme(plot.margin = margin(0, 0, 0, 0, "cm")) +
-    geom_text(aes(y = -12, x = 2, 
-                  label = paste("Person", 
-                                substr(JSONfile[i], 1, 5),
-                                "\n Walking route")), 
-              size = 5) + 
-    geom_hline(yintercept = -45.5)
-  #gglook<- ggpath+ geom_point(data=input.look, mapping= aes(x=x, y=-z), colour="orange", alpha= 0.2)
-  
-  # Save if required
-  if(params$raw.images){
-    # Create path if exists and create if it does not
-    if( ! file.exists(paste0('output/png/', params$output.dir))){
-      dir.create(paste0('output/png/', params$output.dir))
-    }
-    ggsave(paste0('output/png/', params$output.dir, '/',
-                  JSONfile, '_RAW.png'), ggpath, 
-           width = 37.5, height = 21, units = 'cm')
-    # ggsave(paste0('output/png/', params$output.dir, '/',
-    #               JSONfile, '_RAWspeed.png'), ggspeed, 
-    #        width = 37.5, height = 21, units = 'cm')
-
-    
   }
   
   # create product box based on suppermarket
@@ -286,7 +214,6 @@ runFirstAnalyses <- function(JSONfile,input.log,
   product.hits<- check.product.hit(product.log, products)
   
   res <- list(dat = dat,
-              gg = ggpath, 
               input.data= input.data,
               input.look= input.look,
               product.hits= product.hits,

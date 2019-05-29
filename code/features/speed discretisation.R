@@ -36,36 +36,19 @@ speeddiscretisation<-function(data, input.data, aisles.log,hits.log, gg,
   n.slows=sum(log$label=="slow")
   n.stops=sum(log$label=="stop")
   
-  # add labels to path data
-  discretised.path<-datapoint.add.label(input.data,log)
-  
   # add stops to ailes log
   aisles.log<- add.stops.to.aisles.log(stops, aisles.log)
   
   # add if a product was hit, if so, which(first and second) one and the ammount of hits for the case that there are more
   log<- hit.stop(hits.log,log)
   
-  #print plot slows and stops in plot
-  gg<-gg+   geom_point(data = discretised.path[discretised.path$label=="stop",], 
-                    mapping = aes(x = x, y = -z),
-                    fill = 'green', colour = 'green', size= 3.5)+
-            geom_text(aes(y = -48, x = 2, 
-                  label = paste("N stops = ", n.stops, "(X)" )),
-              size = 5,
-              colour = 'green')
-  gg<-gg+ geom_point(data = discretised.path[discretised.path$label=="slow",], 
-                    mapping = aes(x = x, y = -z),
-                    fill = 'black', colour = 'black', size= 3.5)+
-          geom_text(aes(y = -48, x = 3, 
-                  label = paste("N slows = ", n.slows, "(X)")),
-              colour = 'white', size = 5)
+
     
 
   
   speed.res<-list(speed.log = log,
                   aisles.log= aisles.log,
                   data = data,
-                  gg = gg,
                   n.slows=n.slows,
                   n.stops=n.stops
                   )

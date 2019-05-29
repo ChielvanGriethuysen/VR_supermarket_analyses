@@ -67,7 +67,6 @@ for(i in 1 : length(data.files)){
   if(params$save.data | params$full.images){
     res.aisles <- getAisleTimes(data = res$data,
                                 input.data= res$input.data,
-                                gg = res$gg,
                                 aisles = params$features$aisles,
                                 full.images = params$full.images,
                                 save.data = params$save.data,
@@ -75,7 +74,6 @@ for(i in 1 : length(data.files)){
     
     res.products <- WalkpastProduct(data = res.aisles$data,
                                     input.data = res$input.data,
-                                    gg = res.aisles$gg,
                                     products =  res$productbox,
                                     products2 = res$products,
                                     hit.log = res$product.hits,
@@ -87,7 +85,6 @@ for(i in 1 : length(data.files)){
                                     aisles.log=res.aisles$log,
                                     hits.log= res$product.hits,
                                     input.data = res$input.data,
-                                    gg=res.products$gg.products,
                                     stop.params = params$features$stops,
                                     walk.params = params$features$walk,
                                     aisles= params$features$aisles,
@@ -95,39 +92,36 @@ for(i in 1 : length(data.files)){
     
     res.cross <- getCrossings(data = res.speed$data,
                               input.data = res$input.data,
-                              gg = res.speed$gg,
                               shopping.aisle.time.points = res.aisles$shopping.aisle.time.points,
                               aisles = params$features$aisles,
                               cross.lag1 = params$features$cross$cross.lag1,
                               cross.lag2 = params$features$cross$cross.lag2,
                               full.images = params$full.images,
                               i = i)
-    
+
     res.look<- getLookings( aisles.log= res.aisles$log,
                             input.look= res$input.look,
                             aisles = params$features$aisles)
 
     data<-  res.cross$data
     
-    looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile, res.cross$gg)
-    looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, res.cross$gg)
- 
+    
       if(params$full.images){
-      if( ! file.exists(paste0('output/png/', params$output.dir))){
-        dir.create(paste0('output/png/', params$output.dir))
-      }
-      # Save variables required for ggplot in global environment 
-      # (ggplot cannot handle variables created in functions)
-      aisles <- params$features$aisles
-      aisles2 <- params$features$aisles2
-      n.crossings <- res.cross$n.crossings
-      stop.radius <- params$features$stops$stop.radius
-      productsbox <- params$features$products1
-      productslocation <- params$features$products2
-      n.stops<-res.speed$n.stops
-      n.slows<-res.speed$n.slows
-      ggsave(paste0('output/png/', params$output.dir, '/', JSONfile, '.png'), 
-             res.cross$gg.cross, width = 37.5, height = 21, units = 'cm')
+      # if( ! file.exists(paste0('output/png/', params$output.dir))){
+      #   dir.create(paste0('output/png/', params$output.dir))
+      # }
+      # # Save variables required for ggplot in global environment 
+      # # (ggplot cannot handle variables created in functions)
+      # aisles <- params$features$aisles
+      # aisles2 <- params$features$aisles2
+      # n.crossings <- res.cross$n.crossings
+      # stop.radius <- params$features$stops$stop.radius
+      # productsbox <- params$features$products1
+      # productslocation <- params$features$products2
+      # n.stops<-res.speed$n.stops
+      # n.slows<-res.speed$n.slows
+      # ggsave(paste0('output/png/', params$output.dir, '/', JSONfile, '.png'), 
+      #        res.cross$gg.cross, width = 37.5, height = 21, units = 'cm')
       
       
       #add the npo and persenal data to the export
@@ -149,6 +143,13 @@ for(i in 1 : length(data.files)){
                       products.hit.log= res$product.hits)
       export.logs(Jsonfile= Jsonfile, 
                   log.list= log.list)
+      #print pathplots
+      basic<- basic.path.plot(res$input.data, JSONfile,save = TRUE)
+      full<-full.plot(basic,res$input.data,log.list,JSONfile,res$products,res$productbox,params$features$aisles, save = TRUE)
+      
+      looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile, full)
+      looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, full)
+      
     }
   }
 }

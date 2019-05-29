@@ -63,9 +63,6 @@ getCrossings = function(data, input.data, gg,
     data$n.crossings[i] <- 0
     n.crossings.shopping<- 0
   }
-
-
-    
     #split slows per third.
     
     # crosspointstibble<-tibble(crosspoints=crossings[,1])
@@ -79,26 +76,7 @@ getCrossings = function(data, input.data, gg,
     # data$cross.1st.1.3rd[i]<-cross.1st.1.3rd
     # data$cross.2nd.1.3rd[i]<-cross.2nd.1.3rd
     # data$cross.3rd.1.3rd[i]<-cross.3rd.1.3rd
-
-    # add the crossings to the plot
-    if(full.images && n.crossings>0){
-      gg.cross <- gg +
-        geom_point(data = crossings.pos,
-                   aes(x = x, y = -z), size= 3.5,
-                   col = 'blue') +
-        geom_text(aes(y = -48, x = 4, 
-                      label = paste("N crossings =", n.crossings, "(", n.crossings.shopping, ")" )),
-                  colour = 'blue',size=5)
-    }else{
-      gg.cross<-gg+ geom_text(aes(y = -48, x = 4, 
-                                  label = paste("N crossings =", n.crossings, "(", n.crossings.shopping, ")" )),
-                              colour = 'blue',size= 5)
-    }
-    
-
-     
-  res.cross <- list(gg.cross = gg.cross, 
-                    data = data, 
+  res.cross <- list(data = data, 
                     log= crossings,
                     n.crossings = n.crossings,
                     cross.points.all=crossings)

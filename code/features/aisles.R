@@ -4,27 +4,9 @@
 
 
 
-getAisleTimes <- function(data, input.data, gg,
+getAisleTimes <- function(data, input.data,
                           aisles, full.images, save.data, i){
   
-  if(full.images){
-    gg.aisles <- gg
-    
-    # Create rectangles of aisles. append and $layers is used to plot
-    # the rectangles and names UNDER the path
-    suppressWarnings(
-      gg.aisles  <- gg.aisles+
-                                 geom_rect(data = aisles,
-                                           mapping = aes(xmin = xmin, xmax = xmax,
-                                                         ymin = zmin, ymax = zmax,
-                                                         fill=factor(type)), 
-                                           alpha = .3)+
-        geom_label(data = aisles,
-                   mapping = aes(x = xmin, y = zmin, label = aisles$aisle.names),
-                    label.size = .32))
-  } else {
-    gg.aisles <- gg
-  }
   
   aisles.data<-calc.box.feature(input.data,aisles)
   aisles.data<-aisles.label.add(aisles.data,input.data,aisles)
@@ -82,8 +64,7 @@ getAisleTimes <- function(data, input.data, gg,
   
   
   
-  res.aisles <- list(gg.aisles = gg.aisles,
-                     data = data,
+  res.aisles <- list(data = data,
                      log= aisles.data,
                      shopping.aisle.time.points=shopping.aisle.time.points)
   return(res.aisles)
