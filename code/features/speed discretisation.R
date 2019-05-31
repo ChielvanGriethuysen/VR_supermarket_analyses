@@ -1,6 +1,6 @@
 # VR Supermarkt: function to extract the stops.
 #
-# Last edited 9-5-2019 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
+# Last edited 31-5-2019 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
 speeddiscretisation<-function(data, input.data, aisles.log,hits.log, gg,
                               stop.params, walk.params,
@@ -14,8 +14,6 @@ speeddiscretisation<-function(data, input.data, aisles.log,hits.log, gg,
   #add info
   p.stops<-add.times.location(p.stops,input.data)
   walks<-add.times.location(walks,input.data)
-  
-  
   
   #filters
   slows<-p.stops%>% filter(absolute.speed>0.1, time.spend>3)
@@ -41,10 +39,6 @@ speeddiscretisation<-function(data, input.data, aisles.log,hits.log, gg,
   
   # add if a product was hit, if so, which(first and second) one and the ammount of hits for the case that there are more
   log<- hit.stop(hits.log,log)
-  
-
-    
-
   
   speed.res<-list(speed.log = log,
                   aisles.log= aisles.log,

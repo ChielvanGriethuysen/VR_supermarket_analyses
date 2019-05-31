@@ -41,15 +41,16 @@ params <- list(
     stops = list(
       stop.time = 2,      # seconds of stopping #  more than 5 to much to detect product pickup
       stop.radius = 0.25,  # meters of walking
+      
       stop.minimum.duration= 3,
-      stop.max.speed= 0.15,
-      stop.max.distance=1,
-      stop.merge.distance=0.75
+      stop.max.speed= 0.2,
+      #stop.max.distance=1,
+      stop.merge.distance=1.5
     ),
     walk= list(
       walk.minimum.duration= 1,
       walk.min.speed= 0.4,
-      walk.merge.distance=0.75
+      walk.merge.distance=1.5
     ),
     
     # Slows measures the times someone has slowed. Is defined the same as a

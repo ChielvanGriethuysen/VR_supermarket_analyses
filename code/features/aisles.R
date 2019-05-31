@@ -14,7 +14,7 @@ getAisleTimes <- function(data, input.data,
   # data[i,]$n.walked.through.aisles<-nrow(walk.through)
   # data[i,]$n.walked.in.out.aisles<-nrow(same.side.in.out)
   
-  if(nrow(aisles.data)>0 &  save.data){
+  if(nrow(aisles.data)>0){
 
     
     #Count number of times in each aisle

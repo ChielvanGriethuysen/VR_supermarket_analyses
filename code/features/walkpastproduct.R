@@ -30,8 +30,6 @@ WalkpastProduct<-function(data,
   # get data about visiting product boxes
   box.data<-calc.box.feature(input.data,productbox2)
   box.data<-productbox.label.add(box.data,input.data,productbox2)
-   
-  if(save.data){
   
   box.summarised<-box.data %>% group_by(name) %>%
     summarise(time=sum(time.spend),n=n()) %>%
@@ -60,7 +58,7 @@ WalkpastProduct<-function(data,
   walked.past.not.picked.up1<-box.data$id %in% hit.log$prod_id
   
   walked.past.not.picked.up<-box.data[walked.past.not.picked.up1==F,]
-  }
+  
   res.products  <- list(data = data,
                         log= box.data,
                         log.walked.past= walked.past.not.picked.up)
