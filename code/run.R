@@ -128,6 +128,9 @@ for(i in 1 : length(data.files)){
                       products.hit.log= res$product.hits)
       export.logs(Jsonfile= Jsonfile, 
                   log.list= log.list)
+      #combine all partisipants log files to one df
+      combined.logs<-all.logs(log.list, combined.logs, i, str_split(JSONfile,"_")[[1]][1])
+      
       #print pathplots
       basic<- basic.path.plot(res$input.data, JSONfile,save = TRUE)
       full<-full.plot(basic,res$input.data,log.list,JSONfile,res$products,res$productbox,params$features$aisles, save = TRUE)
@@ -138,7 +141,8 @@ for(i in 1 : length(data.files)){
     }
   }
 }
-
+#export all log files in one file
+export.logs("allfilescombined",combined.logs)
 # save the data to an excel sheet
 if(params$save.to.excel){
   write.csv2(datamerged, file = "output/csv/features.csv", row.names = FALSE)

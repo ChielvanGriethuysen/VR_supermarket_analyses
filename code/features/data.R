@@ -81,5 +81,26 @@ export.logs<- function(Jsonfile, log.list){
   write.xlsx2(log.list$products.hit.log,file = file, sheetName = "hit", append = TRUE)
   
 }
+all.logs<- function(log, combined.logs,i,file){
+  if(i==1){
+    log$aisles.log<- cbind(rep(file,nrow(log$aisles.log)),log$aisles.log)
+    log$speed.log<- cbind(rep(file,nrow(log$speed.log)),log$speed.log)
+    log$crossings.log<- cbind(rep(file,nrow(log$crossings.log)),log$crossings.log)
+    log$products.log<- cbind(rep(file,nrow(log$products.log)),log$products.log)
+    log$walked.past.log<- cbind(rep(file,nrow(log$walked.past.log)),log$walked.past.log)
+    log$products.hit.log<- cbind(rep(file,nrow(log$products.hit.log)),log$products.hit.log)
+    return(log)
+  }else{
+    combined.logs$aisles.log<- rbind(combined.logs$aisles.log,cbind(rep(file,nrow(log$aisles.log)),log$aisles.log))
+    combined.logs$speed.log<- rbind(combined.logs$speed.log,cbind(rep(file,nrow(log$speed.log)),log$speed.log))
+    combined.logs$crossings.log<- rbind(combined.logs$crossings.log,cbind(rep(file,nrow(log$crossings.log)),log$crossings.log))
+    combined.logs$products.log<- rbind(combined.logs$products.log,cbind(rep(file,nrow(log$products.log)),log$products.log))
+    combined.logs$walked.past.log<- rbind(combined.logs$walked.past.log,cbind(rep(file,nrow(log$walked.past.log)),log$walked.past.log))
+    combined.logs$products.hit.log<- rbind(combined.logs$products.hit.log,cbind(rep(file,nrow(log$products.hit.log)),log$products.hit.log))
+    return(combined.logs)
+  }
+}
+
+
   
   
