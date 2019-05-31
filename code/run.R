@@ -106,45 +106,49 @@ for(i in 1 : length(data.files)){
     data<-  res.cross$data
     
     
-      if(params$full.images){
+
 
       
-      #add the npo and persenal data to the export
-      if(params$external.excel){
-      datamerged<-add.npo.and.persenal.data(data,params,data.files2)
-      write.csv2(datamerged, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
-      }
-      
-      #plot the speed, with categories of stop/slow/walk
-      ggsave(paste0('output/png/', params$output.dir, '/', JSONfile,'speed', '.png'), 
-      speed.plot(res$input.data,res.speed$speed.log, res.aisles$log), width = 40, height = 7, units = 'cm')
-      
-      #write the log with the timestemsp of events
-      log.list<- list(aisles.log= res.speed$aisles.log, 
-                      speed.log= res.speed$speed.log, 
-                      crossings.log= res.cross$log, 
-                      products.log= res.products$log, 
-                      walked.past.log= res.products$log.walked.past, 
-                      products.hit.log= res$product.hits)
-      export.logs(Jsonfile= Jsonfile, 
-                  log.list= log.list)
-      #combine all partisipants log files to one df
-      combined.logs<-all.logs(log.list, combined.logs, i, str_split(JSONfile,"_")[[1]][1])
-      
-      #print pathplots
-      basic<- basic.path.plot(res$input.data, JSONfile,save = TRUE)
-      full<-full.plot(basic,res$input.data,log.list,JSONfile,res$products,res$productbox,params$features$aisles, save = TRUE)
-      
-      looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile, full)
-      looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, full)
-      
+    #add the npo and persenal data to the export
+    # if(params$external.excel){
+    # datamerged<-add.npo.and.persenal.data(data,params,data.files2)
+    # write.csv2(datamerged, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
+    # }
+    
+    #write the log with the timestemsp of events
+    if(params$save.log){
+    log.list<- list(aisles.log= res.speed$aisles.log, 
+                    speed.log= res.speed$speed.log, 
+                    crossings.log= res.cross$log, 
+                    products.log= res.products$log, 
+                    walked.past.log= res.products$log.walked.past, 
+                    products.hit.log= res$product.hits)
+    #save the log to excel
+    export.logs(Jsonfile= Jsonfile, log.list= log.list)
+    #combine all partisipants log files to one df
+    combined.logs<-all.logs(log.list, combined.logs, i, str_split(JSONfile,"_")[[1]][1])
+    }
+    #print pathplots
+    if(params$save.images){
+    basic<- basic.path.plot(res$input.data, JSONfile,save = TRUE)
+    
+    full<-full.plot(basic,res$input.data,log.list,JSONfile,res$products,res$productbox,params$features$aisles, save = TRUE)
+    # plot places where somone looks
+    looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile, full)
+    looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, full)
+    
+    #plot the speed, with categories of stop/slow/walk
+    ggsave(paste0('output/png/', params$output.dir, '/', JSONfile,'speed', '.png'), 
+           speed.plot(res$input.data,res.speed$speed.log, res.aisles$log), width = 40, height = 7, units = 'cm')
     }
   }
 }
 #export all log files in one file
-export.logs("allfilescombined",combined.logs)
-# save the data to an excel sheet
-if(params$save.to.excel){
-  write.csv2(datamerged, file = "output/csv/features.csv", row.names = FALSE)
+if(params$save.log){
+  export.logs("allfilescombined",combined.logs)
 }
+# save the data to an excel sheet
+# if(params$save.to.excel){
+#   write.csv2(datamerged, file = "output/csv/features.csv", row.names = FALSE)
+# }
 

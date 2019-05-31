@@ -19,11 +19,11 @@ params <- list(
   # what output is saved (TRUE/FALSE)
   # It is adviced that full.images and save.data are both either TRUE or FALSE.
   # This ensures the features and the images shown always correspond.
-  raw.images    = TRUE,     # Images with just the path
-  full.images   = TRUE,     # Images with path + aisles, stops, crosses, etc.
-  external.excel= FALSE,    # should the external excel be used 
-  save.data     = TRUE,     # should stops, slows etc. be saved.
-  save.to.excel = FALSE,    # should stops, slows etc. be saved.to an excel file
+  save.images   = TRUE,     # should the maps, and plots be saved     
+  external.excel= FALSE,    # should the external excel be used(NPO and persenal data)
+  save.log      = TRUE,     # should the raw log's be saved
+  save.feature  = TRUE,     # should a feature file be made
+  
   make.gif      = FALSE,    # Gif of a path (DOES NOT WORK RIGHT NOW)
   
   sheet.excel  = 2,        # On which sheet are the data point
