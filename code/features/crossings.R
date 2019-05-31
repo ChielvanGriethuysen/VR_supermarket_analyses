@@ -12,8 +12,8 @@ getCrossings = function(data, input.data, gg,
 
   
   #skip points, if to close to each other, to speed op crossing finding
-  move_data<-skippoints(input.data,distance = 0.5)
-  
+  move_data<-skippoints(input.data,distance = 0.05)
+  move_data<- speed.dist.add(move_data)
   FootPosition<- move_data[,2:4]
   time<- move_data[,1]
   
@@ -47,7 +47,6 @@ getCrossings = function(data, input.data, gg,
     
     crossings<-crossings[r,]
     crossings<- add.times.location(crossings, move_data)
-    crossings<-crossings[,1:9]
     colnames(crossings)[5]<-"time.between"
     crossings<- cbind(crossings, calc.spot.event.in.box(crossings, aisles))
     

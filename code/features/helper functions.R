@@ -13,6 +13,16 @@ skippoints<-function(data, distance){
   data[filltered.points,1:4]
   
 }
+speed.dist.add<-function(input.data){
+  x.change <- diff(input.data$x, 1)
+  y.change <- diff(input.data$z, 1)
+  distance.between.points<-sqrt(x.change^2 + y.change^2)
+  speed<-c(0,distance.between.points/diff(input.data$t,1))
+  input.data<- data.frame(input.data, speed,c(mean(distance.between.points),distance.between.points))
+  names(input.data)[6]<- "dist"
+  return(input.data)
+}
+
 # calculate distance covert between two data points
 subdistance<-function(FootPosition, start, stop){
   curent.dist<-0
