@@ -19,9 +19,9 @@ params <- list(
   # what output is saved (TRUE/FALSE)
   # It is adviced that full.images and save.data are both either TRUE or FALSE.
   # This ensures the features and the images shown always correspond.
-  save.images   = TRUE,     # should the maps, and plots be saved     
+  save.images   = FALSE,     # should the maps, and plots be saved     
   external.excel= FALSE,    # should the external excel be used(NPO and persenal data)
-  save.log      = TRUE,     # should the raw log's be saved
+  save.log      = FALSE,     # should the raw log's be saved
   save.feature  = TRUE,     # should a feature file be made
   
   make.gif      = FALSE,    # Gif of a path (DOES NOT WORK RIGHT NOW)
@@ -45,12 +45,12 @@ params <- list(
       stop.minimum.duration= 3,
       stop.max.speed= 0.2,
       #stop.max.distance=1,
-      stop.merge.distance=1.5
+      stop.merge.distance=1
     ),
     walk= list(
       walk.minimum.duration= 1,
       walk.min.speed= 0.4,
-      walk.merge.distance=1.5
+      walk.merge.distance=1
     ),
     
     # Slows measures the times someone has slowed. Is defined the same as a
@@ -83,6 +83,7 @@ params <- list(
     
     
     ),
+
   #These are the exact locations of the product
   products =list( nemo_a= data.frame( x =             c( 16.3,  17.2,   13.1,   24.3,   12.3,  24.3,   8.3,   12.9     ),  
                                       z =             c(-18.3, -34.4,  -32.9,  -17.2,  -37.2, -15.6,  -21.9, -37.9     ),

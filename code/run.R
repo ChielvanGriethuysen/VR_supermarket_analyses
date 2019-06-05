@@ -60,19 +60,16 @@ for(i in 1 : length(data.files)){
                           Excel=Excel, 
                           image = image, 
                           params= params,
-                          data = data,
                           i = i)
   
 
-  res.aisles <- getAisleTimes(data = res$data,
-                              input.data= res$input.data,
+  res.aisles <- getAisleTimes(input.data= res$input.data,
                               aisles = params$features$aisles,
                               full.images = params$full.images,
                               save.data = params$save.data,
                               i = i)
     
-  res.products <- WalkpastProduct(data = res.aisles$data,
-                                  input.data = res$input.data,
+  res.products <- WalkpastProduct(input.data = res$input.data,
                                   products =  res$productbox,
                                   products2 = res$products,
                                   hit.log = res$product.hits,
@@ -80,8 +77,7 @@ for(i in 1 : length(data.files)){
                                   save.data = params$save.data,
                                   i = i)
   
-  res.speed<- speeddiscretisation(data = res.products$data,
-                                  aisles.log=res.aisles$log,
+  res.speed<- speeddiscretisation(aisles.log=res.aisles$log,
                                   hits.log= res$product.hits,
                                   input.data = res$input.data,
                                   stop.params = params$features$stops,
@@ -89,8 +85,7 @@ for(i in 1 : length(data.files)){
                                   aisles= params$features$aisles,
                                   i=i)
   
-  res.cross <- getCrossings(data = res.speed$data,
-                            input.data = res$input.data,
+  res.cross <- getCrossings(input.data = res$input.data,
                             shopping.aisle.time.points = res.aisles$shopping.aisle.time.points,
                             aisles = params$features$aisles,
                             cross.lag1 = params$features$cross$cross.lag1,
@@ -98,47 +93,52 @@ for(i in 1 : length(data.files)){
                             full.images = params$full.images,
                             i = i)
 
-  res.look<- getLookings( aisles.log= res.aisles$log,
+  res.look<- getLookings( aisles.log= res.speed$aisles.log,
                           input.look= res$input.look,
                           aisles = params$features$aisles)
 
-  data<-  res.cross$data
-  
-  
 
-
+  log.list<- list(aisles.log= res.speed$aisles.log, 
+                  speed.log= res.speed$speed.log, 
+                  crossings.log= res.cross$log, 
+                  products.log= res.products$log, 
+                  walked.past.log= res.products$log.walked.past, 
+                  products.hit.log= res$product.hits,
+                  look.log= res.look$log)
+  
+  data<-  logs.to.features(data,i,log.list,res$input.data,params)
+  write.csv2(data, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
     
   #add the npo and persenal data to the export
   # if(params$external.excel){
   # datamerged<-add.npo.and.persenal.data(data,params,data.files2)
   # write.csv2(datamerged, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
   # }
-  
+
   #write the log with the timestemsp of events
   if(params$save.log){
-  log.list<- list(aisles.log= res.speed$aisles.log, 
-                  speed.log= res.speed$speed.log, 
-                  crossings.log= res.cross$log, 
-                  products.log= res.products$log, 
-                  walked.past.log= res.products$log.walked.past, 
-                  products.hit.log= res$product.hits)
+
   #save the log to excel
-  export.logs(Jsonfile= Jsonfile, log.list= log.list)
+  export.logs(JSONfile= JSONfile, log.list= log.list)
   #combine all partisipants log files to one df
   combined.logs<-all.logs(log.list, combined.logs, i, str_split(JSONfile,"_")[[1]][1])
   }
   #print pathplots
   if(params$save.images){
-  basic<- basic.path.plot(res$input.data, JSONfile,save = TRUE)
-  
-  full<-full.plot(basic,res$input.data,log.list,JSONfile,res$products,res$productbox,params$features$aisles, save = TRUE)
-  # plot places where somone looks
-  looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile, full)
-  looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, full)
-  
-  #plot the speed, with categories of stop/slow/walk
-  ggsave(paste0('output/png/', params$output.dir, '/', JSONfile,'speed', '.png'), 
-         speed.plot(res$input.data,res.speed$speed.log, res.aisles$log), width = 40, height = 7, units = 'cm')
+    basic<- basic.path.plot(res$input.data, JSONfile,save = TRUE)
+    
+    full<-full.plot(basic,res$input.data,log.list,JSONfile,res$products,res$productbox,params$features$aisles, save = TRUE)
+    # plot places where somone looks
+    looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile, full)
+    looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, full)
+    
+    speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log)
+    speed.map.combine(speed,full,JSONfile,save=TRUE)
+    
+    
+    # #plot the speed, with categories of stop/slow/walk
+    # ggsave(paste0('output/png/', params$output.dir, '/', JSONfile,'speed', '.png'), 
+    #        speed.plot(res$input.data,res.speed$speed.log, res.aisles$log), width = 40, height = 7, units = 'cm')
   }
   
 }

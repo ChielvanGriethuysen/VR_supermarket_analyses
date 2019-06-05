@@ -29,11 +29,9 @@ getLookings<- function(aisles.log, input.look, aisles){
         walk.throughs$view.right[i]<- n.right
       }
       #calculate switches
+      divide<- filterd$x<mean(c(cur.aisles$xmax,cur.aisles$xmin))
+      walk.throughs$look.switch[i]<- sum(divide!=lead(divide,default =  FALSE))
       
-      for (j in 1:nrow(filterd)) {
-        divide<- filterd$x<mean(c(cur.aisles$xmax,cur.aisles$xmin))
-        walk.throughs$look.switch[i]<- sum(divide!=lead(divide,default =  FALSE))
-      }
     }
   }
   walk.throughs$View.fraction<- walk.throughs$view.left/walk.throughs$view.right

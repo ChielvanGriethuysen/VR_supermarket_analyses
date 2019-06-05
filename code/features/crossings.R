@@ -5,7 +5,7 @@
 
 
 
-getCrossings = function(data, input.data, gg, 
+getCrossings = function(input.data, gg, 
                         shopping.aisle.time.points, aisles,
                         cross.lag1, cross.lag2,
                         full.images, i){
@@ -75,8 +75,7 @@ getCrossings = function(data, input.data, gg,
     # data$cross.1st.1.3rd[i]<-cross.1st.1.3rd
     # data$cross.2nd.1.3rd[i]<-cross.2nd.1.3rd
     # data$cross.3rd.1.3rd[i]<-cross.3rd.1.3rd
-  res.cross <- list(data = data, 
-                    log= crossings,
+  res.cross <- list(log= crossings,
                     n.crossings = n.crossings,
                     cross.points.all=crossings)
   

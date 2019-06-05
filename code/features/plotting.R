@@ -114,6 +114,19 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,products, productbox,ai
   return(gg)
 }
 
+speed.map.combine<- function(speed, map, JSONfile,save=FALSE){
+  
+  gg<-ggarrange(map,speed, ncol = 1,nrow = 2,heights = c(2,1))
+  
+  if(save){
+    if( ! file.exists(paste0('output/png/speed.map'))){
+      dir.create(paste0('output/png/speed.map'))
+    }
+    ggsave(paste0('output/png/speed.map/', JSONfile, '.png'), 
+           gg, width = 37.5, height = 21, units = 'cm')
+  }
+}
+
 
 
 
