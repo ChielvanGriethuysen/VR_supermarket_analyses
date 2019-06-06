@@ -41,9 +41,10 @@ getCrossings = function(input.data, params,i){
       r<-c(r,k)
       k<-l
     }
-    # add last element, can't be to close to the next one
-    r<-c(r,k)
-    
+    # add last element, can't be to close to the next one, but only if it is not to close to a earlyer one
+    if(k== nrow(crossings)){
+      r<-c(r,k)
+    }
     
     crossings<-crossings[r,]
     crossings<- add.times.location(crossings, move_data)
