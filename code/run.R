@@ -4,7 +4,7 @@
 
 # preamble ----------------------------------------------------------------
 packages <- c("jsonlite", "tidyverse", "png", "ggforce",
-              "ggalt", "Rcpp", "grid", "gganimate","XML", "DescTools", "xlsx")
+              "ggalt", "Rcpp", "grid", "gganimate","XML", "DescTools", "xlsx","ggpubr")
 
 lapply(packages, require, character.only = TRUE)
 
@@ -86,11 +86,7 @@ for(i in 1 : length(data.files)){
                                   i=i)
   
   res.cross <- getCrossings(input.data = res$input.data,
-                            shopping.aisle.time.points = res.aisles$shopping.aisle.time.points,
-                            aisles = params$features$aisles,
-                            cross.lag1 = params$features$cross$cross.lag1,
-                            cross.lag2 = params$features$cross$cross.lag2,
-                            full.images = params$full.images,
+                            params= params,
                             i = i)
 
   res.look<- getLookings( aisles.log= res.speed$aisles.log,
@@ -106,8 +102,12 @@ for(i in 1 : length(data.files)){
                   products.hit.log= res$product.hits,
                   look.log= res.look$log)
   
+  #make and save features 
   data<-  logs.to.features(data,i,log.list,res$input.data,params)
-  write.csv2(data, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
+  if(params$save.feature){
+    write.csv2(data, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
+  }
+
     
   #add the npo and persenal data to the export
   # if(params$external.excel){
@@ -134,11 +134,6 @@ for(i in 1 : length(data.files)){
     
     speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log)
     speed.map.combine(speed,full,JSONfile,save=TRUE)
-    
-    
-    # #plot the speed, with categories of stop/slow/walk
-    # ggsave(paste0('output/png/', params$output.dir, '/', JSONfile,'speed', '.png'), 
-    #        speed.plot(res$input.data,res.speed$speed.log, res.aisles$log), width = 40, height = 7, units = 'cm')
   }
   
 }

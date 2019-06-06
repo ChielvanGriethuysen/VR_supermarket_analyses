@@ -5,10 +5,7 @@
 
 
 
-getCrossings = function(input.data, gg, 
-                        shopping.aisle.time.points, aisles,
-                        cross.lag1, cross.lag2,
-                        full.images, i){
+getCrossings = function(input.data, params,i){
 
   
   #skip points, if to close to each other, to speed op crossing finding
@@ -18,7 +15,7 @@ getCrossings = function(input.data, gg,
   time<- move_data[,1]
   
   print(paste('Calculating crossings of file', i))
-  crossings <- anyIntersects(FootPosition$x, -FootPosition$z, time, cross.lag1)
+  crossings <- anyIntersects(FootPosition$x, -FootPosition$z, time, params$features$cross$cross.lag1)
   #A crossings consists of 4 time points (a, a+1, b, b+1), both a and b ares saved.
   #Only a is used to calculate n crossings and plot them.
   #b can be used in the future to calculate the angle.
@@ -37,24 +34,27 @@ getCrossings = function(input.data, gg,
     k<-1
     while (k<nrow(crossings)) {
       l<-k+1
-      while (l<nrow(crossings) &&
-                    time[crossings[l,1]]-time[crossings[k,1]]< cross.lag2) {
+      while (l<=nrow(crossings) &&
+                    time[crossings[l,1]]-time[crossings[k,1]]<params$features$cross$cross.lag2) {
         l<-l+1
       }
       r<-c(r,k)
       k<-l
     }
+    # add last element, can't be to close to the next one
+    r<-c(r,k)
+    
     
     crossings<-crossings[r,]
     crossings<- add.times.location(crossings, move_data)
     colnames(crossings)[5]<-"time.between"
-    crossings<- cbind(crossings, calc.spot.event.in.box(crossings, aisles))
+    crossings<- cbind(crossings, calc.spot.event.in.box(crossings, params$features$aisles))
     
-    crossings.pos<- FootPosition[crossings[,1],-2]
+    crossings<- crossings%>% filter(absolute.dist>params$features$cross$cross.dist1)
+    crossings<- crossings.filter.close(crossings,params$features$cross$cross.dist2)
     
     
     n.crossings<- crossings %>% filter(aisles.type!= "none") %>% nrow()
-    data$n.crossings[i] <- crossings %>% nrow()
     n.crossings.shopping<- crossings %>% filter(aisles.type== "shopping") %>%nrow()
   }
   else{

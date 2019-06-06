@@ -19,9 +19,9 @@ params <- list(
   # what output is saved (TRUE/FALSE)
   # It is adviced that full.images and save.data are both either TRUE or FALSE.
   # This ensures the features and the images shown always correspond.
-  save.images   = FALSE,     # should the maps, and plots be saved     
+  save.images   = TRUE,     # should the maps, and plots be saved     
   external.excel= FALSE,    # should the external excel be used(NPO and persenal data)
-  save.log      = FALSE,     # should the raw log's be saved
+  save.log      = TRUE,     # should the raw log's be saved
   save.feature  = TRUE,     # should a feature file be made
   
   make.gif      = FALSE,    # Gif of a path (DOES NOT WORK RIGHT NOW)
@@ -63,7 +63,9 @@ params <- list(
     # Crossings
     cross = list(
       cross.lag1 = 3, #Time required for a path to cross itself before it counts as a crossing
-      cross.lag2 = 3  #Minimum time required between two crossings
+      cross.lag2 = 3, #Minimum time required between two crossings
+      cross.dist1= 5, #distance required for a path to cross itself before it counts as a crossing 
+      cross.dist2= 5  #distance between two crossings
     ),
     
     number.of.items = 8,  # total number of items in supermarket people can pick up.

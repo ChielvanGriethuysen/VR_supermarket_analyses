@@ -80,7 +80,7 @@ logs.to.features<- function(data,i, log.list,input.data, params){
   # data$n.stops.min.3.max8.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>3&time.spend<8&absolute.speed<0.075))
   # data$n.stops.min.4.max8.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>4&time.spend<8&absolute.speed<0.075))
   
-  data$n.stops.min.2.max6.sec.speed.g75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed<0.075))
+  data$n.stops.min.2.max6.sec.speed.g75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed>0.075))
   # data$n.stops.min.3.max6.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>3&time.spend<6&absolute.speed<0.075))
   # data$n.stops.min.4.max6.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>4&time.spend<6&absolute.speed<0.075))
   data$n.stops.min.2.max6.sec.speed.l75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed<0.075))
@@ -96,7 +96,7 @@ logs.to.features<- function(data,i, log.list,input.data, params){
   # data$n.stops.min.8.sec.speed.g10[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>8& absolute.speed>0.10))
   # data$n.stops.min.8.sec.speed.g5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>8& absolute.speed>0.075))
   
-  data$total.stoping.time[i]= sum(log.list$speed.log%>% filter(label=="stop")%>% select(time.spend))
+  #data$total.stoping.time[i]= sum(log.list$speed.log%>% filter(label=="stop")%>% select(time.spend))
   
   data$n.walked.through.aisles[i]= log.list$aisles.log%>% filter(label== "walk through") %>% nrow()
   data$n.walked.in.out.aisles[i]= log.list$aisles.log%>% filter(label== "same side in out") %>% nrow()
@@ -180,7 +180,8 @@ add.npo.and.persenal.data<-function(data,params, data.file ){
 
 export.logs<- function(JSONfile, log.list){
   file <- paste0("output/logs/",strsplit(JSONfile,"_")[[1]][1],"_log",".xlsx")
-  
+  #options(java.parameters = "-Xmx1024m")
+  #gc() for combined file to overcome memory error
   write.xlsx2(log.list$aisles.log,      file = file, sheetName = "aisles")
   write.xlsx2(log.list$speed.log,       file = file, sheetName = "speed", append = TRUE)
   write.xlsx2(log.list$crossings.log,   file = file, sheetName = "crossings", append = TRUE)

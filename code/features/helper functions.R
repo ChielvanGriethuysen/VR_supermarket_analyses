@@ -139,7 +139,7 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
         while (input.data$speed[j]<cuttoff && j< nrow(input.data)) {
           j<-j+1
         }
-        if(input.data$time[j]-input.data$time[i]>0.05){
+        if(input.data$time[j]-input.data$time[i]>0.25){
           candidates<-rbind(candidates,data.frame(start= i,stop=j))
           i<-j
         }
@@ -154,7 +154,7 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
         while (input.data$speed[j]>cuttoff && j<nrow(input.data)) {
           j<-j+1
         }
-        if(input.data$time[j]-input.data$time[i]>0.05){
+        if(input.data$time[j]-input.data$time[i]>0.25){
           candidates<-rbind(candidates,data.frame(start= i,stop=j))
           i<-j
         }
@@ -163,11 +163,15 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
     }
   }
   #if parts are to short afther each other then combine them
+  #to do: only do this when the the inbetween part is smaller than the two parts that can be combined
   k<-1
   while (k<nrow(candidates)) {
     l<-k
+    # add together if part inbetween is smaller than the two parts and merge dist 
     while (l<nrow(candidates) && 
-           input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist) {
+           input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist&&
+           input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] &&
+           input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]) {
       l<-l+1
     }
     output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[l]))
@@ -315,20 +319,22 @@ log.subset<- function(data, log, rev= FALSE){
   }
 
 }
+#add the nr of stops to the aisles log
 add.stops.to.aisles.log<- function(stops, aisles){
   aisles$n.stops<- numeric(nrow(aisles))
   
   for(i in 1:nrow(aisles)){
-    for(j in 1:nrow(stops)){
-      if(aisles$start[i]<stops$start[j]&& aisles$stop[i]>stops$stop[j]){
-        aisles$n.stops[i]<- aisles$n.stops[i]+1
+    if(nrow(stops)>0){
+      for(j in 1:nrow(stops)){
+        if(aisles$start[i]<stops$start[j]&& aisles$stop[i]>stops$stop[j]){
+          aisles$n.stops[i]<- aisles$n.stops[i]+1
+        }
       }
     }
   }
-  
   return(aisles)
 }
-
+#analyse productlog, put products in a dataframe
 product.hit.log<- function(logs){
   logs<-logs  %>% filter(apply(logs,2, str_detect, pattern= "HIT"))%>% 
     separate(SesionLog, c("time","Product"), sep = "- HIT product #")%>% 
@@ -348,7 +354,8 @@ product.hit.log<- function(logs){
   return(logs)
   
 }
-
+#check if product is hit in the expacted place
+#to do, use product range location instead of one point
 check.product.hit<- function(hit.log, products){
   
   products$z<- -products$z
@@ -372,7 +379,7 @@ check.product.hit<- function(hit.log, products){
   return(res)
   
 }
-
+# add hitted product id to stops, if a product was hit during the stop
 hit.stop<- function(hits, stops){
   stops$hit_2<-stops$hit_1<- "none"
   stops$n_hit<-0
@@ -388,6 +395,27 @@ hit.stop<- function(hits, stops){
     }
   }
   return(stops)
+}
+
+
+#remove crossings that are to close to eachather
+crossings.filter.close<- function(crossings, dist){
+  if(nrow(crossings)<2)
+    return(crossings)
+  remove.list<- c()
+  for(i in 2:nrow(crossings))
+  {
+    to.close<-FALSE
+    for (j in (i-1):1) {
+      if(dist(crossings[c(i,j),6:7])<5){
+        to.close<-TRUE
+      }
+
+    }
+    if(to.close)
+      remove.list<- c(remove.list,i)
+  }
+  return(crossings[-remove.list,])
 }
 
 

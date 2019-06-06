@@ -77,22 +77,22 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,products, productbox,ai
               mapping = aes(x = x, y = z, 
                             label = products$productnumber),
               color= "black")+
-    geom_point(data = products, 
-               mapping = aes(x = x+.7, y = z+.3),
-               colour= "white", size=4)+ 
+    # geom_point(data = products, 
+    #            mapping = aes(x = x+.7, y = z+.3),
+    #            colour= "white", size=4)+ 
     #add speed
-    geom_point(data = discretised.path[discretised.path$label=="stop",], 
+    geom_point(data = discretised.path[discretised.path$label=="stop greater than 6 sec speed smaller than 0.075",], 
                        mapping = aes(x = x, y = -z),
                        fill = 'green', colour = 'green', size= 3.5)+
     geom_text(aes(y = -48, x = 2, 
-                  label = paste("N stops = ", nrow(logs$speed.log %>% filter(label== "stop")), "(X)" )),
+                  label = paste("N stops = ", nrow(logs$speed.log %>% filter(label== "stop greater than 6 sec speed smaller than 0.075")), "(X)" )),
               size = 5,
               colour = 'green')+ 
-    geom_point(data = discretised.path[discretised.path$label=="slow",], 
+    geom_point(data = discretised.path[discretised.path$label=="stop greater than 6 sec speed greater than 0.075",], 
                      mapping = aes(x = x, y = -z),
-                     fill = 'black', colour = 'black', size= 3.5)+
+                     fill = 'white', colour = 'white', size= 3.5)+
     geom_text(aes(y = -48, x = 3, 
-                  label = paste("N slows = ", nrow(logs$speed.log %>% filter(label== "slow")), "(X)")),
+                  label = paste("N slows = ", nrow(logs$speed.log %>% filter(label== "stop greater than 6 sec speed greater than 0.075")), "(X)")),
               colour = 'white', size = 5)
     #add crossings
     if(nrow(logs$crossings.log)){
