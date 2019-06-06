@@ -169,7 +169,7 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
     l<-k
     # add together if part inbetween is smaller than the two parts and merge dist 
     while (l<nrow(candidates) && 
-           input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist&&
+           #input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist&&
            input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] &&
            input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]) {
       l<-l+1
@@ -407,7 +407,7 @@ crossings.filter.close<- function(crossings, dist){
   {
     to.close<-FALSE
     for (j in (i-1):1) {
-      if(dist(crossings[c(i,j),6:7])<5){
+      if(dist(crossings[c(i,j),6:7])<dist){
         to.close<-TRUE
       }
 
@@ -415,7 +415,10 @@ crossings.filter.close<- function(crossings, dist){
     if(to.close)
       remove.list<- c(remove.list,i)
   }
-  return(crossings[-remove.list,])
+  if(length(remove.list>0)){
+    return(crossings[-remove.list,])
+  }
+  return(crossings)
 }
 
 

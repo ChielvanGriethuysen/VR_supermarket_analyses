@@ -51,37 +51,6 @@ speeddiscretisation<-function(input.data, aisles.log,hits.log, gg,
   return(speed.res)
 }
 
-speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data)){
-  
-  
-  log_speed<- log_speed %>% filter(start>=start1,stop<=stop1)
-  log_place<- log_place %>% filter(start>=start1,stop<=stop1)
-  
 
-  log_speed$start.time<- log_speed$start.time-data$time[1]
-  log_speed$stop.time<- log_speed$stop.time-data$time[1]
-  
-  log_place$start.time<- log_place$start.time-data$time[1]
-  log_place$stop.time<- log_place$stop.time-data$time[1]
-  data$time<- data$time-data$time[1]
-  
-  
-  plot<-ggplot()+
-    geom_point(data[start1:stop1,], mapping =  aes(time, speed),size=0.75, alpha=0.1)+
-    ylim(-.1,0.6)
-  
-  if(nrow(log_speed)>0){
-    plot<-plot+
-      geom_rect(log_speed,mapping =  aes(xmin=start.time,xmax=stop.time,ymin=0,ymax=0.6, fill= label),alpha=0.35)
-  }
-  if(nrow(log_place)>0){
-    plot<-plot+
-      geom_rect(log_place,mapping =  aes(xmin=start.time,xmax=stop.time,ymin=-0.1,ymax=0, fill= label))+
-      geom_label(data = log_place,
-                 mapping = aes(x = (start.time+stop.time)/2, y = -0.05, label = log_place$aisles.name),
-                 label.size = .32)
-  }
-  plot
-}
   
 
