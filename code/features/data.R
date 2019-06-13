@@ -219,11 +219,12 @@ participant.category<-function(file){
   healthy.code<- c("GEZ","DS","H1","HC")
   ill.code<- c("C2","PP","H2","PSY")
   
-  if(str_detect(file,ill.code)){
+  if(any(str_detect(file,ill.code))){
     return("ill")
-  }
-  if(str_detect(file, healthy.code)){
+  }else if(any(str_detect(file, healthy.code))){
     return("healthy")
+  }else{
+    return("none")
   }
 }
 

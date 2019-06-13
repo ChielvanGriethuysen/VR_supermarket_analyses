@@ -155,10 +155,11 @@ runFirstAnalyses <- function(JSONfile,input.log,
   )
   
   # put data in one dataframe
-  input.data<-data.frame(dat[[1]]$m_PupilTime,dat[[1]]$m_FootPosition)
-  input.look<-dat$tracking_data$m_PositionLeftObject
+  input.data<-data.frame(dat$tracking_data$m_PupilTime,dat$tracking_data$m_FootPosition)
+  input.look<-data.frame(dat$tracking_data$m_PupilTime,dat$tracking_data$m_PositionLeftObject)
   
   names(input.data)[1]<- "time"
+  names(input.look)[1]<- "time"
   
   # Remove duplicate data (speeds up all analyses)
   dup <- which(diff(input.data$time) == 0)

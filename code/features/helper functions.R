@@ -114,10 +114,11 @@ add.times.location<- function(points, input.data){
   points$z.stop<-input.data$z[points$stop]
   points$absolute.dist<- numeric(nrow(points))
   points$relative.dist<-sqrt((points$x.start-points$x.stop)^2+(points$z.start-points$z.stop)^2)
-
+  points$vas.speed<- numeric(nrow(points))
   if(nrow(points)>0){
     for(i in 1:nrow(points)){
       points$absolute.dist[i]<- sum(input.data$dist[points$start[i]:points$stop[i]])
+      points$vas.speed[i]<- var(input.data$dist[points$start[i]:points$stop[i]])
     }
   }
   points$absolute.speed<-points$absolute.dist/points$time.spend
