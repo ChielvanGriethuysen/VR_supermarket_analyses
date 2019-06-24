@@ -11,7 +11,7 @@ params <- list(
   img.name = 'Supermarkt2.png',
   
   # directory with input files
-  input.dir = "test",
+  input.dir = "test_l",
   
   # directory with output files
   output.dir = "test2",
@@ -45,7 +45,7 @@ params <- list(
       stop.minimum.duration= 3,
       stop.max.speed= 0.2,
       #stop.max.distance=1,
-      stop.merge.distance=1
+      stop.merge.distance=3
     ),
     walk= list(
       walk.minimum.duration= 1,

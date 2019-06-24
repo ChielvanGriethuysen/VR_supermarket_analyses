@@ -40,8 +40,8 @@ createDataFrame <- function(data.files){
                       
                      # n.stops.min.6.sec.speed.g15= numeric(length(data.files)), 
                      # n.stops.min.6.sec.speed.g10= numeric(length(data.files)), 
-                     n.stops.min.6.sec.speed.g75= numeric(length(data.files)), 
-                     n.stops.min.6.sec.speed.l75= numeric(length(data.files)), 
+                     n.stops.slow= numeric(length(data.files)), 
+                     n.stops.fast= numeric(length(data.files)), 
                      
                      # n.stops.min.8.sec.speed.g15= numeric(length(data.files)), 
                      # n.stops.min.8.sec.speed.g10= numeric(length(data.files)), 
@@ -80,16 +80,15 @@ logs.to.features<- function(data,i, log.list,input.data, params){
   # data$n.stops.min.3.max8.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>3&time.spend<8&absolute.speed<0.075))
   # data$n.stops.min.4.max8.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>4&time.spend<8&absolute.speed<0.075))
   
-  data$n.stops.min.2.max6.sec.speed.g75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed>0.075))
-  # data$n.stops.min.3.max6.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>3&time.spend<6&absolute.speed<0.075))
-  # data$n.stops.min.4.max6.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>4&time.spend<6&absolute.speed<0.075))
-  data$n.stops.min.2.max6.sec.speed.l75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed<0.075))
+  # data$n.stops.min.2.max6.sec.speed.g75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed>0.075))
+  # # data$n.stops.min.3.max6.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>3&time.spend<6&absolute.speed<0.075))
+  # # data$n.stops.min.4.max6.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>4&time.spend<6&absolute.speed<0.075))
+  # data$n.stops.min.2.max6.sec.speed.l75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed<0.075))
   
   # data$n.stops.min.6.sec.speed.g15[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>6& absolute.speed>0.15))
   # data$n.stops.min.6.sec.speed.g10[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>6& absolute.speed>0.10))
-  data$n.stops.min.6.sec.speed.g75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>6& absolute.speed>0.075))
-  
-  data$n.stops.min.6.sec.speed.l75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>6& absolute.speed<0.075))
+  data$n.stops.slow[i]= nrow(log.list$speed.log%>% filter(label!= "walk", absolute.speed<=0.05))
+  data$n.stops.fast[i]= nrow(log.list$speed.log%>% filter(label!= "walk", absolute.speed>0.05))
   
   
   # data$n.stops.min.8.sec.speed.g15[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>8& absolute.speed>0.15))

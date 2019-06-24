@@ -114,11 +114,11 @@ add.times.location<- function(points, input.data){
   points$z.stop<-input.data$z[points$stop]
   points$absolute.dist<- numeric(nrow(points))
   points$relative.dist<-sqrt((points$x.start-points$x.stop)^2+(points$z.start-points$z.stop)^2)
-  points$vas.speed<- numeric(nrow(points))
+  points$var.speed<- numeric(nrow(points))
   if(nrow(points)>0){
     for(i in 1:nrow(points)){
       points$absolute.dist[i]<- sum(input.data$dist[points$start[i]:points$stop[i]])
-      points$vas.speed[i]<- var(input.data$dist[points$start[i]:points$stop[i]])
+      points$var.speed[i]<- var(input.data$dist[points$start[i]:points$stop[i]])
     }
   }
   points$absolute.speed<-points$absolute.dist/points$time.spend
@@ -165,26 +165,46 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
   }
   #if parts are to short afther each other then combine them
   #to do: only do this when the the inbetween part is smaller than the two parts that can be combined
-  k<-1
-  while (k<nrow(candidates)) {
-    l<-k
-    # add together if part inbetween is smaller than the two parts and merge dist 
-    while (l<nrow(candidates) && 
-           #input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist&&
-           input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] &&
-           input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]) {
-      l<-l+1
-    }
-    output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[l]))
-    k<-l+1
-  }
-  # add last element if not mearged with previous one
-  if(last(candidates$stop)!=last(output$stop))
-  {
-    output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[k]))
-  }
+  output<-speed.discretisation.merge.induction(candidates,input.data, 3)
+  # k<-1
+  # while (k<nrow(candidates)) {
+  #   l<-k
+  #   # add together if part inbetween is smaller than the two parts and merge dist 
+  #   while (l<nrow(candidates) && 
+  #          #input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist&&
+  #          input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] &&
+  #          input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]) {
+  #     l<-l+1
+  #   }
+  #   output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[l]))
+  #   k<-l+1
+  # }
+  # # add last element if not mearged with previous one
+  # if(last(candidates$stop)!=last(output$stop))
+  # {
+  #   output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[k]))
+  # }
   output
 }
+speed.discretisation.merge.induction<-function(candidates, input.data, merge.dist){
+  change<-FALSE
+  for(l in 1:(nrow(candidates)-1)){
+    if((input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] ||
+       input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]])&&
+       input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist){
+      change<-TRUE
+      candidates$stop[l]<-candidates$stop[l+1]
+      candidates<- candidates[-(l+1),]
+      break
+    }
+  }
+  if(change){
+    return(speed.discretisation.merge.induction(candidates,input.data,merge.dist))
+  }else{
+    return(candidates)
+  }
+}
+
 #add the label to eache datapoint based on a log file
 datapoint.add.label<-function(input.data, log){
   

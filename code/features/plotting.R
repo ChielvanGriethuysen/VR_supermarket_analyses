@@ -83,33 +83,19 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,products, productbox,ai
     #            mapping = aes(x = x+.7, y = z+.3),
     #            colour= "white", size=4)+ 
     #add speed
-    geom_point(data = discretised.path[discretised.path$label=="stop greater than 6 sec speed smaller than 0.075",], 
+    geom_point(data = discretised.path[discretised.path$label=="stop with no movement",], 
                        mapping = aes(x = x, y = -z),
                        fill = 'tomato', colour = 'tomato', size= 3.5)+
     geom_text(aes(y = -43, x = 0.5, 
-                  label = paste("N Stops t>6 s<0.075 = ", nrow(logs$speed.log %>% filter(label== "stop greater than 6 sec speed smaller than 0.075")), "(X)" )),
+                  label = paste("N Stops no movement = ", nrow(logs$speed.log %>% filter(label== "stop with no movement")), "(X)" )),
               size = 5,
               colour = 'tomato')+ 
-    geom_point(data = discretised.path[discretised.path$label=="stop greater than 6 sec speed greater than 0.075",], 
+    geom_point(data = discretised.path[discretised.path$label=="stop with some movement",], 
                      mapping = aes(x = x, y = -z),
                      fill = 'darkorchid', colour = 'darkorchid', size= 3.5)+
     geom_text(aes(y = -43, x = 1.5, 
-                  label = paste("N Stops t>6 s>0.075 = ", nrow(logs$speed.log %>% filter(label== "stop greater than 6 sec speed greater than 0.075")), "(X)")),
-              colour = 'darkorchid', size = 5)+
-    
-    geom_point(data = discretised.path[discretised.path$label=="stop between 2 and 6 sec speed smaller than 0.075",], 
-               mapping = aes(x = x, y = -z),
-               fill = 'forestgreen', colour = 'forestgreen', size= 3.5)+
-    geom_text(aes(y = -28, x = 0.5, 
-                  label = paste("N Stops 2<t<6 s<0.075 = ", nrow(logs$speed.log %>% filter(label== "stop between 2 and 6 sec speed smaller than 0.075")), "(X)" )),
-              size = 5,
-              colour = 'forestgreen')+ 
-    geom_point(data = discretised.path[discretised.path$label=="stop between 2 and 6 sec speed greater than 0.075",], 
-               mapping = aes(x = x, y = -z),
-               fill = 'steelblue', colour = 'steelblue', size= 3.5)+
-    geom_text(aes(y = -28, x = 1.5, 
-                  label = paste("N Stops 2<t<6 s>0.075 = ", nrow(logs$speed.log %>% filter(label== "stop between 2 and 6 sec speed greater than 0.075")), "(X)")),
-              colour = 'steelblue', size = 5)
+                  label = paste("N Stops some movement = ", nrow(logs$speed.log %>% filter(label== "stop with some movement")), "(X)")),
+              colour = 'darkorchid', size = 5)
   
     #add crossings
     if(nrow(logs$crossings.log)){
@@ -146,17 +132,15 @@ speed.map.combine<- function(speed, map, JSONfile,save=FALSE){
 
 speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data)){
   
-  cols<-c("stop between 2 and 6 sec speed smaller than 0.075"= "forestgreen",
-          "stop between 2 and 6 sec speed greater than 0.075"= "steelblue", 
-          "stop greater than 6 sec speed smaller than 0.075"="tomato", 
-          "stop greater than 6 sec speed greater than 0.075"="darkorchid",
+  cols<-c("stop with no movement"= "tomato",
+          "stop with some movement"= "darkorchid", 
           "walk"= "darkgoldenrod1",
           "main"="#00BFC4",
           "walk through"="chocolate1",
           "same side in out"= "coral1"
           )
   
-  log_speed<- log_speed %>% filter(start>=start1,stop<=stop1)
+  log_speed<- log_speed %>% filter(start>=start1,stop<=stop1, label!="walk")
   log_place<- log_place %>% filter(start>=start1,stop<=stop1)
   
   
