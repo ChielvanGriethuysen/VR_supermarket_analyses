@@ -1,6 +1,6 @@
 #plotting functions, for making nice plots
 
-basic.path.plot<- function(input.data, JSONfile, save=FALSE){
+basic.path.plot<- function(input.data, JSONfile, params,save=FALSE){
   gg<-ggplot() + 
     #ylim(-53, -7) + xlim(0, 29) +
     scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
@@ -23,16 +23,16 @@ basic.path.plot<- function(input.data, JSONfile, save=FALSE){
                         arrow = arrow(length = unit(4, "points")))
   
   if(save){
-    if( ! file.exists(paste0('output/png/basic'))){
-      dir.create(paste0('output/png/basic'))
+    if( ! file.exists(paste0('output/',params$output.dir,'/png/basic'))){
+      dir.create(paste0('output/',params$output.dir,'/png/basic'),recursive = TRUE)
     }
-    ggsave(paste0('output/png/basic/',
+    ggsave(paste0('output/',params$output.dir,'/png/basic/',
                   JSONfile, '_RAW.png'), gg, 
            width = 37.5, height = 21, units = 'cm')
   }
   return(gg)
 }
-full.plot<- function(gg.basic,input.data, logs, JSONfile,products, productbox,aisles, save=FALSE){
+full.plot<- function(gg.basic,input.data, logs, JSONfile,params ,products, productbox,aisles, save=FALSE){
   
   cols<-c("main"= "#00BFC4","shopping"= "#F8766D", "TRUE"="lightgreen", "FALSE"="red")
   
@@ -108,24 +108,24 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,products, productbox,ai
                   label = paste("N crossings =", nrow(logs$crossings.log), "(", logs$crossings.log %>% filter(aisles.type== "shopping") %>%nrow(), ")" )),
               colour = 'blue',size=5)
   if(save){
-    if( ! file.exists(paste0('output/png/full'))){
-      dir.create(paste0('output/png/full'))
+    if( ! file.exists(paste0('output/',params$output.dir,'/png/full'))){
+      dir.create(paste0('output/',params$output.dir,'/png/full'))
     }
-    ggsave(paste0('output/png/full/', JSONfile, '.png'), 
+    ggsave(paste0('output/',params$output.dir,'/png/full/', JSONfile, '.png'), 
            gg, width = 37.5, height = 21, units = 'cm')
   }
   return(gg)
 }
 
-speed.map.combine<- function(speed, map, JSONfile,save=FALSE){
+speed.map.combine<- function(speed, map, JSONfile,params,save=FALSE){
   
   gg<-ggarrange(map,speed, ncol = 1,nrow = 2,heights = c(2,1))
   
   if(save){
-    if( ! file.exists(paste0('output/png/speed.map'))){
-      dir.create(paste0('output/png/speed.map'))
+    if( ! file.exists(paste0('output/',params$output.dir,'/png/speed.map'))){
+      dir.create(paste0('output/',params$output.dir,'/png/speed.map'))
     }
-    ggsave(paste0('output/png/speed.map/', JSONfile, '.png'), 
+    ggsave(paste0('output/',params$output.dir,'/png/speed.map/', JSONfile, '.png'), 
            gg, width = 37.5, height = 21, units = 'cm')
   }
 }

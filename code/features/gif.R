@@ -1,5 +1,5 @@
 # plot
-makeGifOfPathAndLooking <- function(input.data, input.look, JSONfile, img){
+makeGifOfPathAndLooking <- function(input.data, input.look, JSONfile,params, img){
   walk.time<- round(last(input.data$time)-first(input.data$time))
   input.data$time<-input.data$time-first(input.data$time)
   input.look$time<-input.look$time-first(input.look$time)
@@ -32,14 +32,14 @@ makeGifOfPathAndLooking <- function(input.data, input.look, JSONfile, img){
   
   ggani<-animate(gg,duration = 30, fps = 10, height= 800, width= 1200)
   
-  if( ! file.exists('output/gif/path&view')){
-    dir.create('output/gif/path&view')
+  if( ! file.exists(paste0('output/',params$output.dir,'/gif/path&view'))){
+    dir.create(paste0('output/',params$output.dir,'/gif/path&view'), recursive = TRUE)
   }
   JSONfile <- substr(JSONfile, 1, 21)
   anim_save(filename = paste0(JSONfile,'.gif'),animation = ggani ,path='output/gif/path&view' )
 }
 #not working yet
-makeGifOfPath <- function(input.data, JSONfile, img){
+makeGifOfPath <- function(input.data, JSONfile,params, img){
   time<- round(last(input.data$time)-first(input.data$time))
   
   gg <- ggplot() + 
@@ -67,8 +67,8 @@ makeGifOfPath <- function(input.data, JSONfile, img){
   
   ggani<-animate(gg,duration = 60, fps = 10, height= 800, width= 1200)
   
-  if( ! file.exists('output/gif/path/')){
-    dir.create('output/gif/path/')
+  if( ! file.exists(paste0('output/',params$output.dir,'/gif/path/'))){
+    dir.create(paste0( 'output/',params$output.dir,'/gif/path/'),recursive = TRUE)
   }
   JSONfile <- substr(JSONfile, 1, 21)
   anim_save(filename = paste0(JSONfile,'.gif'),animation = ggani,path=paste0('output/gif/path/') )

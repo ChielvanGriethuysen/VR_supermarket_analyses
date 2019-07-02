@@ -14,7 +14,6 @@ getCrossings = function(input.data, params,i){
   FootPosition<- move_data[,2:4]
   time<- move_data[,1]
   
-  print(paste('Calculating crossings of file', i))
   crossings <- anyIntersects(FootPosition$x, -FootPosition$z, time, params$features$cross$cross.lag1)
   #A crossings consists of 4 time points (a, a+1, b, b+1), both a and b ares saved.
   #Only a is used to calculate n crossings and plot them.
@@ -30,7 +29,7 @@ getCrossings = function(input.data, params,i){
   #remove crossings if the two points are to close
   if(nrow(crossings)>0){
     r<-c()
-    #remove crossings if the next one is to close
+    #remove crossings if the next one is to close in time
     k<-1
     while (k<nrow(crossings)) {
       l<-k+1
@@ -46,13 +45,13 @@ getCrossings = function(input.data, params,i){
       r<-c(r,k)
     }
     
-    crossings<-crossings[r,]
+    # crossings<-crossings[r,]
     crossings<- add.times.location(crossings, move_data)
     colnames(crossings)[5]<-"time.between"
     crossings<- cbind(crossings, calc.spot.event.in.box(crossings, params$features$aisles))
     
     crossings<- crossings%>% filter(absolute.dist>params$features$cross$cross.dist1)
-    crossings<- crossings.filter.close(crossings,params$features$cross$cross.dist2)
+    crossings<- crossings.filter.close(crossings,params$features$cross$cross.dist2,2)
     
     
     n.crossings<- crossings %>% filter(aisles.type!= "none") %>% nrow()

@@ -177,8 +177,11 @@ add.npo.and.persenal.data<-function(data,params, data.file ){
   return(datamerged)
 }
 
-export.logs<- function(JSONfile, log.list){
-  file <- paste0("output/logs/",strsplit(JSONfile,"_")[[1]][1],"_log",".xlsx")
+export.logs<- function(JSONfile,params, log.list){
+  if( ! file.exists(paste0('output/',params$output.dir,'/logs'))){
+    dir.create(paste0('output/',params$output.dir,'/logs'))
+  }
+  file <- paste0("output/",params$output.dir,"/logs/",strsplit(JSONfile,"_")[[1]][1],"_log",".xlsx")
   #options(java.parameters = "-Xmx1024m")
   #gc() for combined file to overcome memory error
   write.xlsx2(log.list$aisles.log,      file = file, sheetName = "aisles")

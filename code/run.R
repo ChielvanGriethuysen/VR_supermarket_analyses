@@ -105,7 +105,10 @@ for(i in 1 : length(data.files)){
   #make and save features 
   data<-  logs.to.features(data,i,log.list,res$input.data,params)
   if(params$save.feature){
-    write.csv2(data, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
+    if( ! file.exists(paste0('output/',params$output.dir,'/csv_temp'))){
+      dir.create(paste0('output/',params$output.dir,'/csv_temp'),recursive = TRUE)
+    }
+    write.csv2(data, file = paste0("output/",params$output.dir,"/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
   }
 
     
@@ -119,27 +122,27 @@ for(i in 1 : length(data.files)){
   if(params$save.log){
 
   #save the log to excel
-  export.logs(JSONfile= JSONfile, log.list= log.list)
+  export.logs(JSONfile= JSONfile,params=params, log.list= log.list)
   #combine all partisipants log files to one df
   combined.logs<-all.logs(log.list, combined.logs, i, str_split(JSONfile,"_")[[1]][1])
   }
   #print pathplots
   if(params$save.images){
-    basic<- basic.path.plot(res$input.data, JSONfile,save = TRUE)
+    basic<- basic.path.plot(res$input.data, JSONfile,params,save = TRUE)
     
-    full<-full.plot(basic,res$input.data,log.list,JSONfile,res$products,res$productbox,params$features$aisles, save = TRUE)
+    full<-full.plot(basic,res$input.data,log.list,JSONfile,params,res$products,res$productbox,params$features$aisles, save = TRUE)
     # plot places where somone looks
-    looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile, full)
-    looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile, full)
+    looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile,params, full)
+    looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile,params, full)
     
     speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log)
-    speed.map.combine(speed,full,JSONfile,save=TRUE)
+    speed.map.combine(speed,full,JSONfile,params,save=TRUE)
   }
   
 }
 #export all log files in one file
 if(params$save.log){
-  export.logs("allfilescombined",combined.logs)
+  export.logs("allfilescombined",params,combined.logs)
 }
 # save the data to an excel sheet
 # if(params$save.to.excel){

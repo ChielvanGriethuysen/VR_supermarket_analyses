@@ -41,7 +41,7 @@ getLookings<- function(aisles.log, input.look, aisles){
 
 
 
-looking.plot.stop<-function(speed.log,input.data, input.look, JSONfile,gg){
+looking.plot.stop<-function(speed.log,input.data, input.look, JSONfile, params,gg){
   
   
   stops<-log.subset(input.look, speed.log %>% filter(label == "stop"))
@@ -50,15 +50,17 @@ looking.plot.stop<-function(speed.log,input.data, input.look, JSONfile,gg){
   #gg<- gg+ geom_point(data=no.stops, mapping= aes(x=x, y=-z), colour="gold", alpha= 0.05)  
   gg<- gg+ geom_point(data=stops, mapping= aes(x=x, y=-z), colour="orange", alpha= 0.2)
 
-
+  if( ! file.exists(paste0('output/',params$output.dir,'/png/Look'))){
+    dir.create(paste0('output/',params$output.dir,'/png/Look'),recursive = TRUE)
+  }
   
-  ggsave(paste0('output/png/', 'Look', '/',
+  ggsave(paste0('output/',params$output.dir,'/png/', 'Look', '/',
                 JSONfile, 'stop','_RAW.png'), gg, 
          width = 37.5, height = 21, units = 'cm')
   
 }
 
-looking.plot.aisles<-function(aisles.log,input.data, input.look, JSONfile,gg){
+looking.plot.aisles<-function(aisles.log,input.data, input.look, JSONfile,params,gg){
   
   
   aisles<-log.subset(input.look, aisles.log %>% filter(label == "walk through"| label == "same side in out"))
@@ -66,9 +68,11 @@ looking.plot.aisles<-function(aisles.log,input.data, input.look, JSONfile,gg){
 
   gg<- gg+ geom_point(data=aisles, mapping= aes(x=x, y=-z), colour="orange", alpha= 0.2)
   
+  if( ! file.exists(paste0('output/',params$output.dir,'/png/Look'))){
+    dir.create(paste0('output/',params$output.dir,'/png/Look'),recursive = TRUE)
+  }
   
-  
-  ggsave(paste0('output/png/', 'Look', '/',
+  ggsave(paste0('output/',params$output.dir,'/png/', 'Look', '/',
                 JSONfile, 'aisles','_RAW.png'), gg, 
          width = 37.5, height = 21, units = 'cm')
   

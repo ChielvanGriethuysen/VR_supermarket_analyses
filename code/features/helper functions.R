@@ -165,7 +165,7 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
   }
   #if parts are to short afther each other then combine them
   #to do: only do this when the the inbetween part is smaller than the two parts that can be combined
-  output<-speed.discretisation.merge.induction(candidates,input.data, 3)
+  output<-speed.discretisation.merge.induction(candidates,input.data, merge.dist)
   # k<-1
   # while (k<nrow(candidates)) {
   #   l<-k
@@ -420,28 +420,45 @@ hit.stop<- function(hits, stops){
 
 
 #remove crossings that are to close to eachather
-crossings.filter.close<- function(crossings, dist){
-  if(nrow(crossings)<2)
-    return(crossings)
-  remove.list<- c()
-  for(i in 2:nrow(crossings))
-  {
-    to.close<-FALSE
-    for (j in (i-1):1) {
-      if(dist(crossings[c(i,j),6:7])<dist){
-        to.close<-TRUE
-      }
+# crossings.filter.close<- function(crossings, dist){
+#   if(nrow(crossings)<2)
+#     return(crossings)
+#   remove.list<- c()
+#   for(i in 2:nrow(crossings))
+#   {
+#     to.close<-FALSE
+#     for (j in (i-1):1) {
+#       if(dist(crossings[c(i,j),6:7])<dist){
+#         to.close<-TRUE
+#       }
+# 
+#     }
+#     if(to.close)
+#       remove.list<- c(remove.list,i)
+#   }
+#   if(length(remove.list>0)){
+#     return(crossings[-remove.list,])
+#   }
+#   return(crossings)
+# }
 
+crossings.filter.close<- function(crossings, dist, start){
+  change<-FALSE
+  for(i in start:(nrow(crossings))){
+    for(j in (i-1):1)
+      if(dist(crossings[c(i,j),6:7])<dist){
+      change<-TRUE
+      crossings<- crossings[-i,]
+      if(nrow(crossings)>=i){
+        return(crossings.filter.closev2(crossings, dist, i))
+      }
+      else{
+        return(crossings)
+      }
     }
-    if(to.close)
-      remove.list<- c(remove.list,i)
-  }
-  if(length(remove.list>0)){
-    return(crossings[-remove.list,])
   }
   return(crossings)
 }
-
 
 
 
