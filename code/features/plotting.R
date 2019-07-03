@@ -1,4 +1,6 @@
-#plotting functions, for making nice plots
+# plotting functions, for making nice plots
+#
+# Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
 basic.path.plot<- function(input.data, JSONfile, params,save=FALSE){
   gg<-ggplot() + 

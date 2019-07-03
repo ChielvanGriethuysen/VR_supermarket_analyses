@@ -1,3 +1,7 @@
+# Set of functions used to help analysis and hide the more complex functionalities, makes it easyer to plug in other implementations
+#
+# Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
+
 #give a subset of the data where the points are a certain distance apart
 skippoints<-function(data, distance){
   curent.dist<-0
@@ -383,6 +387,9 @@ check.product.hit<- function(hit.log, products){
   res<- data.frame(prod_id= as.numeric(),name.product= as.character(), name.hit= as.character(),
                    x.product=as.numeric(),z.product=as.numeric(), 
                    x.hit=as.numeric(),z.hit=as.numeric(),time=numeric(), d= numeric())
+  if(nrow(hit.log)<1){
+    return(res)
+  }
   
   for (i in 1:nrow(hit.log)) {
     pos.log<- hit.log[i,c(3,5)]

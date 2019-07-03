@@ -1,6 +1,6 @@
 # VR Supermarkt: Extract features
 #
-# Last edited 2018-10-18 by Laurent Smeets (l.s.m.smeets@uu.nl)
+# Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
 # preamble ----------------------------------------------------------------
 packages <- c("jsonlite", "tidyverse", "png", "ggforce",
@@ -24,12 +24,6 @@ data.files <- list.files(
   pattern = 'json',
   full.names = FALSE
 )
-data.logs <- list.files(
-  path = file.path("input", params$input.dir),
-  pattern = 'Log.xml',
-  full.names = FALSE
-)
-
 
 # get the excel sheet
 data.files2 <- list.files(
@@ -52,11 +46,10 @@ data <- createDataFrame(data.files)
 
 # loop over all the participants 
 for(i in 1 : length(data.files)){
+  print(paste('Calculating logs for file', i, "of",length(data.files) , "started at",Sys.time()))
   JSONfile <- data.files[i]
-  input.log<- data.logs[i]
   
   res <- runFirstAnalyses(JSONfile = JSONfile, 
-                          input.log = input.log,
                           Excel=Excel, 
                           image = image, 
                           params= params,

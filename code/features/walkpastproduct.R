@@ -1,6 +1,6 @@
 # VR Supermarkt: function to extract the whether someone walked past a product
 #
-# Last edited 2018-10-18 by Laurent Smeets (l.s.m.smeets@uu.nl)
+# Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
 
 

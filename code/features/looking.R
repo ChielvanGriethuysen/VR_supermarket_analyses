@@ -1,3 +1,7 @@
+# Extracts the places where somone has looked and how many times there was a change in side
+#
+# Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
+
 getLookings<- function(aisles.log, input.look, aisles){
   walk.throughs<-filter(aisles.log, label== "walk through")
   walk.throughs$view.left<- walk.throughs$view.right<-walk.throughs$look.switch<- numeric(nrow(walk.throughs))

@@ -1,6 +1,6 @@
 # VR Supermarkt: function to extract crossings
 #
-# Last edited 2018-10-18 by Laurent Smeets (l.s.m.smeets@uu.nl)
+# Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
 
 
@@ -51,8 +51,9 @@ getCrossings = function(input.data, params,i){
     crossings<- cbind(crossings, calc.spot.event.in.box(crossings, params$features$aisles))
     
     crossings<- crossings%>% filter(absolute.dist>params$features$cross$cross.dist1)
-    crossings<- crossings.filter.close(crossings,params$features$cross$cross.dist2,2)
-    
+    if(nrow(crossings)>1){
+      crossings<- crossings.filter.close(crossings,params$features$cross$cross.dist2,2)
+    }
     
     n.crossings<- crossings %>% filter(aisles.type!= "none") %>% nrow()
     n.crossings.shopping<- crossings %>% filter(aisles.type== "shopping") %>%nrow()

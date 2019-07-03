@@ -1,3 +1,7 @@
+#
+#
+# Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
+
 createDataFrame <- function(data.files){
   
   data <- data.frame(name = character(length(data.files)),          # name of input file

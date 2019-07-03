@@ -1,6 +1,6 @@
 # VR Supermarkt: create dataframe to load all statistics in and run some basic analyses.
 #
-# Last edited 2018-10-18 by Laurent Smeets (l.s.m.smeets@uu.nl)
+# Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
 
 # createDataFrame <- function(data.files){
@@ -126,7 +126,7 @@
 #   return(data)
 # }
 
-runFirstAnalyses <- function(JSONfile,input.log,
+runFirstAnalyses <- function(JSONfile,
                              Excel,
                              image,
                              params,
@@ -150,9 +150,15 @@ runFirstAnalyses <- function(JSONfile,input.log,
     dat <- fromJSON(readLines(paste0('input/', params$input.dir, '/', JSONfile)),
                     simplifyDataFrame = TRUE)
   )
-  suppressWarnings(
-    product.log <- xmlToDataFrame(paste0('input/', params$input.dir, '/', input.log))
-  )
+  input.log<- str_remove(JSONfile,".json") %>% str_c("Log.xml")
+  
+  if(file.exists(paste0('input/', params$input.dir, '/', input.log))){
+    suppressWarnings(
+      product.log <- xmlToDataFrame(paste0('input/', params$input.dir, '/', input.log))
+    )
+  }else{
+    product.log<- data.frame(SesionLog= as.character())
+  }
   
   # put data in one dataframe
   input.data<-data.frame(dat$tracking_data$m_PupilTime,dat$tracking_data$m_FootPosition)
