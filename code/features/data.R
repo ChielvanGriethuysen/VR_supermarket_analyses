@@ -10,6 +10,14 @@ createDataFrame <- function(data.files){
                      total.distance = numeric(length(data.files)),  # needs to be fixed.
                      average.speed = numeric(length(data.files)),   # average speed of user
                      
+                     r.x = numeric(length(data.files)),
+                     r.z = numeric(length(data.files)),
+                     r.best= numeric(length(data.files)),
+                     
+                     time.target=numeric(length(data.files)),
+                     time.none.target=numeric(length(data.files)),
+                     target.fraction= numeric(length(data.files)),
+                     
                      n.crossings = numeric(length(data.files)),     # total number of crossings someone made (crossing his/her own path)
                      n.crossings.dist.15= numeric(length(data.files)),
                      n.crossings.dist.20= numeric(length(data.files)),
@@ -69,6 +77,14 @@ logs.to.features<- function(data,i, log.list,input.data, params){
   data$total.time[i] = last(input.data$time) - input.data$time[1]
   data$total.distance[i] = sum(input.data$dist)
   data$average.speed[i] = data$total.distance[i] / data$total.time[i]
+  
+  data$r.x[i] = cor(input.data$time, input.data$x)
+  data$r.z[i] = cor(input.data$time, input.data$z)
+  data$r.best[i]= max(data$r.x[i],data$r.z[i])
+  
+  data$time.target[i]=log.list$aisles.log %>% filter(target==TRUE)%>% select(time.spend) %>%sum()
+  data$time.none.target[i]=log.list$aisles.log %>% filter(target==FALSE)%>% select(time.spend) %>%sum()
+  data$target.fraction[i]= data$time.target[i]/data$time.none.target[i]
   
   data$n.crossings[i] = nrow(log.list$crossings.log)
   data$n.crossings.dist.15[i]= nrow(log.list$crossings.log %>% filter(absolute.dist>15))

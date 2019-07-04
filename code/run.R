@@ -57,6 +57,7 @@ for(i in 1 : length(data.files)){
   
 
   res.aisles <- getAisleTimes(input.data= res$input.data,
+                              products= res$products,
                               aisles = params$features$aisles,
                               full.images = params$full.images,
                               save.data = params$save.data,
@@ -73,6 +74,7 @@ for(i in 1 : length(data.files)){
   res.speed<- speeddiscretisation(aisles.log=res.aisles$log,
                                   hits.log= res$product.hits,
                                   input.data = res$input.data,
+                                  products= res$products,
                                   stop.params = params$features$stops,
                                   walk.params = params$features$walk,
                                   aisles= params$features$aisles,

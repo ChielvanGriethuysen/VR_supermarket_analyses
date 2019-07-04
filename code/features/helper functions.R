@@ -467,7 +467,21 @@ crossings.filter.close<- function(crossings, dist, start){
   return(crossings)
 }
 
-
+calc.target.aisles<- function(product, aisles){
+  
+  a<-apply(data.frame(product$x,-product$z), 1, box.check, box.list=aisles)
+  t <- which(a, arr.ind = TRUE)
+  t<- data.frame(t)
+  
+  res.type<- rep("none", nrow(product))
+  res.name<- rep("none", nrow(product))
+  
+  for (i in 1:nrow(t)) {
+    res.type[t[i,2]]<- as.character(aisles$type[ t[i,1]])
+    res.name[t[i,2]]<- as.character(aisles$aisle.names[t[i,1]])
+  }
+  data.frame(aisles.type=res.type, aisles.name= res.name)
+}
 
 
 

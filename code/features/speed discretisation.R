@@ -2,7 +2,7 @@
 #
 # Last edited 31-5-2019 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
-speeddiscretisation<-function(input.data, aisles.log,hits.log, gg,
+speeddiscretisation<-function(input.data, aisles.log,hits.log, products,
                               stop.params, walk.params,
                               aisles, i){
   #get all mearged discretisations of the speed
@@ -14,6 +14,7 @@ speeddiscretisation<-function(input.data, aisles.log,hits.log, gg,
   #add info
   p.stops<-add.times.location(p.stops,input.data)
   walks<-add.times.location(walks,input.data)
+  
   
   #filters
   p.stops<- p.stops %>% filter(time.spend>stop.params$stop.minimum.duration)
@@ -35,6 +36,9 @@ speeddiscretisation<-function(input.data, aisles.log,hits.log, gg,
   log<- rbind(stops.slow,stops.fast,walks)
   log<- log %>% arrange(start)
   log<- cbind(log, calc.spot.event.in.box(log, aisles))
+  
+  #add if it is in a target aisles
+  log$target<- log$aisles.name %in% calc.target.aisles(products, aisles)[,2]
   
   # add stops to ailes log
   aisles.log<- add.stops.to.aisles.log(p.stops, aisles.log)

@@ -4,13 +4,13 @@
 
 
 
-getAisleTimes <- function(input.data,
+getAisleTimes <- function(input.data, products,
                           aisles, full.images, save.data, i){
   
   
   aisles.data<-calc.box.feature(input.data,aisles)
   aisles.data<-aisles.label.add(aisles.data,input.data,aisles)
-  
+  aisles.data$target<- aisles.data$aisles.name %in% calc.target.aisles(products, params$features$aisles)[,2]
   # data[i,]$n.walked.through.aisles<-nrow(walk.through)
   # data[i,]$n.walked.in.out.aisles<-nrow(same.side.in.out)
   
