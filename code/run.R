@@ -54,6 +54,7 @@ for(i in 1 : length(data.files)){
                           image = image, 
                           params= params,
                           i = i)
+  print(missing.data.length(res$input.look))
   
 
   res.aisles <- getAisleTimes(input.data= res$input.data,

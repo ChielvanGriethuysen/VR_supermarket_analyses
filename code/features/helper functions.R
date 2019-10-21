@@ -574,4 +574,22 @@ filter.product.hits<- function(targets, hits){
 }
 
   
+missing.data.length<- function(data){
+  n<-start<- stop<-0
+  for (i in 1:nrow(data)) {
+    if(data$x[i]==0){
+      start<- i
+      while (data$x[i]==0) {
+        i<-i+1
+      }
+      stop<- i
+      if(stop-start>n){
+        n<- stop-start
+        res.start<- start
+        res.stop<- stop
+      }
 
+    }
+  }
+  return(data.frame(n=n, start=res.start,stop= res.stop, time=round(data$time[res.stop]-data$time[res.start],3)))
+}
