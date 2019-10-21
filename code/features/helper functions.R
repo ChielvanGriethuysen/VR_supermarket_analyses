@@ -573,7 +573,7 @@ filter.product.hits<- function(targets, hits){
   
 }
 
-  
+# finds out the longest cerie of zerro's in the data, to detect the lagest gap in the data  
 missing.data.length<- function(data){
   n<-start<- stop<-0
   for (i in 1:nrow(data)) {
@@ -593,3 +593,38 @@ missing.data.length<- function(data){
   }
   return(data.frame(n=n, start=res.start,stop= res.stop, time=round(data$time[res.stop]-data$time[res.start],3)))
 }
+#for each point finds what the first point is afther a sertain distance
+find.first.point.on.dist<- function(data, dist)
+{
+  d<- 0
+  data$point.on.dist<-0
+  for (i in 1: nrow(data)) {
+    
+    while (d<dist) {
+      j<-j+1
+      d<-d+data$dist[j]
+    }
+    if (j>= nrow(data))
+      break
+    data$point.on.dist[i]<- j
+    d<- d-data$dist[i]
+  }
+  return(data)
+}
+
+calculate.direction<- function(data){
+  data$angles<-0
+  for (i in 1:sum(data$point.on.dist!=0)){
+    A<- c(data$x[data$point.on.dist[i]], data$z[data$point.on.dist[i]])
+    B<- c(walk$x[i], walk$z[i])
+    C<- c(walk$x[i], 0)
+    if(A[1]>B[1]){
+    data$angles[i]<- Angle(A,B,C)
+    }else{
+      data$angles[i]<- 360-Angle(A,B,C)
+    }
+    
+  }
+  return(data)
+}
+
