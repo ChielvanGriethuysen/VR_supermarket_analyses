@@ -2,10 +2,7 @@
 #
 # Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
-
-
-
-getCrossings = function(input.data, params,i){
+getCrossings = function(input.data, params,products,i){
 
   
   #skip points, if to close to each other, to speed op crossing finding
@@ -63,19 +60,9 @@ getCrossings = function(input.data, params,i){
     data$n.crossings[i] <- 0
     n.crossings.shopping<- 0
   }
-    #split slows per third.
-    
-    # crosspointstibble<-tibble(crosspoints=crossings[,1])
-    # split1<-which.min(abs(time - last(time)/3)) 
-    # split2<-which.min(abs(time - (last(time)/3*2)))
-    # 
-    # cross.1st.1.3rd<-nrow(filter(crosspointstibble, crosspoints<split1))
-    # cross.2nd.1.3rd<-nrow(filter(crosspointstibble, crosspoints>split1 & crosspoints<split2))
-    # cross.3rd.1.3rd<-nrow(filter(crosspointstibble, crosspoints>split2))
-    # 
-    # data$cross.1st.1.3rd[i]<-cross.1st.1.3rd
-    # data$cross.2nd.1.3rd[i]<-cross.2nd.1.3rd
-    # data$cross.3rd.1.3rd[i]<-cross.3rd.1.3rd
+  
+  crossings$target<- crossings$aisles.name %in% calc.target.aisles(products, params$features$aisles)[,2]
+
   res.cross <- list(log= crossings,
                     n.crossings = n.crossings,
                     cross.points.all=crossings)

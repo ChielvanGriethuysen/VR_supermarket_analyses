@@ -119,16 +119,57 @@ add.times.location<- function(points, input.data){
   points$absolute.dist<- numeric(nrow(points))
   points$relative.dist<-sqrt((points$x.start-points$x.stop)^2+(points$z.start-points$z.stop)^2)
   points$var.speed<- numeric(nrow(points))
+  points$nzero<- numeric(nrow(points))
+  points$errorfrac<-numeric(nrow(points))
+  points$n.cross.straight<- numeric(nrow(points))
+  points$max.from.straight<- numeric(nrow(points))
+  points$mean.from.straight<- numeric(nrow(points))
+  points$var.from.straight<- numeric(nrow(points))
   if(nrow(points)>0){
     for(i in 1:nrow(points)){
       points$absolute.dist[i]<- sum(input.data$dist[points$start[i]:points$stop[i]])
       points$var.speed[i]<- var(input.data$dist[points$start[i]:points$stop[i]])
+      points$nzero[i]<- sum(input.data$dist[points$start[i]:points$stop[i]]==0)
+      
+      points$n.cross.straight[i]<- determine.n.sway(points$x.start[i],points$x.stop[i],
+                                                    points$z.start[i],points$z.stop[i],input.data$x[points$start[i]:points$stop[i]],
+                                                    input.data$z[points$start[i]:points$stop[i]])
+      mean.max.var<- determine.max.mean.var.from.straight(points$x.start[i],points$x.stop[i],
+                                                    points$z.start[i],points$z.stop[i],input.data$x[points$start[i]:points$stop[i]],
+                                                    input.data$z[points$start[i]:points$stop[i]])
+      points$max.from.straight[i]<- mean.max.var$max
+      points$mean.from.straight[i]<- mean.max.var$mean
+      points$var.from.straight[i]<- mean.max.var$var
     }
   }
+  points$errorfrac<- points$nzero/(points$stop-points$start)
   points$absolute.speed<-points$absolute.dist/points$time.spend
   points$relative.speed<-points$relative.dist/points$time.spend
+  points$dist.frac<-points$absolute.dist/points$relative.dist
   return(points)
 }
+#determines max dist from straight line
+determine.max.mean.var.from.straight<- function(x.start, x.stop, y.start, y.stop, input.data.x, input.data.y){
+  distances<-apply(data.frame(input.data.x, input.data.y), 1, dist2d, b= c(x.start,y.start), c= c(x.stop,y.stop))
+  return(list(mean= mean(distances),max =max(distances), var= var(distances)))
+}
+#calculate distance between point and line
+dist2d <- function(a,b,c) {
+  v1 <- b - c
+  v2 <- a - b
+  m <- cbind(v1,v2)
+  d <- abs(det(m))/sqrt(sum(v1*v1))
+} 
+#determines if the nr of sways a person makes
+determine.n.sway<- function(x.start, x.stop, y.start, y.stop, input.data.x, input.data.y){
+  position <- sign((x.stop - x.start) * (input.data.y - y.start) - (y.stop - y.start) * (input.data.x - x.start))
+  position <- position[position!=0]
+  n<- sum(position != lag(position,default = position[1]))
+  return(n)
+
+}
+
+
 # make parts thate are above or below a certain speed, merge these parts if they are close to each other to deal with data errors and small movements
 calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequations=TRUE){
   candidates <-output<- data.frame(start = numeric(), stop = numeric())
@@ -169,44 +210,25 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
   }
   #if parts are to short afther each other then combine them
   #to do: only do this when the the inbetween part is smaller than the two parts that can be combined
-  output<-speed.discretisation.merge.induction(candidates,input.data, merge.dist)
-  # k<-1
-  # while (k<nrow(candidates)) {
-  #   l<-k
-  #   # add together if part inbetween is smaller than the two parts and merge dist 
-  #   while (l<nrow(candidates) && 
-  #          #input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist&&
-  #          input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] &&
-  #          input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]) {
-  #     l<-l+1
-  #   }
-  #   output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[l]))
-  #   k<-l+1
-  # }
-  # # add last element if not mearged with previous one
-  # if(last(candidates$stop)!=last(output$stop))
-  # {
-  #   output<-rbind(output,data.frame(start= candidates$start[k],stop=candidates$stop[k]))
-  # }
-  output
+  #output<-speed.discretisation.merge.induction(candidates,input.data, merge.dist)
+  #output
+  return(candidates)
+  
 }
 speed.discretisation.merge.induction<-function(candidates, input.data, merge.dist){
-  change<-FALSE
-  for(l in 1:(nrow(candidates)-1)){
-    if((input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] ||
-       input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]])&&
-       input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist){
-      change<-TRUE
-      candidates$stop[l]<-candidates$stop[l+1]
-      candidates<- candidates[-(l+1),]
-      break
+  if(nrow(candidates)>1){
+    for(l in 1:(nrow(candidates)-1)){
+      if((input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] ||
+         input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]])&&
+         input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist){
+        
+        candidates$stop[l]<-candidates$stop[l+1]
+        candidates<- candidates[-(l+1),]
+        return(speed.discretisation.merge.induction(candidates,input.data,merge.dist))
+      }
     }
   }
-  if(change){
-    return(speed.discretisation.merge.induction(candidates,input.data,merge.dist))
-  }else{
-    return(candidates)
-  }
+  return(candidates)
 }
 
 #add the label to eache datapoint based on a log file
@@ -229,10 +251,8 @@ calc.productbox<- function(products){
              zmax = rep(NA, nrow(products)),
              up.down.side= products$up.down.side,
              announced = products$announced,
-             productnumber =  products$productnumber,
-             x = products$x,
-             z = products$z,
-             colour = products$colour) %>%
+             productnumber =  products$productnumber
+             ) %>%
     mutate(xmin = ifelse(up.down.side == "up", products$x-products$height,
                          ifelse(up.down.side =="down", products$x,
                                 products$x-.5*products$height))) %>% 
@@ -399,7 +419,7 @@ check.product.hit<- function(hit.log, products){
       if(d<0.5)
       {
         res<-rbind(res,data.frame(prod_id= j,name.product= products$productnumber[j], name.hit= hit.log$product[i],
-                                  x.product=pos.product$x,z.product=pos.product$z, 
+                                  x.product=pos.product$x,z.product=pos.product$z,
                                   x.hit=pos.log$x,z.hit=pos.log$z,time= hit.log$time[i], d=as.numeric(d)))
       }
     }
@@ -407,6 +427,20 @@ check.product.hit<- function(hit.log, products){
   return(res)
   
 }
+add.product.hit.position<-function(product.hits, position){
+  # product.hits$x.pos<- numeric(nrow(product.hits))
+  # product.hits$z.pos<- numeric(nrow(product.hits))
+  # product.hits$time.id<-numeric(nrow(product.hits))
+  if(nrow(product.hits)>0)
+  for (i in 1:nrow(product.hits)) {
+    index<-first(which(position$time> product.hits$time[i]))
+    product.hits$x.pos[i]<- position$x[index]
+    product.hits$z.pos[i]<- position$z[index]
+    product.hits$time.index[i]<- index
+  }
+  return(product.hits)
+}
+
 # add hitted product id to stops, if a product was hit during the stop
 hit.stop<- function(hits, stops){
   stops$hit_2<-stops$hit_1<- "none"
@@ -457,7 +491,7 @@ crossings.filter.close<- function(crossings, dist, start){
       change<-TRUE
       crossings<- crossings[-i,]
       if(nrow(crossings)>=i){
-        return(crossings.filter.closev2(crossings, dist, i))
+        return(crossings.filter.close(crossings, dist, i))
       }
       else{
         return(crossings)
@@ -484,4 +518,60 @@ calc.target.aisles<- function(product, aisles){
 }
 
 
+stop.to.walk<- function(log, input.data){
+  res<- data.frame(start= numeric(), stop=numeric())
+  start<-1
+  stop<-log[1,1]-1
+  
+  for(i in 1:nrow(log)){
+    res<-rbind(res, data.frame(start=start,stop=stop))
+    start<-log$stop[i]+1
+    stop<-log$start[i+1]-1
+  }
+  rbind(res, data.frame(start=start,stop=nrow(input.data)))
+}
+
+calc.short.dist<- function(aisles, product.hits, input.data){
+  product.hits$short.dist<- numeric(nrow(product.hits))
+  product.hits$walk.dist<- numeric(nrow(product.hits))
+  main.aisles<- aisles %>% filter(type == "main") %>% mutate(zmin= -zmin, zmax= -zmax) 
+  mid.points<- (main.aisles$zmax+main.aisles$zmin)/2
+  if(nrow(product.hits)>1)
+  for(i in 1:(nrow(product.hits)-1)){
+    if(product.hits$aisles.name[i]==product.hits$aisles.name[i+1]){
+      product.hits$short.dist[i]<-abs(product.hits$z[i]-product.hits$z[i+1])
+      product.hits$walk.dist[i]<- sum(input.data$dist[product.hits$time.index[i]:product.hits$time.index[i+1]])
+    }else
+    {
+      dist.to.midle.1<-mid.points-product.hits$z.pos[i]
+      dist.to.midle.2<-mid.points-product.hits$z.pos[i+1]
+      product.hits$short.dist[i]<- min(abs(dist.to.midle.1)+abs(dist.to.midle.2))+
+        abs(product.hits$x.pos[i]-product.hits$x.pos[i+1])
+      product.hits$walk.dist[i]<- sum(input.data$dist[product.hits$time.index[i]:product.hits$time.index[i+1]])
+      
+    }
+    
+    
+  }
+  product.hits$dist.frac<- product.hits$walk.dist/product.hits$short.dist
+  return(product.hits)
+  
+}
+filter.product.hits<- function(targets, hits){
+  # give indexes of hitted items that are also targets
+  hit.target<- lapply(hits$product, function(x) str_detect(x,targets$productname)) %>% lapply(function(x)any(x))%>% 
+    unlist()
+  
+  false.hits<- hits%>% filter(!hit.target)
+  # give logical indexes of related products when a product was not correct
+  hit.related<- lapply(false.hits$product, function(x) lapply( targets$alternativename, function(y) any(str_detect(x,y))))%>% 
+    lapply(function(x)any(unlist(x))) %>% 
+    unlist()
+  
+  return(list(hit.target= hits %>% filter(hit.target),
+              hit.related= false.hits %>% filter(hit.related)))
+  
+}
+
+  
 

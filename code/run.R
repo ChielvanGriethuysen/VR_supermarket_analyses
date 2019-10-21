@@ -26,17 +26,17 @@ data.files <- list.files(
 )
 
 # get the excel sheet
-data.files2 <- list.files(
-  path = file.path("input", params$input.dir),
-  pattern = 'xlsx',
-  full.names = FALSE
-)
+# data.files2 <- list.files(
+#   path = file.path("input", params$input.dir),
+#   pattern = 'xlsx',
+#   full.names = FALSE
+# )
 
 # load the excelsheet with the hits of the respondents
-Excel<-readxl::read_excel(path= file.path("input", params$input.dir, data.files2),
-                                          sheet=params$sheet.excel,
-                                          n_max=params$n.row.excel)%>%
-  mutate(ID = as.character(ID))
+# Excel<-readxl::read_excel(path= file.path("input", params$input.dir, data.files2),
+#                                           sheet=params$sheet.excel,
+#                                           n_max=params$n.row.excel)%>%
+#   mutate(ID = as.character(ID))
 
 
 
@@ -82,6 +82,7 @@ for(i in 1 : length(data.files)){
   
   res.cross <- getCrossings(input.data = res$input.data,
                             params= params,
+                            products= res$products,
                             i = i)
 
   res.look<- getLookings( aisles.log= res.speed$aisles.log,
@@ -95,10 +96,13 @@ for(i in 1 : length(data.files)){
                   products.log= res.products$log, 
                   walked.past.log= res.products$log.walked.past, 
                   products.hit.log= res$product.hits,
-                  look.log= res.look$log)
+                  look.log= res.look$log,
+                  product.all= res$product.all)
   
   #make and save features 
-  data<-  logs.to.features(data,i,log.list,res$input.data,params)
+  data<-  logs.to.features(data,i,log.list,res$input.data,res$products, params)
+  filter.feature.plot(res$input.data,res.aisles$log)
+  #feature.plot(res$input.data, res.speed$speed.log, "all")
   if(params$save.feature){
     if( ! file.exists(paste0('output/',params$output.dir,'/csv_temp'))){
       dir.create(paste0('output/',params$output.dir,'/csv_temp'),recursive = TRUE)
@@ -130,9 +134,10 @@ for(i in 1 : length(data.files)){
     looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile,params, full)
     looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile,params, full)
     
-    speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log)
+    speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log, save = TRUE)
     speed.map.combine(speed,full,JSONfile,params,save=TRUE)
   }
+  #plot.best.r(res$input.data, str_split(JSONfile,"_")[[1]][1])
   
 }
 #export all log files in one file

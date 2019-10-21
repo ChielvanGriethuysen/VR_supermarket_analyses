@@ -80,24 +80,24 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,params ,products, produ
     geom_text(data = products, 
               mapping = aes(x = x, y = z, 
                             label = products$productnumber),
-              color= "black")+
+              color= "black")
     # geom_point(data = products, 
     #            mapping = aes(x = x+.7, y = z+.3),
     #            colour= "white", size=4)+ 
     #add speed
-    geom_point(data = discretised.path[discretised.path$label=="stop with no movement",], 
-                       mapping = aes(x = x, y = -z),
-                       fill = 'tomato', colour = 'tomato', size= 3.5)+
-    geom_text(aes(y = -43, x = 0.5, 
-                  label = paste("N Stops no movement = ", nrow(logs$speed.log %>% filter(label== "stop with no movement")), "(X)" )),
-              size = 5,
-              colour = 'tomato')+ 
-    geom_point(data = discretised.path[discretised.path$label=="stop with some movement",], 
-                     mapping = aes(x = x, y = -z),
-                     fill = 'darkorchid', colour = 'darkorchid', size= 3.5)+
-    geom_text(aes(y = -43, x = 1.5, 
-                  label = paste("N Stops some movement = ", nrow(logs$speed.log %>% filter(label== "stop with some movement")), "(X)")),
-              colour = 'darkorchid', size = 5)
+    # geom_point(data = discretised.path[discretised.path$label=="stop with no movement",], 
+    #                    mapping = aes(x = x, y = -z),
+    #                    fill = 'tomato', colour = 'tomato', size= 3.5)+
+    # geom_text(aes(y = -43, x = 0.5, 
+    #               label = paste("N Stops no movement = ", nrow(logs$speed.log %>% filter(label== "stop with no movement")), "(X)" )),
+    #           size = 5,
+    #           colour = 'tomato')+ 
+    # geom_point(data = discretised.path[discretised.path$label=="stop with some movement",], 
+    #                  mapping = aes(x = x, y = -z),
+    #                  fill = 'darkorchid', colour = 'darkorchid', size= 3.5)+
+    # geom_text(aes(y = -43, x = 1.5, 
+    #               label = paste("N Stops some movement = ", nrow(logs$speed.log %>% filter(label== "stop with some movement")), "(X)")),
+    #           colour = 'darkorchid', size = 5)
   
     #add crossings
     if(nrow(logs$crossings.log)){
@@ -132,7 +132,7 @@ speed.map.combine<- function(speed, map, JSONfile,params,save=FALSE){
   }
 }
 
-speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data)){
+speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data), save= FALSE){
   
   cols<-c("stop with no movement"= "tomato",
           "stop with some movement"= "darkorchid", 
@@ -142,7 +142,7 @@ speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data)){
           "same side in out"= "coral1"
           )
   
-  log_speed<- log_speed %>% filter(start>=start1,stop<=stop1, label!="walk")
+  log_speed<- log_speed %>% filter(start>=start1,stop<=stop1)
   log_place<- log_place %>% filter(start>=start1,stop<=stop1)
   
   
@@ -154,9 +154,17 @@ speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data)){
   data$time<- data$time-data$time[1]
   
   
+  ## test  filter code ##
+  
+  log_speed <- log_speed %>% filter(label== "walk"& absolute.speed >= 0.458824867341898
+                                    &  var.speed >= 2.04402427300576e-06)
+  
+  
+  ##  end  ##
+  
   plot<-ggplot()+
     geom_point(data[start1:stop1,], mapping =  aes(time, speed),size=0.75, alpha=0.1)+
-    ylim(-.1,0.6)
+    ylim(-.1,0.7)
   
   if(nrow(log_speed)>0){
     plot<-plot+
@@ -170,11 +178,73 @@ speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data)){
                  mapping = aes(x = (start.time+stop.time)/2, y = -0.05, label = log_place$aisles.name),
                  label.size = .32)
   }
+  if(save){
+    if( ! file.exists(paste0('output/',params$output.dir,'/png/speed'))){
+      dir.create(paste0('output/',params$output.dir,'/png/speed'))
+    }
+    ggsave(paste0('output/',params$output.dir,'/png/speed/', JSONfile, '.png'), 
+           plot, width = (last(data$time)-data$time[1])/10, height = 7, units = 'cm',limitsize = FALSE)
+  }
+  
   plot
+}
+
+feature.plot<- function(data, log_speed, map){
+  
+  if( ! file.exists(paste0('output/',params$output.dir,'/png/speed/',map))){
+    dir.create(paste0('output/',params$output.dir,'/png/speed/',map),recursive = TRUE)
+  }
+  if(nrow(log_speed)>0){
+    for (i in 1:nrow(log_speed)) {
+      start<- log_speed$start[i]
+      stop<- log_speed$stop[i]
+      plot1<-ggplot()+
+        geom_point(data[start:stop,], mapping =  aes(-z, x, colour= time))
+      
+      plot2<-ggplot()+
+        geom_point(data[start:stop,], mapping =  aes(time, speed),size=0.75, alpha=1)+
+        ylim(-.1,0.7)
+      plot<- ggarrange(plot1,plot2, ncol = 1,nrow = 2,heights = c(2,1))
+      
+      ggsave(paste0('output/',params$output.dir,'/png/speed/',map,'/', JSONfile,'_',i, '.png'), 
+             plot,  width = 37.5, height = 21, units = 'cm',limitsize = FALSE)
+    }
+  }
 }
 
 
 
+filter.feature.plot<-function(data, log_aisles){
+  
+  log_aisles_main<- log_aisles %>% filter(label == "main")
+  log_aisles_WT<- log_aisles %>% filter(label == "walk through")
+  log_aisles_target<-log_aisles %>% filter(target == "TRUE")
+  log_aisles_nontarget<- log_aisles %>% filter(target != "TRUE")
+  
+  feature.plot(data, log_aisles_main,"main")
+  feature.plot(data, log_aisles_WT,"walk through")
+  feature.plot(data, log_aisles_target,"Target")
+  feature.plot(data, log_aisles_nontarget,"Non target")
+  
+
+  
+
+  
+}
+
+plot.best.r = function(data,JSONfile){
+  plotx<-ggplot()+geom_point(data, mapping = aes(time,x))+ ggtitle(paste0("X vs Time",JSONfile))
+  plotz<-ggplot()+geom_point(data, mapping = aes(time,z))+ ggtitle(paste0("Z vs Time",JSONfile))
+  
+  if( ! file.exists(paste0('output/',params$output.dir,'/png/best.r'))){
+    dir.create(paste0('output/',params$output.dir,'/png/best.r'),recursive = TRUE)}
+  ggsave(paste0('output/',params$output.dir,'/png/best.r/',
+                JSONfile, '_x.png'), plotx, 
+         width = 37.5, height = 21, units = 'cm')
+  ggsave(paste0('output/',params$output.dir,'/png/best.r/',
+                JSONfile, '_z.png'), plotz, 
+         width = 37.5, height = 21, units = 'cm')
+}
 
 
 

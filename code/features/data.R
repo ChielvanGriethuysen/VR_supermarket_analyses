@@ -19,58 +19,52 @@ createDataFrame <- function(data.files){
                      target.fraction= numeric(length(data.files)),
                      
                      n.crossings = numeric(length(data.files)),     # total number of crossings someone made (crossing his/her own path)
-                     n.crossings.dist.15= numeric(length(data.files)),
-                     n.crossings.dist.20= numeric(length(data.files)),
-                     n.crossings.dist.25=numeric(length(data.files)),
                     
                      n.crossings.outside.aisles = numeric(length(data.files)), # how many crossings did make outside of the horizontal shopping aisles
-                     n.crossings.dist.15.outside.aisles= numeric(length(data.files)),
-                     n.crossings.dist.20.outside.aisles= numeric(length(data.files)),
-                     n.crossings.dist.25.outside.aisles=numeric(length(data.files)),
+                     n.crossings.inside.aisles = numeric(length(data.files)),
+                     n.crossings.target= numeric(length(data.files)),
+                     n.crossings.non.target= numeric(length(data.files)),
                      
-                     # n.stops= numeric(length(data.files)),             # number of stops someone made
-                     # n.stops.min.2.sec= numeric(length(data.files)), 
-                     # n.stops.min.4.sec= numeric(length(data.files)), 
-                     # n.stops.min.6.sec= numeric(length(data.files)), 
-                     # n.stops.min.8.sec= numeric(length(data.files)), 
+                     n.target.enter = numeric(length(data.files)),
+                     n.non.target.enter = numeric(length(data.files)),
+                     n.enter.fraction = numeric(length(data.files)),
                      
-                     # n.stops.min.2.max8.sec.speed.0_5= numeric(length(data.files)), 
-                     # n.stops.min.3.max8.sec.speed.0_5= numeric(length(data.files)), 
-                     # n.stops.min.4.max8.sec.speed.0_5= numeric(length(data.files)), 
-                     #n.stops.min.8.sec.speed.0_5= numeric(length(data.files)), 
+                     n.target.enter.unique = numeric(length(data.files)),
+                     n.non.target.enter.unique = numeric(length(data.files)),
+                     n.enter.fraction.unique = numeric(length(data.files)),
                      
-                     n.stops.min.2.max6.sec.speed.g75= numeric(length(data.files)), 
-                     n.stops.min.2.max6.sec.speed.l75= numeric(length(data.files)),
-                     # n.stops.min.3.max6.sec.speed.0_5= numeric(length(data.files)), 
-                     # n.stops.min.4.max6.sec.speed.0_5= numeric(length(data.files)), 
-                     #n.stops.min.8.sec.speed.0_10= numeric(length(data.files)), 
+                     n.revisit = numeric(length(data.files)),
+                     n.revisit.target = numeric(length(data.files)),
+                     n.revisit.non.target = numeric(length(data.files)),
+                     n.revisit.fraction = numeric(length(data.files)),
                      
-                     # n.stops.min.2.sec.speed.10_15= numeric(length(data.files)), 
-                     # n.stops.min.4.sec.speed.10_15= numeric(length(data.files)), 
-                     # n.stops.min.6.sec.speed.10_15= numeric(length(data.files)), 
-                     # n.stops.min.8.sec.speed.10_15= numeric(length(data.files)), 
-                      
-                     # n.stops.min.6.sec.speed.g15= numeric(length(data.files)), 
-                     # n.stops.min.6.sec.speed.g10= numeric(length(data.files)), 
-                     n.stops.slow= numeric(length(data.files)), 
-                     n.stops.fast= numeric(length(data.files)), 
+                     distance.between.target.products.mean = numeric(length(data.files)),
+                     distance.between.target.products.sd  = numeric(length(data.files)),
                      
-                     # n.stops.min.8.sec.speed.g15= numeric(length(data.files)), 
-                     # n.stops.min.8.sec.speed.g10= numeric(length(data.files)), 
-                     # n.stops.min.8.sec.speed.g5= numeric(length(data.files)), 
+                     distance.between.related.products.mean = numeric(length(data.files)),
+                     distance.between.related.products.sd  = numeric(length(data.files)),
+                     
+                     distance.between.aisles.mean = numeric(length(data.files)),
+                     distance.between.aisles.sd = numeric(length(data.files)),
+                     
+                     
+                    
                      
                      total.stoping.time= numeric(length(data.files)),  # total stopping time
                      
                      n.walked.through.aisles= numeric(length(data.files)), #nr of times walked through a aisles
                      n.walked.in.out.aisles= numeric(length(data.files)), #nr of times walked in an aisles and the same side out
                      
-                     Hit_Totaal = numeric(length(data.files)),        # total items someone picked up
+                     Hit_Totaal.target = numeric(length(data.files)),        # total items someone picked up
+                     Hit_Totaal.related = numeric(length(data.files)), 
+                     Hit_Totaal.all = numeric(length(data.files)), 
+                     
                      stringsAsFactors = FALSE
   )
   return(data)
 }
 
-logs.to.features<- function(data,i, log.list,input.data, params){
+logs.to.features<- function(data,i, log.list,input.data,products ,params){
   
   data$name[i] = JSONfile
   data$ID[i]= substr(JSONfile,1,6)
@@ -87,47 +81,73 @@ logs.to.features<- function(data,i, log.list,input.data, params){
   data$target.fraction[i]= data$time.target[i]/data$time.none.target[i]
   
   data$n.crossings[i] = nrow(log.list$crossings.log)
-  data$n.crossings.dist.15[i]= nrow(log.list$crossings.log %>% filter(absolute.dist>15))
-  data$n.crossings.dist.20[i]= nrow(log.list$crossings.log %>% filter(absolute.dist>20))
-  data$n.crossings.dist.25[i]=nrow(log.list$crossings.log %>% filter(absolute.dist>25))
   
   data$n.crossings.outside.aisles[i] = nrow(log.list$crossings.log %>% filter(aisles.type== "main"))
-  data$n.crossings.dist.15.outside.aisles[i]= nrow(log.list$crossings.log %>% filter(aisles.type== "main"& absolute.dist>15))
-  data$n.crossings.dist.20.outside.aisles[i]= nrow(log.list$crossings.log %>% filter(aisles.type== "main"& absolute.dist>20))
-  data$n.crossings.dist.25.outside.aisles[i]=nrow(log.list$crossings.log %>% filter(aisles.type== "main"& absolute.dist>25))
   
-  # data$n.stops.min.2.max8.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<8&absolute.speed<0.075))
-  # data$n.stops.min.3.max8.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>3&time.spend<8&absolute.speed<0.075))
-  # data$n.stops.min.4.max8.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>4&time.spend<8&absolute.speed<0.075))
+  data$n.crossings.inside.aisles[i] = nrow(log.list$crossings.log %>% filter(aisles.type== "shopping"))
+  data$n.crossings.target[i]= nrow(log.list$crossings.log %>% filter(aisles.type== "shopping", target== TRUE))
+  data$n.crossings.non.target[i]= nrow(log.list$crossings.log %>% filter(aisles.type== "shopping", target== FALSE))
   
-  # data$n.stops.min.2.max6.sec.speed.g75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed>0.075))
-  # # data$n.stops.min.3.max6.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>3&time.spend<6&absolute.speed<0.075))
-  # # data$n.stops.min.4.max6.sec.speed.0_5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>4&time.spend<6&absolute.speed<0.075))
-  # data$n.stops.min.2.max6.sec.speed.l75[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>2&time.spend<6&absolute.speed<0.075))
+  aisles<- log.list$aisles.log %>% group_by(aisles.name) %>% summarise(target= first(target),
+                                                                       visits=n(),
+                                                                       main= first(label)=="main")
   
-  # data$n.stops.min.6.sec.speed.g15[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>6& absolute.speed>0.15))
-  # data$n.stops.min.6.sec.speed.g10[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>6& absolute.speed>0.10))
-  data$n.stops.slow[i]= nrow(log.list$speed.log%>% filter(label!= "walk", absolute.speed<=0.05))
-  data$n.stops.fast[i]= nrow(log.list$speed.log%>% filter(label!= "walk", absolute.speed>0.05))
+  data$n.target.enter[i] = sum((aisles %>% filter(target== TRUE, main==FALSE))$visits)
+  data$n.non.target.enter[i] = sum((aisles %>% filter(target== FALSE, main==FALSE))$visits)
+  data$n.enter.fraction[i] = data$n.target.enter[i]/data$n.non.target.enter[i]
+  
+  data$n.target.enter.unique[i] = nrow(aisles %>% filter(target== TRUE, main==FALSE))
+  data$n.non.target.enter.unique[i] = nrow(aisles %>% filter(target== FALSE, main==FALSE))
+  data$n.enter.fraction.unique[i] = data$n.target.enter.unique[i]/data$n.non.target.enter.unique[i]
+  
+  data$n.revisit[i] = nrow(aisles %>% filter(main==FALSE, visits>1))
+  data$n.revisit.target[i] = nrow(aisles %>% filter(main==FALSE, visits>1,target== TRUE))
+  data$n.revisit.non.target[i] = nrow(aisles %>% filter(main==FALSE, visits>1,target== FALSE))
+  data$n.revisit.fraction[i] = data$n.revisit.target[i]/data$n.revisit.non.target[i]
+  
+  DBAE<- distance.between.aisles.enters(input.data,log.list$aisles.log)
+  
+  data$distance.between.aisles.mean[i] = mean(DBAE)
+  data$distance.between.aisles.sd[i] = sd(DBAE)
+  
+  # product.hits<- cbind(log.list$product.all,
+  #                      calc.spot.event.in.box(data.frame(x.start=log.list$product.all$x,z.start= log.list$product.all$z),params$features$aisles))
+  # product.hits<-add.product.hit.position(product.hits,input.data)
   
   
-  # data$n.stops.min.8.sec.speed.g15[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>8& absolute.speed>0.15))
-  # data$n.stops.min.8.sec.speed.g10[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>8& absolute.speed>0.10))
-  # data$n.stops.min.8.sec.speed.g5[i]= nrow(log.list$speed.log%>% filter(label=="stop"& time.spend>8& absolute.speed>0.075))
+  product.hits<- filter.product.hits(products,log.list$product.all)
+
+  product.hits.target<- calc.short.dist(params$features$aisles, product.hits$hit.target, input.data)
   
-  #data$total.stoping.time[i]= sum(log.list$speed.log%>% filter(label=="stop")%>% select(time.spend))
+  
+  data$distance.between.target.products.mean[i]= product.hits.target[-nrow(product.hits.target),]$dist.frac %>% mean()
+  data$distance.between.target.products.sd[i]= product.hits.target[-nrow(product.hits.target),]$dist.frac %>% sd()
+  
+  product.hits.all<- rbind(product.hits$hit.target,product.hits$hit.related)%>% arrange(time)
+  product.hits.all<- calc.short.dist(params$features$aisles, product.hits.all, input.data)
+  
+  
+  data$distance.between.related.products.mean[i]= product.hits.all[-nrow(product.hits.all),]$dist.frac %>% mean()
+  data$distance.between.related.products.sd[i]= product.hits.all[-nrow(product.hits.all),]$dist.frac %>% sd()
+  
+  
+  
+  
+  data$total.stoping.time[i]= sum(log.list$speed.log%>% filter(label!="walk")%>% select(time.spend))
   
   data$n.walked.through.aisles[i]= log.list$aisles.log%>% filter(label== "walk through") %>% nrow()
   data$n.walked.in.out.aisles[i]= log.list$aisles.log%>% filter(label== "same side in out") %>% nrow()
   
-  data$Hit_Totaal[i] = length(unique(log.list$products.hit.log$prod_id))
+  data$Hit_Totaal.target[i] = length(unique(product.hits$hit.target$prod_id))
+  data$Hit_Totaal.related[i]=length(unique(product.hits$hit.related$prod_id))
+  data$Hit_Totaal.all[i]=length(unique(log.list$product.all$prod_id))
   return(data)
 }
 
 
 data.basic<-function(data, input.data,i){
   data$name[i] <- JSONfile
-  data$ID[i]<-substr(JSONfile,1,6)
+  data$ID[i]<-strsplit(JSONfile,"_")[[1]][1]
   data$total.time[i] <- last(input.data$time) - input.data$time[1]
   data$total.distance[i] <- sum(input.data$dist)
   data$n.datapoints[i] <- length(input.data$time)
@@ -205,12 +225,18 @@ export.logs<- function(JSONfile,params, log.list){
   #options(java.parameters = "-Xmx1024m")
   #gc() for combined file to overcome memory error
   write.xlsx2(log.list$aisles.log,      file = file, sheetName = "aisles")
+  gc()
   write.xlsx2(log.list$speed.log,       file = file, sheetName = "speed", append = TRUE)
+  gc()
   write.xlsx2(log.list$crossings.log,   file = file, sheetName = "crossings", append = TRUE)
+  gc()
   write.xlsx2(log.list$products.log,    file = file, sheetName = "products", append = TRUE)
+  gc()
   write.xlsx2(log.list$walked.past.log, file = file, sheetName = "walked.past", append = TRUE)
-  write.xlsx2(log.list$products.hit.log,file = file, sheetName = "hit", append = TRUE)
-  write.xlsx2(log.list$look.log,file = file, sheetName = "look", append = TRUE)
+  gc()
+  write.xlsx2(log.list$product.all,    file = file, sheetName = "hit", append = TRUE)
+  gc()
+  write.xlsx2(log.list$look.log,        file = file, sheetName = "look", append = TRUE)
   
 }
 all.logs<- function(log, combined.logs,i,file){
@@ -225,6 +251,7 @@ all.logs<- function(log, combined.logs,i,file){
     log$walked.past.log<- cbind(rep(status,nrow(log$walked.past.log)),rep(file,nrow(log$walked.past.log)),log$walked.past.log)
     log$products.hit.log<- cbind(rep(status,nrow(log$products.hit.log)),rep(file,nrow(log$products.hit.log)),log$products.hit.log)
     log$look.log<- cbind(rep(status,nrow(log$look.log)),rep(file,nrow(log$look.log)),log$look.log)
+    log$product.all<- cbind(rep(status,nrow(log$product.all)),rep(file,nrow(log$product.all)),log$product.all)
     return(log)
   }else{
     combined.logs$aisles.log<- rbind(combined.logs$aisles.log,cbind(rep(status,nrow(log$aisles.log)),rep(file,nrow(log$aisles.log)),log$aisles.log))
@@ -234,23 +261,33 @@ all.logs<- function(log, combined.logs,i,file){
     combined.logs$walked.past.log<- rbind(combined.logs$walked.past.log,cbind(rep(status,nrow(log$walked.past.log)),rep(file,nrow(log$walked.past.log)),log$walked.past.log))
     combined.logs$products.hit.log<- rbind(combined.logs$products.hit.log,cbind(rep(status,nrow(log$products.hit.log)),rep(file,nrow(log$products.hit.log)),log$products.hit.log))
     combined.logs$look.log<- rbind(combined.logs$look.log,cbind(rep(status,nrow(log$look.log)),rep(file,nrow(log$look.log)),log$look.log))
+    combined.logs$product.all<- rbind(combined.logs$product.all,cbind(rep(status,nrow(log$product.all)),rep(file,nrow(log$product.all)),log$product.all))
     return(combined.logs)
   }
 }
 participant.category<-function(file){
-  healthy.code<- c("GEZ","DS","H1","HC")
-  ill.code<- c("C2","PP","H2","PSY")
+  healthy.code<- c("GEZ","DS","H1","HC","C1","01")
+  ill.code<- c("C2","PP","H2","PSY","02","06")
   
-  if(any(str_detect(file,ill.code))){
+  if(any(startsWith(file,ill.code))){
     return("ill")
-  }else if(any(str_detect(file, healthy.code))){
+  }else if(any(startsWith(file, healthy.code))){
     return("healthy")
   }else{
     return("none")
   }
 }
 
-
+distance.between.aisles.enters<- function(input.data, aisles.log){
+  aisles<-aisles.log %>% filter(label!= "main")
+  
+  pieces<-data.frame(start=aisles$stop[-nrow(aisles)], stop=aisles$start[-1])
+  if(nrow(pieces)>0)
+  for(i in 1:nrow(pieces)){
+    pieces$dist[i]<-sum(input.data$dist[pieces$start[i]:pieces$stop[i]])
+  }
+  return(pieces$dist)
+}
 
   
   

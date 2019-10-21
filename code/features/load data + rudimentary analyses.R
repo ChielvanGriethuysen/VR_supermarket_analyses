@@ -154,7 +154,7 @@ runFirstAnalyses <- function(JSONfile,
   
   if(file.exists(paste0('input/', params$input.dir, '/', input.log))){
     suppressWarnings(
-      product.log <- xmlToDataFrame(paste0('input/', params$input.dir, '/', input.log))
+      product.log <- xmlToDataFrame(paste0('input/', params$input.dir, '/', input.log), stringsAsFactors = FALSE)
     )
   }else{
     product.log<- data.frame(SesionLog= as.character())
@@ -211,17 +211,34 @@ runFirstAnalyses <- function(JSONfile,
   if(str_detect(dat$dataHeader$m_SupermarketName,"Nemo B")){
     productbox<- calc.productbox(params$products$nemo_b)
     products<- params$products$nemo_b
-  }else{
+  }else if(str_detect(dat$dataHeader$m_SupermarketName,"Nemo A")){
     productbox<- calc.productbox(params$products$nemo_a)
     products<-params$products$nemo_a
+  }else if(str_detect(dat$dataHeader$m_SupermarketName,"UMC")){
+    productbox<- calc.productbox(params$products$UMC3pro)
+    products<-params$products$UMC3pro
   }
   # put the hit log in a dataframe, filter on products from the product list
-  product.log<- product.hit.log(product.log)
-  product.hits<- check.product.hit(product.log, products)
+  start.stop<- which(apply(product.log, 1, function(x) any(grepl("Sessie|Ending", x))))
+  product.all<- product.hit.log( data.frame(SesionLog=product.log[(start.stop[1]+1):(start.stop[2]-1),]))
+  
+  product.all<- cbind(product.all,
+                       calc.spot.event.in.box(data.frame(x.start=product.all$x,z.start= product.all$z),params$features$aisles))
+  product.all<-add.product.hit.position(product.all,input.data)
+  products$prod_id<- 1:nrow(products)
+  product.all<- merge(product.all,products[,c(7,8,10)],by.x  = "product",by.y= "productname",all.x = TRUE)
+  product.all<- product.all %>% arrange(time)
+  product.all<- product.all %>% distinct(product, .keep_all = TRUE)
+  
+  product.hits<- filter.product.hits(products,product.all)$hit.target
+  # product.hits<- check.product.hit(product.all, products)
+  # product.hits<- add.product.hit.position(product.hits,input.data)
+  # product.hits<- calc.short.dist(params$features$aisles, product.hits, input.data)
   
   res <- list(input.data= input.data,
               input.look= input.look,
               product.hits= product.hits,
+              product.all= product.all,
               data = data,
               productbox = productbox,
               products= products)
