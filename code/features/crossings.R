@@ -2,7 +2,7 @@
 #
 # Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
-getCrossings = function(input.data, params,products,i){
+getCrossings = function(input.data, params,products){
 
   
   #skip points, if to close to each other, to speed op crossing finding
@@ -57,7 +57,6 @@ getCrossings = function(input.data, params,products,i){
   }
   else{
     n.crossings<- 0
-    data$n.crossings[i] <- 0
     n.crossings.shopping<- 0
   }
   

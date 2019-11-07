@@ -160,7 +160,7 @@ runFirstAnalyses <- function(JSONfile,
     product.log<- data.frame(SesionLog= as.character())
   }
   
-  # put data in one dataframe
+  # put data in one dataframe(position and eye data)
   input.data<-data.frame(time=dat$tracking_data$m_PupilTime,dat$tracking_data$m_FootPosition)
   input.look.left<-data.frame(time=dat$tracking_data$m_PupilTime,
                          dat$tracking_data$m_PositionLeftObject, 
@@ -181,9 +181,6 @@ runFirstAnalyses <- function(JSONfile,
   input.look.right<- input.look.right %>% mutate(x=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),x,0),
                                                y=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),y,0),
                                                z=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),z,0))
-  
-  #input.rotation<- data.frame(dat$tracking_data$m_PupilTime,dat$tracking_data$m_HeadRotation)
-  
   
   # Remove duplicate data (speeds up all analyses)
   dup <- which(diff(input.data$time) == 0)
@@ -210,6 +207,10 @@ runFirstAnalyses <- function(JSONfile,
   row.names(input.look.left) <- 1:nrow(input.look.left)
   row.names(input.look.right) <- 1:nrow(input.look.right)
   
+  #add data when possible
+  input.look.left<- missing.view.data.fill(input.look.left)
+  input.look.right<- missing.view.data.fill(input.look.right)
+  
   #add speed and distance to dataframe and calculate total distance
   x.change <- diff(input.data$x, 1)
   y.change <- diff(input.data$z, 1)
@@ -217,16 +218,6 @@ runFirstAnalyses <- function(JSONfile,
   speed<-c(0,distance.between.points/diff(input.data$t,1))
   input.data<- data.frame(input.data, speed,c(mean(distance.between.points),distance.between.points))
   names(input.data)[6]<- "dist"
-  
-  #input.data<-data.frame(input.data,input.look)
-  
-  
-  # Save results of basic analyses
-  # data<-data.basic(data,input.data, i)
-  # if(params$external.excel){
-  #   #add VRlog data
-  #   data<-data.VRlog(data,Excel,i)
-  # }
   
   # create product box based on suppermarket
   if(str_detect(dat$dataHeader$m_SupermarketName,"Nemo B")){
@@ -239,14 +230,14 @@ runFirstAnalyses <- function(JSONfile,
     productbox<- calc.productbox(params$products$UMC3pro)
     products<-params$products$UMC3pro
   }
+  products$prod_id<- 1:nrow(products)
+  
   # put the hit log in a dataframe, filter on products from the product list
   start.stop<- which(apply(product.log, 1, function(x) any(grepl("Sessie|Ending", x))))
   product.all<- product.hit.log( data.frame(SesionLog=product.log[(start.stop[1]+1):(start.stop[2]-1),]))
-  
   product.all<- cbind(product.all,
                        calc.spot.event.in.box(data.frame(x.start=product.all$x,z.start= product.all$z),params$features$aisles))
   product.all<-add.product.hit.position(product.all,input.data)
-  products$prod_id<- 1:nrow(products)
   product.all<- merge(product.all,products[,c(7,8,10)],by.x  = "product",by.y= "productname",all.x = TRUE)
   product.all<- product.all %>% arrange(time)
   product.all<- product.all %>% distinct(product, .keep_all = TRUE)
@@ -259,10 +250,8 @@ runFirstAnalyses <- function(JSONfile,
   res <- list(input.data= input.data,
               input.look.left= input.look.left,
               input.look.right= input.look.right,
-              #input.rotation= input.rotation,
               product.hits= product.hits,
               product.all= product.all,
-              data = data,
               productbox = productbox,
               products= products)
   

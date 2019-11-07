@@ -313,8 +313,8 @@ calc.box.feature<-function(input.data, box){
   start.points<-t[t[,1] != lag(t[,1], default = !t[1,1]),]
   stop.points<-t[t[,1] != lead(t[,1], default = !t[1,1]),]
   
-  order.of.visiting<-data.frame(id= start.points$row, start=start.points$col,stop=stop.points$col)
-  order.of.visiting<- add.times.location(order.of.visiting,input.data)
+  order.of.visiting<-data.frame(box.id= start.points$row, start=start.points$col,stop=stop.points$col)
+  #order.of.visiting<- add.times.location(order.of.visiting,input.data)
   return(order.of.visiting)
 }
 # add productbox name to product box log
@@ -322,7 +322,7 @@ productbox.label.add<-function(data, input.data,box){
   
   
   #add labels and aisles names
-  data$name<-box$productnumber[data$id]
+  data$name<-box$productnumber[data$box.id]
   
   data$name<-factor(data$name, levels = box$productnumber)
   return(data)
@@ -355,7 +355,7 @@ aisles.label.add<-function(order.of.visiting, input.data, aisles){
   }
   #add labels and aisles names
   order.of.visiting$label<-label.list
-  order.of.visiting$aisles.name<-aisles$aisle.names[order.of.visiting$id]
+  order.of.visiting$aisles.name<-aisles$aisle.names[order.of.visiting$box.id]
   
   order.of.visiting$aisles.name<-factor(order.of.visiting$aisles.name, levels = aisles$aisle.names)
   return(order.of.visiting)

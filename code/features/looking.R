@@ -11,7 +11,7 @@ getLookings<- function(aisles.log, input.look, aisles){
       # walked from right to left
       if(walk.throughs$z.start[i]>walk.throughs$z.stop[i]){
         viewpoints<- input.look[walk.throughs$start[i]:walk.throughs$stop[i],]
-        cur.aisles<- aisles[walk.throughs$id[i],]
+        cur.aisles<- aisles[walk.throughs$box.id[i],]
         filterd<-viewpoints %>% filter(z> -cur.aisles$zmax , z< -cur.aisles$zmin)
         
         n.left<- filterd%>% filter(x< mean(c(cur.aisles$xmax,cur.aisles$xmin))) %>% nrow()
@@ -24,7 +24,7 @@ getLookings<- function(aisles.log, input.look, aisles){
       #walked from left to right
       else{
         viewpoints<- input.look[walk.throughs$start[i]:walk.throughs$stop[i],]
-        cur.aisles<- aisles[walk.throughs$id[i],]
+        cur.aisles<- aisles[walk.throughs$box.id[i],]
         filterd<-viewpoints %>% filter(z> -cur.aisles$zmax , z< -cur.aisles$zmin)
         
         n.right<- filterd%>% filter(x< mean(c(cur.aisles$xmax,cur.aisles$xmin))) %>% nrow()

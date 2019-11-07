@@ -4,16 +4,14 @@
 
 # preamble ----------------------------------------------------------------
 packages <- c("jsonlite", "tidyverse", "png", "ggforce",
-              "ggalt", "Rcpp", "grid", "gganimate","XML", "DescTools", "xlsx","ggpubr")
+              "ggalt", "Rcpp", "grid", "gganimate","XML", 
+              "DescTools", "xlsx","ggpubr","LearnGeom")
 
 lapply(packages, require, character.only = TRUE)
-
-
 
 source("code/config.R") # load the configuration file
 sapply(list.files("code/features", full.names = TRUE, '.R'), source) # load FE funcs
 sourceCpp('code/features/cppDoLinesIntersect.cpp') # load the C function that calculates crossings
-
 
 # Load image
 image <- readPNG(paste0('input/', params$img.name))
@@ -25,20 +23,6 @@ data.files <- list.files(
   full.names = FALSE
 )
 
-# get the excel sheet
-# data.files2 <- list.files(
-#   path = file.path("input", params$input.dir),
-#   pattern = 'xlsx',
-#   full.names = FALSE
-# )
-
-# load the excelsheet with the hits of the respondents
-# Excel<-readxl::read_excel(path= file.path("input", params$input.dir, data.files2),
-#                                           sheet=params$sheet.excel,
-#                                           n_max=params$n.row.excel)%>%
-#   mutate(ID = as.character(ID))
-
-
 
 # Create data frame to save results
 data <- createDataFrame(data.files)
@@ -49,48 +33,39 @@ for(i in 1 : length(data.files)){
   print(paste('Calculating logs for file', i, "of",length(data.files) , "started at",Sys.time()))
   JSONfile <- data.files[i]
   
+  #load data, make datasets to use for analysis
   res <- runFirstAnalyses(JSONfile = JSONfile, 
                           Excel=Excel, 
                           image = image, 
                           params= params,
                           i = i)
-  print("look hit")
-  print(missing.data.length(res$input.look))
-  
 
+  # calculate start and stop points and add features
+  #for entering a aislesbox
   res.aisles <- getAisleTimes(input.data= res$input.data,
                               products= res$products,
-                              aisles = params$features$aisles,
-                              full.images = params$full.images,
-                              save.data = params$save.data,
-                              i = i)
-    
+                              aisles = params$features$aisles)
+  #for entering a productbox  
   res.products <- WalkpastProduct(input.data = res$input.data,
-                                  products =  res$productbox,
-                                  products2 = res$products,
-                                  hit.log = res$product.hits,
-                                  full.images = params$full.images,
-                                  save.data = params$save.data,
-                                  i = i)
+                                  productbox =  res$productbox,
+                                  products = res$products,
+                                  hit.log = res$product.hits)
   
+  #for a change in speed
   res.speed<- speeddiscretisation(aisles.log=res.aisles$log,
                                   hits.log= res$product.hits,
                                   input.data = res$input.data,
                                   products= res$products,
-                                  stop.params = params$features$stops,
-                                  walk.params = params$features$walk,
-                                  aisles= params$features$aisles,
-                                  i=i)
-  
+                                  params= params)
+  #calculate crossings
   res.cross <- getCrossings(input.data = res$input.data,
                             params= params,
-                            products= res$products,
-                            i = i)
-
+                            products= res$products)
+  
+  #adds features to aisles data, move to aisles function
   res.look<- getLookings( aisles.log= res.speed$aisles.log,
-                          input.look= res$input.look,
+                          input.look= res$input.look.left,
                           aisles = params$features$aisles)
-
 
   log.list<- list(aisles.log= res.speed$aisles.log, 
                   speed.log= res.speed$speed.log, 
@@ -103,21 +78,17 @@ for(i in 1 : length(data.files)){
   
   #make and save features 
   data<-  logs.to.features(data,i,log.list,res$input.data,res$products, params)
-  filter.feature.plot(res$input.data,res.aisles$log)
+  
+  #filter.feature.plot(res$input.data,res.aisles$log)
   #feature.plot(res$input.data, res.speed$speed.log, "all")
+  
+  #Do intermeadiate save of data
   if(params$save.feature){
     if( ! file.exists(paste0('output/',params$output.dir,'/csv_temp'))){
       dir.create(paste0('output/',params$output.dir,'/csv_temp'),recursive = TRUE)
     }
     write.csv2(data, file = paste0("output/",params$output.dir,"/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
   }
-
-    
-  #add the npo and persenal data to the export
-  # if(params$external.excel){
-  # datamerged<-add.npo.and.persenal.data(data,params,data.files2)
-  # write.csv2(datamerged, file = paste0("output/csv_temp/data_until_file_", i, ".csv"), row.names = FALSE)
-  # }
 
   #write the log with the timestemsp of events
   if(params$save.log){
@@ -140,14 +111,10 @@ for(i in 1 : length(data.files)){
     speed.map.combine(speed,full,JSONfile,params,save=TRUE)
   }
   #plot.best.r(res$input.data, str_split(JSONfile,"_")[[1]][1])
-  
 }
 #export all log files in one file
 if(params$save.log){
-  export.logs("allfilescombined",params,combined.logs)
+  export.logs("allfilescombined_view_inproved",params,combined.logs)
 }
-# save the data to an excel sheet
-# if(params$save.to.excel){
-#   write.csv2(datamerged, file = "output/csv/features.csv", row.names = FALSE)
-# }
+
 
