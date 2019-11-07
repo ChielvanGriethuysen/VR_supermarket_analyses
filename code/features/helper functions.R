@@ -108,7 +108,7 @@ Checkstopbeforeitem <- function(position, productsbox){
     -position[2] > productsbox$zmin & -position[2] < productsbox$zmax
 }
 # add time info to stop/slow
-add.times.location<- function(points, input.data){
+add.times.location<- function(points, input.data, input.look.left= res$input.look.left, input.look.right= res$input.look.right){
   points$start.time<-input.data$time[points$start]
   points$stop.time<- input.data$time[points$stop]
   points$time.spend<-points$stop.time- points$start.time
@@ -125,6 +125,11 @@ add.times.location<- function(points, input.data){
   points$max.from.straight<- numeric(nrow(points))
   points$mean.from.straight<- numeric(nrow(points))
   points$var.from.straight<- numeric(nrow(points))
+  points$missing.view.mean<- numeric(nrow(points))
+  points$missing.view.max<- numeric(nrow(points))
+  points$missing.view.frac<- numeric(nrow(points))
+  points$missing.view.n<- numeric(nrow(points))
+  input.look<- if(sum(input.look.left$x==0)< sum(input.look.right$x==0)) input.look.left else input.look.right
   if(nrow(points)>0){
     for(i in 1:nrow(points)){
       points$absolute.dist[i]<- sum(input.data$dist[points$start[i]:points$stop[i]])
@@ -134,6 +139,14 @@ add.times.location<- function(points, input.data){
       points$n.cross.straight[i]<- determine.n.sway(points$x.start[i],points$x.stop[i],
                                                     points$z.start[i],points$z.stop[i],input.data$x[points$start[i]:points$stop[i]],
                                                     input.data$z[points$start[i]:points$stop[i]])
+      
+      
+      
+      missing.stats<-missing.data.length(input.look[points$start[i]:points$stop[i],])
+      points$missing.view.mean[i]<- missing.stats$mean
+      points$missing.view.max[i]<-missing.stats$max
+      points$missing.view.frac[i]<-missing.stats$missing
+      points$missing.view.n[i]<-missing.stats$n
       mean.max.var<- determine.max.mean.var.from.straight(points$x.start[i],points$x.stop[i],
                                                     points$z.start[i],points$z.stop[i],input.data$x[points$start[i]:points$stop[i]],
                                                     input.data$z[points$start[i]:points$stop[i]])
@@ -575,29 +588,73 @@ filter.product.hits<- function(targets, hits){
 
 # finds out the longest cerie of zerro's in the data, to detect the lagest gap in the data  
 missing.data.length<- function(data){
-  n<-start<- stop<-0
-  for (i in 1:nrow(data)) {
-    if(data$x[i]==0){
+  n<-start<- stop<- res.stop<-i<-0
+  length<- time<-res.start<- c()
+  while (i<=nrow(data)) {
+    i<-i+1
+    if(i<= nrow(data) &&data$x[i]==0){
       start<- i
-      while (data$x[i]==0) {
+      while (i<= nrow(data) &&data$x[i]==0) {
         i<-i+1
       }
       stop<- i
-      if(stop-start>n){
-        n<- stop-start
-        res.start<- start
-        res.stop<- stop
+      length<- c(length, stop-start)
+      time<- c(time, if(start== stop) 0 else round(data$time[stop-1]-data$time[start],3))
+      res.start<- c(res.start, start)
+      if(i >= nrow(data)){
+        break
       }
-
     }
   }
-  return(data.frame(n=n, start=res.start,stop= res.stop, time=round(data$time[res.stop]-data$time[res.start],3)))
+  return(data.frame(mean= if(is.null(length))0 else mean(length), 
+                    max=  if(is.null(length))0 else max(length),
+                    n= if(is.null(length))0 else length(length),
+                    missing= sum(data$x==0)/nrow(data)))
 }
+missing.view.data.fill<- function(data){
+  n<-start<- stop<- i<-0
+  while (i <= nrow(data)) {
+    i<-i+1
+    if(i<= nrow(data) &&data$x[i]==0){
+      start<- i
+      while (i<= nrow(data) &&data$x[i]==0) {
+        i<-i+1
+      }
+      stop<- i-1
+      #fill in gap when time between points is les than 0.1 sec
+      if(data$time[stop]-data$time[start]<0.1)
+      {
+        for (j in start:stop) {
+          if(start==1){
+            data$x[j]<- data$x[stop+1]
+            data$y[j]<- data$y[stop+1]
+            data$z[j]<- data$z[stop+1]
+          } else if(stop == nrow(data)){
+            data$x[j]<- data$x[start-1]
+            data$y[j]<- data$y[start-1]
+            data$z[j]<- data$z[start-1]
+            
+          }else{
+            data$x[j]<- mean(data$x[start-1],data$x[stop+1])
+            data$y[j]<- mean(data$y[start-1],data$y[stop+1])
+            data$z[j]<- mean(data$z[start-1],data$z[stop+1])
+          }
+        }
+      }
+      if(i >= nrow(data)){
+        break
+      }
+    }
+  }
+  return(data)
+}
+
 #for each point finds what the first point is afther a sertain distance
 find.first.point.on.dist<- function(data, dist)
 {
   d<- 0
   data$point.on.dist<-0
+  j<-0
   for (i in 1: nrow(data)) {
     
     while (d<dist) {
@@ -609,22 +666,26 @@ find.first.point.on.dist<- function(data, dist)
     data$point.on.dist[i]<- j
     d<- d-data$dist[i]
   }
-  return(data)
+  data$point.on.dist[i:j]<-j
+  return(data[data$point.on.dist,])
 }
-
-calculate.direction<- function(data){
-  data$angles<-0
-  for (i in 1:sum(data$point.on.dist!=0)){
-    A<- c(data$x[data$point.on.dist[i]], data$z[data$point.on.dist[i]])
-    B<- c(walk$x[i], walk$z[i])
-    C<- c(walk$x[i], 0)
+##calculate the angles between twoo datasets op points and the side of the map 
+calculate.direction<- function(data.o,data.t){
+  data.o$angles<-0
+  for (i in 1:nrow(data.o)){
+    A<- c(data.t$x[i], data.t$z[i])
+    B<- c(data.o$x[i], data.o$z[i])
+    C<- c(data.o$x[i], 0)
+    if(A== c(0,0))
+      data.o$angles[i]<- NA
+    else
     if(A[1]>B[1]){
-    data$angles[i]<- Angle(A,B,C)
+    data.o$angles[i]<- Angle(A,B,C)
     }else{
-      data$angles[i]<- 360-Angle(A,B,C)
+      data.o$angles[i]<- 360-Angle(A,B,C)
     }
     
   }
-  return(data)
+  return(data.o$angles)
 }
 

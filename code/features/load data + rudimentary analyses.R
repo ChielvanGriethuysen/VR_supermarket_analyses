@@ -161,11 +161,29 @@ runFirstAnalyses <- function(JSONfile,
   }
   
   # put data in one dataframe
-  input.data<-data.frame(dat$tracking_data$m_PupilTime,dat$tracking_data$m_FootPosition)
-  input.look<-data.frame(dat$tracking_data$m_PupilTime,dat$tracking_data$m_PositionLeftObject)
+  input.data<-data.frame(time=dat$tracking_data$m_PupilTime,dat$tracking_data$m_FootPosition)
+  input.look.left<-data.frame(time=dat$tracking_data$m_PupilTime,
+                         dat$tracking_data$m_PositionLeftObject, 
+                         dist= dat$tracking_data$m_SqrtDistanceLeftEye, 
+                         confidence= dat$tracking_data$m_PupilConfidenceLeft,
+                         lost=dat$tracking_data$m_PupilLoss )
+  input.look.right<-data.frame(time=dat$tracking_data$m_PupilTime,
+                              dat$tracking_data$m_PositionRightObject, 
+                              dist= dat$tracking_data$m_SqrtDistanceRightEye, 
+                              confidence= dat$tracking_data$m_PupilConfidenceRight,
+                              lost=dat$tracking_data$m_PupilLoss )
   
-  names(input.data)[1]<- "time"
-  names(input.look)[1]<- "time"
+  
+  #make uncertain data nul
+  input.look.left<- input.look.left %>% mutate(x=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),x,0),
+                                     y=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),y,0),
+                                     z=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),z,0))
+  input.look.right<- input.look.right %>% mutate(x=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),x,0),
+                                               y=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),y,0),
+                                               z=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),z,0))
+  
+  #input.rotation<- data.frame(dat$tracking_data$m_PupilTime,dat$tracking_data$m_HeadRotation)
+  
   
   # Remove duplicate data (speeds up all analyses)
   dup <- which(diff(input.data$time) == 0)
@@ -177,17 +195,20 @@ runFirstAnalyses <- function(JSONfile,
   first <- first(which(input.data$z < 45.5 & input.data$z >10))
   if(first > 1){
     input.data<-input.data[-1:-first,]
-    input.look<-input.look[-1:-first,]
+    input.look.left<-input.look.left[-1:-first,]
+    input.look.right<-input.look.right[-1:-first,]
   }
   
   # Remove all datapoints after end of the task
   last <- last(which(input.data$z < 45.5))
   if(last < nrow(input.data)){
     input.data<-input.data[-last:-nrow(input.data),]
-    input.look<-input.look[-last:-nrow(input.look),]
+    input.look.left<-input.look.left[-last:-nrow(input.look.left),]
+    input.look.right<-input.look.right[-last:-nrow(input.look.right),]
   }
   row.names(input.data) <- 1:nrow(input.data)
-  row.names(input.look) <- 1:nrow(input.look)
+  row.names(input.look.left) <- 1:nrow(input.look.left)
+  row.names(input.look.right) <- 1:nrow(input.look.right)
   
   #add speed and distance to dataframe and calculate total distance
   x.change <- diff(input.data$x, 1)
@@ -236,7 +257,9 @@ runFirstAnalyses <- function(JSONfile,
   # product.hits<- calc.short.dist(params$features$aisles, product.hits, input.data)
   
   res <- list(input.data= input.data,
-              input.look= input.look,
+              input.look.left= input.look.left,
+              input.look.right= input.look.right,
+              #input.rotation= input.rotation,
               product.hits= product.hits,
               product.all= product.all,
               data = data,

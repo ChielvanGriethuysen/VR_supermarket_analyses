@@ -54,6 +54,7 @@ for(i in 1 : length(data.files)){
                           image = image, 
                           params= params,
                           i = i)
+  print("look hit")
   print(missing.data.length(res$input.look))
   
 
