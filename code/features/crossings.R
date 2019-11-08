@@ -11,7 +11,7 @@ getCrossings = function(input.data, params,products){
   FootPosition<- move_data[,2:4]
   time<- move_data[,1]
   
-  crossings <- anyIntersects(FootPosition$x, -FootPosition$z, time, params$features$cross$cross.lag1)
+  crossings <- anyIntersects(FootPosition$x, FootPosition$z, time, params$features$cross$cross.lag1)
   #A crossings consists of 4 time points (a, a+1, b, b+1), both a and b ares saved.
   #Only a is used to calculate n crossings and plot them.
   #b can be used in the future to calculate the angle.

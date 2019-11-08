@@ -6,22 +6,23 @@ basic.path.plot<- function(input.data, JSONfile, params,save=FALSE){
   gg<-ggplot() + 
     #ylim(-53, -7) + xlim(0, 29) +
     scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
-    scale_y_continuous(limits = c(-50, -2.5), expand=c(0,0)) +
+    scale_y_continuous(limits = c(2.5,50), expand=c(0,0)) +
     annotation_custom(rasterGrob(image, 
                                  width = unit(1, "npc"), 
                                  height = unit(1, "npc")), 
                       -Inf, Inf, -Inf, Inf) +
     #    coord_fixed() + 
     coord_flip() +
+    ylab("z")+
     theme(legend.position = "none",
           plot.margin = margin(0, 0, 0, 0, "cm")) +
-    geom_label(aes(y = -5, x = 28, 
+    geom_label(aes(y = 5, x = 28, 
                   label = paste("Person", 
                                 substr(JSONfile, 1, 5))), 
               size = 5) + 
-    geom_hline(yintercept = -45.5)+ 
+    geom_hline(yintercept = 45.5)+ 
     geom_path(data = input.data, 
-                        mapping = aes(x = x, y = -z, color = 1:length(x)),
+                        mapping = aes(x = x, y = z, color = 1:length(x)),
                         arrow = arrow(length = unit(4, "points")))
   
   if(save){
@@ -38,24 +39,13 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,params ,products, produ
   
   cols<-c("main"= "#00BFC4","shopping"= "#F8766D", "TRUE"="lightgreen", "FALSE"="red")
   
-  if(data$total.time[i]>180){
-    productbox<-productbox
-  } else{
-    productbox<-filter(productbox, announced != TRUE)
-  }
-  
-  if(data$total.time[i]>180){
-    products<-products
-  } else{
-    products<-filter(products, announced != TRUE)
-  }
   discretised.path<-datapoint.add.label(input.data,logs$speed.log)
-  info.box<-data.frame(x1=0.1,x2= 2.25,y1=-49.9,y2=-20)
+  info.box<-data.frame(x1=0.1,x2= 2.25,y1=49.9,y2=20)
   gg<- gg.basic+
-    geom_rect(data= info.box, mapping = aes(xmin=x1, xmax=x2,
-                            ymin= y1, ymax=y2),fill="gray80",alpha= 0.7)+
+    # geom_rect(data= info.box, mapping = aes(xmin=x1, xmax=x2,
+    #                         ymin= y1, ymax=y2),fill="gray80",alpha= 0.7)+
   
-    #add aiisles
+    #add aisles
     geom_rect(data = aisles,
               mapping = aes(xmin = xmin, xmax = xmax,
                             ymin = zmin, ymax = zmax,
@@ -74,24 +64,29 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,params ,products, produ
     #add product dot
     geom_point(data = products, 
                mapping = aes(x = x, y = z, 
-                             fill= factor(products$productnumber %in% logs$products.hit.log$name.product)),
+                             fill= factor(products$productnumber %in% logs$products.hit.log$productnumber)),
                color= "red", size= 8, shape=21)+
     scale_fill_manual(values= cols)+
     geom_text(data = products, 
               mapping = aes(x = x, y = z, 
                             label = products$productnumber),
-              color= "black")
-    # geom_point(data = products, 
-    #            mapping = aes(x = x+.7, y = z+.3),
-    #            colour= "white", size=4)+ 
-    #add speed
-    # geom_point(data = discretised.path[discretised.path$label=="stop with no movement",], 
-    #                    mapping = aes(x = x, y = -z),
-    #                    fill = 'tomato', colour = 'tomato', size= 3.5)+
-    # geom_text(aes(y = -43, x = 0.5, 
+              color= "black")+
+    #add product order
+    geom_point(data = products %>% slice(logs$products.hit.log$prod_id),
+               mapping = aes(x = x+.7, y = z+.3),
+               colour= "white", size=4)+
+    geom_text(data= products %>% slice(logs$products.hit.log$prod_id),
+              mapping = aes(x=x+.7,y=z+.3,
+                            label= 1:nrow(logs$products.hit.log)),
+              colour= "black")+
+    #add stops to pick product
+    geom_point(data = logs$speed.log %>% filter(n_hit>0),
+                       mapping = aes(x = x.start, y = z.start),
+                       fill = 'tomato', colour = 'tomato', size= 3.5)
+    # geom_text(aes(y = -43, x = 0.5,
     #               label = paste("N Stops no movement = ", nrow(logs$speed.log %>% filter(label== "stop with no movement")), "(X)" )),
     #           size = 5,
-    #           colour = 'tomato')+ 
+    #           colour = 'tomato')
     # geom_point(data = discretised.path[discretised.path$label=="stop with some movement",], 
     #                  mapping = aes(x = x, y = -z),
     #                  fill = 'darkorchid', colour = 'darkorchid', size= 3.5)+
@@ -102,11 +97,11 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,params ,products, produ
     #add crossings
     if(nrow(logs$crossings.log)){
     gg<-gg+geom_point(data = logs$crossings.log,
-               aes(x = x.start, y = -z.start), size= 3.5,
+               aes(x = x.start, y = z.start), size= 3.5,
                col = 'blue')
     }
   
-    gg<-gg+geom_text(aes(y = -15, x = 0.5, 
+    gg<-gg+geom_text(aes(y = 45.5, x = 29, 
                   label = paste("N crossings =", nrow(logs$crossings.log), "(", logs$crossings.log %>% filter(aisles.type== "shopping") %>%nrow(), ")" )),
               colour = 'blue',size=5)
   if(save){

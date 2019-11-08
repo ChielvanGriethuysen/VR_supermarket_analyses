@@ -282,7 +282,7 @@ calc.productbox<- function(products){
 # check if a position is in one of the boxes of a box list
 box.check<-function(position, box.list){
   position[1] > box.list$xmin & position[1] < box.list$xmax &
-    -position[2] > box.list$zmin & -position[2] < box.list$zmax
+    position[2] > box.list$zmin & position[2] < box.list$zmax
 }
 # calculates for stops in which aisles they where made
 calc.spot.event.in.box<- function(log, box){
@@ -516,7 +516,7 @@ crossings.filter.close<- function(crossings, dist, start){
 
 calc.target.aisles<- function(product, aisles){
   
-  a<-apply(data.frame(product$x,-product$z), 1, box.check, box.list=aisles)
+  a<-apply(data.frame(product$x,product$z), 1, box.check, box.list=aisles)
   t <- which(a, arr.ind = TRUE)
   t<- data.frame(t)
   

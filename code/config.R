@@ -8,7 +8,7 @@ params <- list(
   
   # name of image of supermarket
   #img.name ='Supermarkt Screenshot 10 Producten (volwassenen, tieners, kinderen).png',
-  img.name = 'Supermarkt2.png',
+  img.name = 'Supermarkt.png',
   
   # directory with input files
   input.dir = "test",
@@ -71,10 +71,10 @@ params <- list(
     number.of.items = 8,  # total number of items in supermarket people can pick up.
     
     # Aisles, both names and coordinates are defined here
-    aisles = data.frame(xmin = c(rep(c(5, 9.2, 13, 17, 21), 2), 25.2, rep(5,3)),
+    aisles = data.frame(xmin = c(rep(c(5, 9.2, 13, 17, 21), 2), 25.2, c(3,3,5)),
                         xmax = c(rep(c(8.5, 12.4, 16.4, 20.3, 24.5), 2), 29.3, c(24.5 , 29.3, 29.3)),
-                        zmin = c(rep(-37.5, 5), rep(-24.9, 6), c(-42, -30.2, -13.8)),
-                        zmax = c(rep(-30.3, 5), rep(-13.9, 6),  c(-37.6, -25, -10)), 
+                        zmin = c(rep(30.3, 5), rep(13.9, 6),  c(37.6, 25, 10)), 
+                        zmax = c(rep(37.5, 5), rep(24.9, 6), c(41, 30.2, 13.8)),
                         aisle.names = c(paste0(rep(1:5, 2), rep(LETTERS[1:2], each = 5)), "6B", "M1", "M2", "M3"), # Names of aisles
                         x = 1, y = 1, colour = 1, # Required for gg plot to work (don't ask why)
                         type= c(rep("shopping", 11), rep("main", 3)))
@@ -89,11 +89,11 @@ params <- list(
   #These are the exact locations of the product
   #if no alternative reuse the complete name
   products =list( nemo_a= data.frame( x =             c( 16.3,  17.2,   13.1,   24.3,   12.3,  24.3,   8.3,   12.9     ),  
-                                      z =             c(-18.3, -34.4,  -32.9,  -17.2,  -37.2, -15.6,  -21.9, -37.9     ),
-                                      height =        c(3.3,    3.3,    3.3,    3.3,    3.3,   3.3,    3.3,  .3        ),
-                                      width =         c(1.5,   1.5,    1.5,    1.5,    1.5,    1.5,   1.5,    3.3        ),
-                                      up.down.side =  c("up", "down", "down" , "up",   "up",   "up",   "up", "sideleft"),
-                                      announced =     c(FALSE, FALSE,  FALSE,  FALSE,  FALSE,  FALSE,  FALSE, TRUE     ),
+                                      z =             c(18.3,   34.4,   32.9,   17.2,   37.2,  15.6,   21.9,  37.9     ),
+                                      height =        c(3.3,    3.3,    3.3,    3.3,    3.3,   3.3,    3.3,   4        ),
+                                      width =         c(3,      3,      3,      3,      3,     3,      3,     3        ),
+                                      up.down.side =  c("up",   "down", "down", "up",   "up",  "up",   "up",  "sideright"),
+                                      announced =     c(FALSE,  FALSE,  FALSE,  FALSE,  FALSE, FALSE,  FALSE, TRUE     ),
                                       productnumber = c("P1",   "P2",  "P3",    "P4",   "P5",  "P6",  "P7",   "P8"     ),
                                       productname =   c("LU Oreo cookies", "Andrélon Wax flexible hold", "Dreft Afwasmiddel original", "Nutella Hazelnootpasta", "AH Sportsokken wit maat 43-46", "Calvé Pindakaas regular", "AH Molen zeezout", "Lay's Naturel"),
                                       alternativename=I(list(c("cookies"),
@@ -106,11 +106,11 @@ params <- list(
                                                            c("Lay's Naturel")) ), stringsAsFactors = FALSE),
                    
                   nemo_b= data.frame(x =            c( 8.3 ,  8.3 ,   12.3,   16.3,   13.2,  17.2,   24.3,  16.8     ),  
-                                    z =             c(-18.8, -16.1,  -35.0,  -35.1,  -17.9, -33.0,  -19.1, -38.2     ),
-                                    height =        c(3.3,    3.3,    3.3,    3.3,    3.3,   3.3,    3.3,  .3        ),
-                                    width =         c(1.5,   1.5,    1.5,    1.5,    1.5,    1.5,   1.5,    3.3        ),
-                                    up.down.side =  c("up", "up", "up" , "up",   "down",   "down",   "up", "sideleft"),
-                                    announced =     c(FALSE, FALSE,  FALSE,  FALSE,  FALSE,  FALSE,  FALSE, TRUE     ),
+                                    z =             c( 18.8,  16.1,   35.0,   35.1,   17.9,  33.0,   19.1,  38.2     ),
+                                    height =        c( 3.3,   3.3,    3.3,    3.3,    3.3,   3.3,    3.3,   4        ),
+                                    width =         c( 3,     3,      3,      3,      3,     3,      3,     3        ),
+                                    up.down.side =  c("up",   "up",   "up" ,  "up",   "down","down", "up",  "sideright"),
+                                    announced =     c(FALSE,  FALSE,  FALSE,  FALSE,  FALSE, FALSE,  FALSE, TRUE     ),
                                     productnumber = c("P1",   "P2",  "P3",    "P4",   "P5",  "P6",  "P7",   "P8"     ),
                                     productname =   as.character(c("Inproba Sambal oelek", "AH Mie nestjes", "AH Handzeep", "Omo Wit vloeibaar", "LU Tuc crackers cheese", "Fa Mystic moments deodorant", "Bolletje Meergranen beschuit", "Douwe Egberts Aroma rood grove maling")),
                                     alternativename=I(list(c("Sambal"),
@@ -122,9 +122,9 @@ params <- list(
                                                            c("beschuit"),
                                                            c("AH Perla", "Douwe Egberts","Arome","koffiepads")) ), stringsAsFactors = FALSE),
                   UMC3pro= data.frame(x =            c( 8.3 ,  16.3 ,   24.3,   17.2,   16.3,  12.3),  
-                                     z =             c(-21.9, -32.5,  -18.3,  -34.4,  -20.0, -37.3 ),
+                                     z =             c( 21.9,  32.5,   18.3,   34.4,   20.0,  37.3 ),
                                      height =        c(3.3,    3.3,    3.3,    3.3,    3.3,   3.3      ),
-                                     width =         c(1.5,   1.5,    1.5,    1.5,    1.5,    1.5      ),
+                                     width =         c(3,   3,    3,    3,    3,    3      ),
                                      up.down.side =  c("down", "down", "down" , "up",   "down",   "down"),
                                      announced =     c(FALSE, FALSE,  FALSE,  FALSE,  FALSE,  FALSE     ),
                                      productnumber = c("P1",   "P2",  "P3",    "P4",   "P5",  "P6" ),
