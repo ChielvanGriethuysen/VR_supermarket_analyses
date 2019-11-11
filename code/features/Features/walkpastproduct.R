@@ -25,7 +25,9 @@ WalkpastProduct<-function(input.data,
   
   # get data about visiting product boxes
   box.data<-calc.box.feature(input.data,productbox)
-  box.data<-add.times.location(box.data,input.data)
+  box.data<-add.basic.features(box.data,input.data)
+  box.data<-add.quality.features(box.data,input.data)
+  box.data<-add.view.quality.features(box.data,input.data)
   box.data<-productbox.label.add(box.data,input.data,productbox)
   
   # box.summarised<-box.data %>% group_by(name) %>%

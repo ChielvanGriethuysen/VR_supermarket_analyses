@@ -13,14 +13,14 @@ speeddiscretisation<-function(input.data, aisles.log,hits.log, products, params)
   #find real stops
   p.stops<- speed.discretisation.merge.induction(c.stops,input.data,  stop.params$stop.merge.distance)
   #add info
-  p.stops<-add.times.location(p.stops,input.data)
+  p.stops<-add.basic.features(p.stops,input.data)
   
   r.stops<-p.stops%>% filter( relative.dist<=0.5)
   slows<-p.stops%>% filter( relative.dist>0.5)
   
   #update info
-  slows<- add.times.location(slows,input.data)
-  r.stops<- add.times.location(r.stops,input.data)
+  slows<- add.basic.features(slows,input.data)
+  r.stops<- add.basic.features(r.stops,input.data)
   
   
   #filters
@@ -34,13 +34,16 @@ speeddiscretisation<-function(input.data, aisles.log,hits.log, products, params)
   
   #add info
   walks<-stop.to.walk(log,input.data)
-  walks<-add.times.location(walks,input.data)
+  walks<-add.basic.features(walks,input.data)
   walks<-walks %>% filter(time.spend>walk.params$walk.minimum.duration)
   walks$label<-rep("walk", nrow(walks))
   log<-rbind(log,walks)
   
   #combine to one dataframe
   log<- log %>% arrange(start)
+  
+  log<- add.quality.features(log, input.data)
+  log<- add.view.quality.features(log, input.data)
   #add location of stop and slow
   log<- cbind(log, calc.spot.event.in.box(log, params$features$aisles))
   

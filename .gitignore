@@ -35,8 +35,8 @@ vignettes/*.pdf
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
 .Rproj.user
-input/test/
 output/
-input/test_v
-input/map nemo A.png
 input/
+!code/features/output
+!code/features/input
+

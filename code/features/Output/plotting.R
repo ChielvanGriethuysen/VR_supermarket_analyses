@@ -2,7 +2,7 @@
 #
 # Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
-basic.path.plot<- function(input.data, JSONfile, params,save=FALSE){
+basic.path.plot<- function(input.data, id, params,save=FALSE){
   gg<-ggplot() + 
     #ylim(-53, -7) + xlim(0, 29) +
     scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
@@ -18,7 +18,7 @@ basic.path.plot<- function(input.data, JSONfile, params,save=FALSE){
           plot.margin = margin(0, 0, 0, 0, "cm")) +
     geom_label(aes(y = 5, x = 28, 
                   label = paste("Person", 
-                                substr(JSONfile, 1, 5))), 
+                                 id)), 
               size = 5) + 
     geom_hline(yintercept = 45.5)+ 
     geom_path(data = input.data, 
@@ -30,12 +30,12 @@ basic.path.plot<- function(input.data, JSONfile, params,save=FALSE){
       dir.create(paste0('output/',params$output.dir,'/png/basic'),recursive = TRUE)
     }
     ggsave(paste0('output/',params$output.dir,'/png/basic/',
-                  JSONfile, '_RAW.png'), gg, 
+                  id, '_RAW.png'), gg, 
            width = 37.5, height = 21, units = 'cm')
   }
   return(gg)
 }
-full.plot<- function(gg.basic,input.data, logs, JSONfile,params ,products, productbox,aisles, save=FALSE){
+full.plot<- function(gg.basic,input.data, logs, id,params ,products, productbox,aisles, save=FALSE){
   
   cols<-c("main"= "#00BFC4","shopping"= "#F8766D", "TRUE"="lightgreen", "FALSE"="red")
   
@@ -74,13 +74,15 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,params ,products, produ
     #add product order
     geom_point(data = products %>% slice(logs$products.hit.log$prod_id),
                mapping = aes(x = x+.7, y = z+.3),
-               colour= "white", size=4)+
-    geom_text(data= products %>% slice(logs$products.hit.log$prod_id),
+               colour= "white", size=4)
+    if(nrow(logs$products.hit.log)>0){
+    gg<- gg+geom_text(data= products %>% slice(logs$products.hit.log$prod_id),
               mapping = aes(x=x+.7,y=z+.3,
-                            label= 1:nrow(logs$products.hit.log)),
-              colour= "black")+
+                            label=  1:nrow(logs$products.hit.log)),
+              colour= "black")
+    }
     #add stops to pick product
-    geom_point(data = logs$speed.log %>% filter(n_hit>0),
+    gg<-gg+geom_point(data = logs$speed.log %>% filter(n_hit>0),
                        mapping = aes(x = x.start, y = z.start),
                        fill = 'tomato', colour = 'tomato', size= 3.5)
     # geom_text(aes(y = -43, x = 0.5,
@@ -108,13 +110,13 @@ full.plot<- function(gg.basic,input.data, logs, JSONfile,params ,products, produ
     if( ! file.exists(paste0('output/',params$output.dir,'/png/full'))){
       dir.create(paste0('output/',params$output.dir,'/png/full'))
     }
-    ggsave(paste0('output/',params$output.dir,'/png/full/', JSONfile, '.png'), 
+    ggsave(paste0('output/',params$output.dir,'/png/full/', id, '.png'), 
            gg, width = 37.5, height = 21, units = 'cm')
   }
   return(gg)
 }
 
-speed.map.combine<- function(speed, map, JSONfile,params,save=FALSE){
+speed.map.combine<- function(speed, map, id,params,save=FALSE){
   
   gg<-ggarrange(map,speed, ncol = 1,nrow = 2,heights = c(2,1))
   
@@ -122,12 +124,12 @@ speed.map.combine<- function(speed, map, JSONfile,params,save=FALSE){
     if( ! file.exists(paste0('output/',params$output.dir,'/png/speed.map'))){
       dir.create(paste0('output/',params$output.dir,'/png/speed.map'))
     }
-    ggsave(paste0('output/',params$output.dir,'/png/speed.map/', JSONfile, '.png'), 
+    ggsave(paste0('output/',params$output.dir,'/png/speed.map/', id, '.png'), 
            gg, width = 37.5, height = 21, units = 'cm')
   }
 }
 
-speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data), save= FALSE){
+speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data),id, save= FALSE){
   
   cols<-c("stop with no movement"= "tomato",
           "stop with some movement"= "darkorchid", 
@@ -177,14 +179,14 @@ speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data), save
     if( ! file.exists(paste0('output/',params$output.dir,'/png/speed'))){
       dir.create(paste0('output/',params$output.dir,'/png/speed'))
     }
-    ggsave(paste0('output/',params$output.dir,'/png/speed/', JSONfile, '.png'), 
+    ggsave(paste0('output/',params$output.dir,'/png/speed/', id, '.png'), 
            plot, width = (last(data$time)-data$time[1])/10, height = 7, units = 'cm',limitsize = FALSE)
   }
   
   plot
 }
 
-feature.plot<- function(data, log_speed, map){
+feature.plot<- function(data, log_speed, map, id){
   
   if( ! file.exists(paste0('output/',params$output.dir,'/png/speed/',map))){
     dir.create(paste0('output/',params$output.dir,'/png/speed/',map),recursive = TRUE)
@@ -201,7 +203,7 @@ feature.plot<- function(data, log_speed, map){
         ylim(-.1,0.7)
       plot<- ggarrange(plot1,plot2, ncol = 1,nrow = 2,heights = c(2,1))
       
-      ggsave(paste0('output/',params$output.dir,'/png/speed/',map,'/', JSONfile,'_',i, '.png'), 
+      ggsave(paste0('output/',params$output.dir,'/png/speed/',map,'/', id,'_',i, '.png'), 
              plot,  width = 37.5, height = 21, units = 'cm',limitsize = FALSE)
     }
   }
@@ -209,17 +211,17 @@ feature.plot<- function(data, log_speed, map){
 
 
 
-filter.feature.plot<-function(data, log_aisles){
+filter.feature.plot<-function(data, log_aisles, id){
   
   log_aisles_main<- log_aisles %>% filter(label == "main")
   log_aisles_WT<- log_aisles %>% filter(label == "walk through")
   log_aisles_target<-log_aisles %>% filter(target == "TRUE")
   log_aisles_nontarget<- log_aisles %>% filter(target != "TRUE")
   
-  feature.plot(data, log_aisles_main,"main")
-  feature.plot(data, log_aisles_WT,"walk through")
-  feature.plot(data, log_aisles_target,"Target")
-  feature.plot(data, log_aisles_nontarget,"Non target")
+  feature.plot(data, log_aisles_main,"main", id)
+  feature.plot(data, log_aisles_WT,"walk through", id)
+  feature.plot(data, log_aisles_target,"Target", id)
+  feature.plot(data, log_aisles_nontarget,"Non target", id)
   
 
   
@@ -227,20 +229,30 @@ filter.feature.plot<-function(data, log_aisles){
   
 }
 
-plot.best.r = function(data,JSONfile){
-  plotx<-ggplot()+geom_point(data, mapping = aes(time,x))+ ggtitle(paste0("X vs Time",JSONfile))
-  plotz<-ggplot()+geom_point(data, mapping = aes(time,z))+ ggtitle(paste0("Z vs Time",JSONfile))
+plot.best.r = function(data,id){
+  plotx<-ggplot()+geom_point(data, mapping = aes(time,x))+ ggtitle(paste0("X vs Time",id))
+  plotz<-ggplot()+geom_point(data, mapping = aes(time,z))+ ggtitle(paste0("Z vs Time",id))
   
   if( ! file.exists(paste0('output/',params$output.dir,'/png/best.r'))){
     dir.create(paste0('output/',params$output.dir,'/png/best.r'),recursive = TRUE)}
   ggsave(paste0('output/',params$output.dir,'/png/best.r/',
-                JSONfile, '_x.png'), plotx, 
+                id, '_x.png'), plotx, 
          width = 37.5, height = 21, units = 'cm')
   ggsave(paste0('output/',params$output.dir,'/png/best.r/',
-                JSONfile, '_z.png'), plotz, 
+                id, '_z.png'), plotz, 
          width = 37.5, height = 21, units = 'cm')
 }
 
-
+looking.plot<-function(log,input.data, input.look, id, params,gg,title){
+  view.points<-log.subset(input.look, log)
+  gg<- gg+ geom_point(data=view.points, mapping= aes(x=x, y=z), colour="orange", alpha= 0.2)
+  
+  if( ! file.exists(paste0('output/',params$output.dir,'/png/Look'))){
+    dir.create(paste0('output/',params$output.dir,'/png/Look'),recursive = TRUE)
+  }
+  ggsave(paste0('output/',params$output.dir,'/png/', 'Look', '/',
+                id, title,'_RAW.png'), gg, 
+         width = 37.5, height = 21, units = 'cm')
+}
 
 

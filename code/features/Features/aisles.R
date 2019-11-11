@@ -9,7 +9,9 @@ getAisleTimes <- function(input.data, products,
   
   
   aisles.data<-calc.box.feature(input.data,aisles)
-  aisles.data<- add.times.location(aisles.data,input.data)
+  aisles.data<- add.basic.features(aisles.data,input.data)
+  aisles.data<- add.quality.features(aisles.data,input.data)
+  aisles.data<- add.view.quality.features(aisles.data, input.data)
   aisles.data<-aisles.label.add(aisles.data,input.data,aisles)
   aisles.data$target<- aisles.data$aisles.name %in% calc.target.aisles(products, params$features$aisles)[,2]
   

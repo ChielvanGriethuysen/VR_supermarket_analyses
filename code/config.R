@@ -19,7 +19,7 @@ params <- list(
   # what output is saved (TRUE/FALSE)
   # It is adviced that full.images and save.data are both either TRUE or FALSE.
   # This ensures the features and the images shown always correspond.
-  save.images   = FALSE,     # should the maps, and plots be saved     
+  save.images   = TRUE,     # should the maps, and plots be saved     
   external.excel= FALSE,    # should the external excel be used(NPO and persenal data)
   save.log      = TRUE,     # should the raw log's be saved
   save.feature  = TRUE,     # should a feature file be made

@@ -217,11 +217,11 @@ add.npo.and.persenal.data<-function(data,params, data.file ){
   return(datamerged)
 }
 
-export.logs<- function(JSONfile,params, log.list){
+export.logs<- function(id,params, log.list){
   if( ! file.exists(paste0('output/',params$output.dir,'/logs'))){
     dir.create(paste0('output/',params$output.dir,'/logs'))
   }
-  file <- paste0("output/",params$output.dir,"/logs/",strsplit(JSONfile,"_")[[1]][1],"_log",".xlsx")
+  file <- paste0("output/",params$output.dir,"/logs/",id,"_log",".xlsx")
   #options(java.parameters = "-Xmx1024m")
   #gc() for combined file to overcome memory error
   write.xlsx2(log.list$aisles.log,      file = file, sheetName = "aisles")
@@ -235,8 +235,6 @@ export.logs<- function(JSONfile,params, log.list){
   write.xlsx2(log.list$walked.past.log, file = file, sheetName = "walked.past", append = TRUE)
   gc()
   write.xlsx2(log.list$product.all,    file = file, sheetName = "hit", append = TRUE)
-  gc()
-  write.xlsx2(log.list$look.log,        file = file, sheetName = "look", append = TRUE)
   
 }
 all.logs<- function(log, combined.logs,i,file){
@@ -250,7 +248,6 @@ all.logs<- function(log, combined.logs,i,file){
     log$products.log<- cbind(rep(status,nrow(log$products.log)),rep(file,nrow(log$products.log)),log$products.log)
     log$walked.past.log<- cbind(rep(status,nrow(log$walked.past.log)),rep(file,nrow(log$walked.past.log)),log$walked.past.log)
     log$products.hit.log<- cbind(rep(status,nrow(log$products.hit.log)),rep(file,nrow(log$products.hit.log)),log$products.hit.log)
-    log$look.log<- cbind(rep(status,nrow(log$look.log)),rep(file,nrow(log$look.log)),log$look.log)
     log$product.all<- cbind(rep(status,nrow(log$product.all)),rep(file,nrow(log$product.all)),log$product.all)
     return(log)
   }else{
@@ -260,7 +257,6 @@ all.logs<- function(log, combined.logs,i,file){
     combined.logs$products.log<- rbind(combined.logs$products.log,cbind(rep(status,nrow(log$products.log)),rep(file,nrow(log$products.log)),log$products.log))
     combined.logs$walked.past.log<- rbind(combined.logs$walked.past.log,cbind(rep(status,nrow(log$walked.past.log)),rep(file,nrow(log$walked.past.log)),log$walked.past.log))
     combined.logs$products.hit.log<- rbind(combined.logs$products.hit.log,cbind(rep(status,nrow(log$products.hit.log)),rep(file,nrow(log$products.hit.log)),log$products.hit.log))
-    combined.logs$look.log<- rbind(combined.logs$look.log,cbind(rep(status,nrow(log$look.log)),rep(file,nrow(log$look.log)),log$look.log))
     combined.logs$product.all<- rbind(combined.logs$product.all,cbind(rep(status,nrow(log$product.all)),rep(file,nrow(log$product.all)),log$product.all))
     return(combined.logs)
   }

@@ -43,7 +43,7 @@ getCrossings = function(input.data, params,products){
     }
     
     # crossings<-crossings[r,]
-    crossings<- add.times.location(crossings, move_data)
+    crossings<- add.basic.features(crossings, move_data)
     colnames(crossings)[5]<-"time.between"
     crossings<- cbind(crossings, calc.spot.event.in.box(crossings, params$features$aisles))
     
@@ -67,4 +67,23 @@ getCrossings = function(input.data, params,products){
                     cross.points.all=crossings)
   
   return(res.cross)
+}
+
+# filters away crossings that are to close to each other
+crossings.filter.close<- function(crossings, dist, start){
+  change<-FALSE
+  for(i in start:(nrow(crossings))){
+    for(j in (i-1):1)
+      if(dist(crossings[c(i,j),6:7])<dist){
+        change<-TRUE
+        crossings<- crossings[-i,]
+        if(nrow(crossings)>=i){
+          return(crossings.filter.close(crossings, dist, i))
+        }
+        else{
+          return(crossings)
+        }
+      }
+  }
+  return(crossings)
 }

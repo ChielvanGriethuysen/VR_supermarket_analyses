@@ -139,3 +139,87 @@ runFirstAnalyses <- function(JSONfile,
   
   return(res)
 }
+
+#analyse productlog, put products in a dataframe
+product.hit.log<- function(logs){
+  logs<-logs  %>% filter(apply(logs,2, str_detect, pattern= "HIT"))%>% 
+    separate(SesionLog, c("time","Product"), sep = "- HIT product #")%>% 
+    separate(Product, c("product", "rest"), sep = c("\\|\\| X:"),extra = "merge")%>% 
+    separate(rest, c("x", "rest"), sep = c("\\|\\| Y:"),extra = "merge")%>% 
+    separate(rest, c("y", "z"), sep = c("\\|\\| Z:"),extra = "merge")
+  
+  hour<- logs$time %>% str_sub(2,3)%>% as.numeric()
+  minutes<- logs$time %>% str_sub(5,6)%>% as.numeric()
+  seconds<- logs$time %>% str_sub(8,9)%>% as.numeric()
+  rest<- logs$time %>% str_sub(11,13)%>% as.numeric()
+  
+  time<- hour*60*60+minutes*60+seconds+rest/1000
+  logs$time<- time
+  
+  logs[,3:5]<- sapply (logs[,3:5], as.numeric)
+  return(logs)
+  
+}
+
+# fill gaps when gap is small enough 
+missing.view.data.fill<- function(data){
+  n<-start<- stop<- i<-0
+  while (i <= nrow(data)) {
+    i<-i+1
+    if(i<= nrow(data) &&data$x[i]==0){
+      start<- i
+      while (i<= nrow(data) &&data$x[i]==0) {
+        i<-i+1
+      }
+      stop<- i-1
+      #fill in gap when time between points is les than 0.1 sec
+      if(data$time[stop]-data$time[start]<0.1)
+      {
+        for (j in start:stop) {
+          if(start==1){
+            data$x[j]<- data$x[stop+1]
+            data$y[j]<- data$y[stop+1]
+            data$z[j]<- data$z[stop+1]
+          } else if(stop == nrow(data)){
+            data$x[j]<- data$x[start-1]
+            data$y[j]<- data$y[start-1]
+            data$z[j]<- data$z[start-1]
+            
+          }else{
+            data$x[j]<- mean(data$x[start-1],data$x[stop+1])
+            data$y[j]<- mean(data$y[start-1],data$y[stop+1])
+            data$z[j]<- mean(data$z[start-1],data$z[stop+1])
+          }
+        }
+      }
+      if(i >= nrow(data)){
+        break
+      }
+    }
+  }
+  return(data)
+}
+
+#calculate box around products, used to determine if person is doing somting close to the product
+calc.productbox<- function(products){
+  data.frame(xmin = rep(NA, nrow(products)),
+             xmax = rep(NA, nrow(products)),
+             zmin = rep(NA, nrow(products)),
+             zmax = rep(NA, nrow(products)),
+             up.down.side= products$up.down.side,
+             announced = products$announced,
+             productnumber =  products$productnumber
+  ) %>%
+    mutate(xmin = ifelse(up.down.side == "up", products$x-products$height,
+                         ifelse(up.down.side =="down", products$x,
+                                products$x-.5*products$height))) %>% 
+    mutate(xmax = ifelse(up.down.side == "up", products$x,
+                         ifelse(up.down.side == "down",products$x+products$height,
+                                products$x+.5*products$height)))%>%
+    mutate(zmin = ifelse(up.down.side == "sideleft", products$z-products$width, 
+                         ifelse(up.down.side == "sideright",  products$z,
+                                products$z-.5*products$width))) %>%
+    mutate(zmax = ifelse(up.down.side == "sideleft", products$z, 
+                         ifelse(up.down.side == "sideright",  products$z+products$width,
+                                products$z+.5*products$width)))
+}

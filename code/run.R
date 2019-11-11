@@ -10,8 +10,8 @@ packages <- c("jsonlite", "tidyverse", "png", "ggforce",
 lapply(packages, require, character.only = TRUE)
 
 source("code/config.R") # load the configuration file
-sapply(list.files("code/features", full.names = TRUE, '.R'), source) # load FE funcs
-sourceCpp('code/features/cppDoLinesIntersect.cpp') # load the C function that calculates crossings
+sapply(list.files("code/features", full.names = TRUE, '.R', recursive= TRUE), source) # load FE funcs
+sourceCpp('code/features/Support/cppDoLinesIntersect.cpp') # load the C function that calculates crossings
 
 # Load image
 image <- readPNG(paste0('input/', params$img.name))
@@ -32,6 +32,7 @@ data <- createDataFrame(data.files)
 for(i in 1 : length(data.files)){
   print(paste('Calculating logs for file', i, "of",length(data.files) , "started at",Sys.time()))
   JSONfile <- data.files[i]
+  id<- str_split(JSONfile,"_")[[1]][1]
   
   #load data, make datasets to use for analysis
   res <- runFirstAnalyses(JSONfile = JSONfile, 
@@ -63,9 +64,9 @@ for(i in 1 : length(data.files)){
                             products= res$products)
   
   #adds features to aisles data, move to aisles function
-  res.look<- getLookings( aisles.log= res.speed$aisles.log,
-                          input.look= res$input.look.left,
-                          aisles = params$features$aisles)
+  # res.look<- getLookings( aisles.log= res.speed$aisles.log,
+  #                         input.look= res$input.look.left,
+  #                         aisles = params$features$aisles)
 
   log.list<- list(aisles.log= res.speed$aisles.log, 
                   speed.log= res.speed$speed.log, 
@@ -73,7 +74,6 @@ for(i in 1 : length(data.files)){
                   products.log= res.products$log, 
                   walked.past.log= res.products$log.walked.past, 
                   products.hit.log= res$product.hits,
-                  look.log= res.look$log,
                   product.all= res$product.all)
   
   #make and save features 
@@ -94,23 +94,26 @@ for(i in 1 : length(data.files)){
   if(params$save.log){
 
   #save the log to excel
-  export.logs(JSONfile= JSONfile,params=params, log.list= log.list)
+  export.logs(id= id,params=params, log.list= log.list)
   #combine all partisipants log files to one df
-  combined.logs<-all.logs(log.list, combined.logs, i, str_split(JSONfile,"_")[[1]][1])
+  combined.logs<-all.logs(log.list, combined.logs, i, id)
   }
   #print pathplots
   if(params$save.images){
-    basic<- basic.path.plot(res$input.data, JSONfile,params,save = TRUE)
+    basic<- basic.path.plot(res$input.data, id,params,save = TRUE)
     
-    full<-full.plot(basic,res$input.data,log.list,JSONfile,params,res$products,res$productbox,params$features$aisles, save = TRUE)
+    full<-full.plot(basic,res$input.data,log.list,id,params,res$products,res$productbox,params$features$aisles, save = TRUE)
     # plot places where somone looks
-    looking.plot.stop(res.speed$speed.log, res$input.data, res$input.look, JSONfile,params, full)
-    looking.plot.aisles(res.aisles$log, res$input.data, res$input.look, JSONfile,params, full)
+    looking.plot(res.speed$speed.log %>% filter(label== "stop with no movement"), 
+                 res$input.data, res$input.look.left, id,params, full,"stop")
     
-    speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log, save = TRUE)
-    speed.map.combine(speed,full,JSONfile,params,save=TRUE)
+    looking.plot(res.aisles$log %>% filter(label == "walk through"| label == "same side in out"), 
+                 res$input.data, res$input.look.left, id,params, full, "aisles")
+    
+    speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log,id=id, save = TRUE)
+    speed.map.combine(speed,full,id,params,save=TRUE)
   }
-  #plot.best.r(res$input.data, str_split(JSONfile,"_")[[1]][1])
+  #plot.best.r(res$input.data, id)
 }
 #export all log files in one file
 if(params$save.log){
