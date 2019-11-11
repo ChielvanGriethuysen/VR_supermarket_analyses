@@ -10,18 +10,6 @@ WalkpastProduct<-function(input.data,
                           products,
                           hit.log){
   
-  if(data$total.time[i]>180){
-    productbox<-productbox
-  } else{
-    productbox<-filter(productbox, announced != TRUE)
-  }
-  
-  if(data$total.time[i]>180){
-    productslocation<-products
-  } else{
-    productslocation<-filter(products, announced != TRUE)
-  }
-  
   
   # get data about visiting product boxes
   box.data<-calc.box.feature(input.data,productbox)

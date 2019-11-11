@@ -41,7 +41,7 @@ for(i in 1 : length(data.files)){
                           params= params,
                           i = i)
 
-  # calculate start and stop points and add features
+  #calculate start and stop points and add features
   #for entering a aislesbox
   res.aisles <- getAisleTimes(input.data= res$input.data,
                               products= res$products,

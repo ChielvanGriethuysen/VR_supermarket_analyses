@@ -74,31 +74,34 @@ box.check<-function(position, box.list){
   position[1] > box.list$xmin & position[1] < box.list$xmax &
     position[2] > box.list$zmin & position[2] < box.list$zmax
 }
-# calculates for stops in which aisles they where made
-calc.spot.event.in.box<- function(log, box){
-  
-  a<-apply(data.frame(log$x.start,log$z.start), 1, box.check, box.list=box)
+#
+box.check.list<-function(points, box.list){
+  # a is a matrix with [n.aisles, n.time points] with T or F.
+  # T indicating that timepoint was spent in that aisle
+  a<-apply(data.frame(points$x,points$z), 1, box.check, box.list=box.list)
+  # t is a matrix with 2 columns. [, 1] = aisle number and [, 2] = time point
   t <- which(a, arr.ind = TRUE)
   t<- data.frame(t)
+  return(t)
+}
+
+
+# calculates for stops in which aisles they where made
+calc.spot.event.in.box<- function(spot.log, box){
   
-  res.type<- rep("none", nrow(log))
-  res.name<- rep("none", nrow(log))
+  t<-box.check.list(data.frame(x=spot.log$x,z=spot.log$z),box)
   
-  for (i in 1:nrow(t)) {
-    res.type[t[i,2]]<- as.character(box$type[ t[i,1]])
-    res.name[t[i,2]]<- as.character(box$aisle.names[t[i,1]])
-  }
-  data.frame(aisles.type=res.type, aisles.name= res.name)
+  res.type<- rep("none", nrow(spot.log))
+  res.name<- rep("none", nrow(spot.log))
+  
+  res.type[t$col]<- as.character(box$type[t$row])
+  res.name[t$col]<- as.character(box$names[t$row])
+  
+  data.frame(type=res.type, names= res.name)
 }
 #calculate the moments somone enters end exitst a box( aisles or product box), boxes may overlap
 calc.box.feature<-function(input.data, box){
-  
-  # a is a matrix with [n.aisles, n.time points] with T or F.
-  # T indicating that timepoint was spent in that aisle
-  a <- apply(input.data[, c(2, 4)], 1, box.check, box.list = box)
-  # t is a matrix with 2 columns. [, 1] = aisle number and [, 2] = time point
-  t <- which(a, arr.ind = TRUE)
-  t<-data.frame(t)
+  t<- box.check.list(data.frame(x=input.data$x,z=input.data$z), box)
   
   # use max en min point as start en stop and reorder the data
   order.of.visiting <-t %>% group_by(row) %>% summarise(start= min(col), stop = max(col)) %>% 

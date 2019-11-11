@@ -75,7 +75,7 @@ params <- list(
                         xmax = c(rep(c(8.5, 12.4, 16.4, 20.3, 24.5), 2), 29.3, c(24.5 , 29.3, 29.3)),
                         zmin = c(rep(30.3, 5), rep(13.9, 6),  c(37.6, 25, 10)), 
                         zmax = c(rep(37.5, 5), rep(24.9, 6), c(41, 30.2, 13.8)),
-                        aisle.names = c(paste0(rep(1:5, 2), rep(LETTERS[1:2], each = 5)), "6B", "M1", "M2", "M3"), # Names of aisles
+                        names = c(paste0(rep(1:5, 2), rep(LETTERS[1:2], each = 5)), "6B", "M1", "M2", "M3"), # Names of aisles
                         x = 1, y = 1, colour = 1, # Required for gg plot to work (don't ask why)
                         type= c(rep("shopping", 11), rep("main", 3)))
     

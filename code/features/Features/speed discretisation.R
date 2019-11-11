@@ -45,10 +45,10 @@ speeddiscretisation<-function(input.data, aisles.log,hits.log, products, params)
   log<- add.quality.features(log, input.data)
   log<- add.view.quality.features(log, input.data)
   #add location of stop and slow
-  log<- cbind(log, calc.spot.event.in.box(log, params$features$aisles))
+  log<- cbind(log, calc.spot.event.in.box(data.frame(x=log$x.start, z=log$z.start), params$features$aisles))
   
   #add if it is in a target aisles
-  log$target<- log$aisles.name %in% calc.target.aisles(products, params$features$aisles)[,2]
+  log$target<- log$names %in% calc.spot.event.in.box(products, params$features$aisles)[,2]
   
   # add stops to ailes log
   aisles.log<- add.stops.to.aisles.log(r.stops, aisles.log)

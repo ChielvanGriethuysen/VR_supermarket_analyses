@@ -84,9 +84,9 @@ aisles.label.add<-function(order.of.visiting, input.data, aisles){
   }
   #add labels and aisles names
   order.of.visiting$label<-label.list
-  order.of.visiting$aisles.name<-aisles$aisle.names[order.of.visiting$box.id]
+  order.of.visiting$aisles.name<-aisles$names[order.of.visiting$box.id]
   
-  order.of.visiting$aisles.name<-factor(order.of.visiting$aisles.name, levels = aisles$aisle.names)
+  order.of.visiting$aisles.name<-factor(order.of.visiting$aisles.name, levels = aisles$names)
   return(order.of.visiting)
 }
 
@@ -138,21 +138,6 @@ hit.stop<- function(hits, stops){
   return(stops)
 }
 
-calc.target.aisles<- function(product, aisles){
-  
-  a<-apply(data.frame(product$x,product$z), 1, box.check, box.list=aisles)
-  t <- which(a, arr.ind = TRUE)
-  t<- data.frame(t)
-  
-  res.type<- rep("none", nrow(product))
-  res.name<- rep("none", nrow(product))
-  
-  for (i in 1:nrow(t)) {
-    res.type[t[i,2]]<- as.character(aisles$type[ t[i,1]])
-    res.name[t[i,2]]<- as.character(aisles$aisle.names[t[i,1]])
-  }
-  data.frame(aisles.type=res.type, aisles.name= res.name)
-}
 stop.to.walk<- function(log, input.data){
   res<- data.frame(start= numeric(), stop=numeric())
   start<-1
