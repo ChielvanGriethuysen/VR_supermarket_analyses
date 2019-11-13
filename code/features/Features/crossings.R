@@ -8,10 +8,9 @@ getCrossings = function(input.data, params,products){
   #skip points, if to close to each other, to speed op crossing finding
   move_data<-skippoints(input.data,distance = 0.05)
   move_data<- speed.dist.add(move_data)
-  FootPosition<- move_data[,2:4]
-  time<- move_data[,1]
+  move_data$angles<- calculate.direction(move_data, find.first.point.on.dist(move_data,1))
   
-  crossings <- anyIntersects(FootPosition$x, FootPosition$z, time, params$features$cross$cross.lag1)
+  crossings <- anyIntersects(move_data$x, move_data$z, move_data$time, params$features$cross$cross.lag1)
   #A crossings consists of 4 time points (a, a+1, b, b+1), both a and b ares saved.
   #Only a is used to calculate n crossings and plot them.
   #b can be used in the future to calculate the angle.
@@ -31,7 +30,7 @@ getCrossings = function(input.data, params,products){
     while (k<nrow(crossings)) {
       l<-k+1
       while (l<=nrow(crossings) &&
-                    time[crossings[l,1]]-time[crossings[k,1]]<params$features$cross$cross.lag2) {
+                    move_data$time[crossings[l,1]]-move_data$time[crossings[k,1]]<params$features$cross$cross.lag2) {
         l<-l+1
       }
       r<-c(r,k)
@@ -45,7 +44,9 @@ getCrossings = function(input.data, params,products){
     # crossings<-crossings[r,]
     crossings<- add.basic.features(crossings, move_data)
     colnames(crossings)[5]<-"time.between"
-    crossings<- cbind(crossings, calc.spot.event.in.box(crossings, params$features$aisles))
+    crossings<- cbind(crossings, calc.spot.event.in.box(data.frame(x= crossings$x.start, z= crossings$z.start), params$features$aisles) %>%
+                        rename(aisles.type= type,
+                               aisles.name= names))
     
     crossings<- crossings%>% filter(absolute.dist>params$features$cross$cross.dist1)
     if(nrow(crossings)>1){
@@ -59,8 +60,11 @@ getCrossings = function(input.data, params,products){
     n.crossings<- 0
     n.crossings.shopping<- 0
   }
-  
-  crossings$target<- crossings$aisles.name %in% calc.target.aisles(products, params$features$aisles)[,2]
+  #add if crossing is in a target aisles
+  crossings$target<- crossings$aisles.name %in% calc.spot.event.in.box(products, params$features$aisles)[,2]
+  #calculate angle between two segments, take smalest one so max is 90
+  angles<-(move_data$angles[crossings$start]-move_data$angles[crossings$stop])%% 180
+  crossings$angle<- mapply(function(a,b) min(c(a,b)), a=angles, b= 180-angles )
 
   res.cross <- list(log= crossings,
                     n.crossings = n.crossings,

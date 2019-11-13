@@ -4,7 +4,7 @@
 calc.short.dist<- function(aisles, product.hits, input.data){
   product.hits$short.dist<- numeric(nrow(product.hits))
   product.hits$walk.dist<- numeric(nrow(product.hits))
-  main.aisles<- aisles %>% filter(type == "main") %>% mutate(zmin= zmin, zmax= zmax) 
+  main.aisles<- aisles %>% filter(type == "main")
   mid.points<- (main.aisles$zmax+main.aisles$zmin)/2
   if(nrow(product.hits)>1)
     for(i in 1:(nrow(product.hits)-1)){

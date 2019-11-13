@@ -52,7 +52,7 @@ full.plot<- function(gg.basic,input.data, logs, id,params ,products, productbox,
                             fill=factor(type)), 
               alpha = .3)+
     geom_label(data = aisles,
-               mapping = aes(x = xmin, y = zmin, label = aisles$aisle.names),
+               mapping = aes(x = xmin, y = zmin, label = aisles$names),
                label.size = .32)+  
     #add productbox
     geom_rect(data = productbox,

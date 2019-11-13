@@ -104,8 +104,10 @@ calc.box.feature<-function(input.data, box){
   t<- box.check.list(data.frame(x=input.data$x,z=input.data$z), box)
   
   # use max en min point as start en stop and reorder the data
-  order.of.visiting <-t %>% group_by(row) %>% summarise(start= min(col), stop = max(col)) %>% 
-    rename(box.id= row) %>% arrange(start)
+  # but first divide the data in the individual segments by finding a gap, done by looking at the change in two series
+  order.of.visiting <-t %>% group_by(row) %>% mutate(id = 1:length(col), gap.id= id-col) %>% group_by(row, gap.id) %>% 
+    summarise(start= min(col), stop = max(col)) %>% 
+    rename(box.id= row) %>% arrange(start) %>% select(-gap.id) %>% data.frame()
   
   return(order.of.visiting)
 }

@@ -16,8 +16,6 @@ getAisleTimes <- function(input.data, products,
   aisles.data$target<- aisles.data$aisles.name %in% calc.spot.event.in.box(products, params$features$aisles)[,2]
   
   if(nrow(aisles.data)>0){
-
-    
     #Count number of times in each aisle can be used for output
     # aisles.summarised<-aisles.data %>% group_by(aisles.name) %>%
     #   summarise(time=sum(time.spend),n=n()) %>%

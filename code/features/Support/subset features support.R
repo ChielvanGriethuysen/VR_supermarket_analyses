@@ -7,9 +7,9 @@ missing.data.length<- function(data){
   length<- time<-res.start<- c()
   while (i<=nrow(data)) {
     i<-i+1
-    if(i<= nrow(data) &&data$x[i]==0){
+    if(i<= nrow(data) &&is.na(data$x[i])){
       start<- i
-      while (i<= nrow(data) &&data$x[i]==0) {
+      while (i<= nrow(data) &&is.na(data$x[i])) {
         i<-i+1
       }
       stop<- i
@@ -24,7 +24,7 @@ missing.data.length<- function(data){
   return(data.frame(mean= if(is.null(length))0 else mean(length), 
                     max=  if(is.null(length))0 else max(length),
                     n= if(is.null(length))0 else length(length),
-                    missing= sum(data$x==0)/nrow(data)))
+                    missing= sum(is.na(data$x))/nrow(data)))
 }
 
 #for each point finds what the first point is afther a sertain distance
@@ -53,7 +53,7 @@ calculate.direction<- function(data.o,data.t){
     A<- c(data.t$x[i], data.t$z[i])
     B<- c(data.o$x[i], data.o$z[i])
     C<- c(data.o$x[i], 0)
-    if(A== c(0,0))
+    if(any(is.na(A)))
       data.o$angles[i]<- NA
     else
       if(A[1]>B[1]){

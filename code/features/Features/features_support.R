@@ -14,14 +14,22 @@ skippoints<-function(data, distance){
   }
   data[filltered.points,1:4]
 }
-speed.dist.add<-function(input.data){
-  x.change <- diff(input.data$x, 1)
-  y.change <- diff(input.data$z, 1)
+speed.dist.add<-function(points){
+  x.change <- diff(points$x, 1)
+  y.change <- diff(points$z, 1)
   distance.between.points<-sqrt(x.change^2 + y.change^2)
-  speed<-c(0,distance.between.points/diff(input.data$t,1))
-  input.data<- data.frame(input.data, speed,dist=c(mean(distance.between.points),distance.between.points))
-  return(input.data)
+  points$speed<-c(0,distance.between.points/diff(points$time,1))
+  points$dist<- c(mean(distance.between.points),distance.between.points)
+  return(points)
 }
+
+dist.2sets.2d<- function(points1, points2){
+  x.change <- abs(points1$x-points2$x )
+  y.change <- abs(points1$z-points2$z)
+  distance.between.points<-sqrt(x.change^2 + y.change^2)
+  return(distance.between.points)
+}
+
 
 
 

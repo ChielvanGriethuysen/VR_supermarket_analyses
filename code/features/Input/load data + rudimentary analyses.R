@@ -52,12 +52,12 @@ runFirstAnalyses <- function(JSONfile,
   
   
   #make uncertain data nul
-  input.look.left<- input.look.left %>% mutate(x=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),x,0),
-                                     y=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),y,0),
-                                     z=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),z,0))
-  input.look.right<- input.look.right %>% mutate(x=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),x,0),
-                                               y=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),y,0),
-                                               z=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),z,0))
+  input.look.left<- input.look.left %>% mutate(x=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),x,NA),
+                                     y=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),y,NA),
+                                     z=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),z,NA))
+  input.look.right<- input.look.right %>% mutate(x=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),x,NA),
+                                               y=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),y,NA),
+                                               z=ifelse(confidence>0.75 &(lost=="None" | lost== "Left"),z,NA))
   
   # Remove duplicate data (speeds up all analyses)
   dup <- which(diff(input.data$time) == 0)
@@ -88,13 +88,21 @@ runFirstAnalyses <- function(JSONfile,
   input.look.left<- missing.view.data.fill(input.look.left)
   input.look.right<- missing.view.data.fill(input.look.right)
   
-  #add speed and distance to dataframe and calculate total distance
-  x.change <- diff(input.data$x, 1)
-  y.change <- diff(input.data$z, 1)
-  distance.between.points<-sqrt(x.change^2 + y.change^2)
-  speed<-c(0,distance.between.points/diff(input.data$t,1))
-  input.data<- data.frame(input.data, speed,c(mean(distance.between.points),distance.between.points))
-  names(input.data)[6]<- "dist"
+  #add looking directions
+  input.look.left$angle<- calculate.direction(input.data, input.look.left)
+  input.look.right$angle<- calculate.direction(input.data, input.look.right)
+  
+  #add looking distance
+  input.look.left$dist<- dist.2sets.2d(input.data,input.look.left)
+  input.look.right$dist<- dist.2sets.2d(input.data,input.look.right)
+  
+  #remove confidence and lost variable
+  input.look.left<- input.look.left %>% select(-c(lost, confidence))
+  input.look.right<- input.look.right %>% select(-c(lost, confidence))
+  
+  #add speed, distance and direction to position data
+  input.data<- speed.dist.add(input.data)
+  input.data$walk.direction<-calculate.direction(input.data, find.first.point.on.dist(input.data,1))
   
   # create product box based on suppermarket
   if(str_detect(dat$dataHeader$m_SupermarketName,"Nemo B")){
@@ -108,6 +116,7 @@ runFirstAnalyses <- function(JSONfile,
     products<-params$products$UMC3pro
   }
   
+  #remove product if not announced
   if(last(input.data$time)- input.data$time[1]<180){
     productbox<-filter(productbox, announced != TRUE)
     products<- filter(products, announced != TRUE)
@@ -118,16 +127,15 @@ runFirstAnalyses <- function(JSONfile,
   start.stop<- which(apply(product.log, 1, function(x) any(grepl("Sessie|Ending", x))))
   product.all<- product.hit.log( data.frame(SesionLog=product.log[(start.stop[1]+1):(start.stop[2]-1),]))
   product.all<- cbind(product.all,
-                       calc.spot.event.in.box(data.frame(x.start=product.all$x,z.start= product.all$z),params$features$aisles))
+                       calc.spot.event.in.box(data.frame(x.start=product.all$x,z.start= product.all$z),params$features$aisles) %>%
+                        rename(aisles.type= type,
+                               aisles.name= names))
   product.all<-add.product.hit.position(product.all,input.data)
   product.all<- merge(product.all,products[,c(7,8,10)],by.x  = "product",by.y= "productname",all.x = TRUE)
   product.all<- product.all %>% arrange(time)
   product.all<- product.all %>% distinct(product, .keep_all = TRUE)
   
   product.hits<- filter.product.hits(products,product.all)$hit.target
-  # product.hits<- check.product.hit(product.all, products)
-  # product.hits<- add.product.hit.position(product.hits,input.data)
-  # product.hits<- calc.short.dist(params$features$aisles, product.hits, input.data)
   
   res <- list(input.data= input.data,
               input.look.left= input.look.left,
@@ -166,9 +174,9 @@ missing.view.data.fill<- function(data){
   n<-start<- stop<- i<-0
   while (i <= nrow(data)) {
     i<-i+1
-    if(i<= nrow(data) &&data$x[i]==0){
+    if(i<= nrow(data) &&is.na(data$x[i])){
       start<- i
-      while (i<= nrow(data) &&data$x[i]==0) {
+      while (i<= nrow(data) &&is.na(data$x[i])) {
         i<-i+1
       }
       stop<- i-1
@@ -186,9 +194,9 @@ missing.view.data.fill<- function(data){
             data$z[j]<- data$z[start-1]
             
           }else{
-            data$x[j]<- mean(data$x[start-1],data$x[stop+1])
-            data$y[j]<- mean(data$y[start-1],data$y[stop+1])
-            data$z[j]<- mean(data$z[start-1],data$z[stop+1])
+            data$x[j]<- mean(c(data$x[start-1],data$x[stop+1]))
+            data$y[j]<- mean(c(data$y[start-1],data$y[stop+1]))
+            data$z[j]<- mean(c(data$z[start-1],data$z[stop+1]))
           }
         }
       }

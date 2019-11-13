@@ -242,22 +242,22 @@ all.logs<- function(log, combined.logs,i,file){
   
   if(i==1){
     
-    log$aisles.log<- cbind(rep(status,nrow(log$aisles.log)),rep(file,nrow(log$aisles.log)),log$aisles.log)
-    log$speed.log<- cbind(rep(status,nrow(log$speed.log)),rep(file,nrow(log$speed.log)),log$speed.log)
-    log$crossings.log<- cbind(rep(status,nrow(log$crossings.log)),rep(file,nrow(log$crossings.log)),log$crossings.log)
-    log$products.log<- cbind(rep(status,nrow(log$products.log)),rep(file,nrow(log$products.log)),log$products.log)
-    log$walked.past.log<- cbind(rep(status,nrow(log$walked.past.log)),rep(file,nrow(log$walked.past.log)),log$walked.past.log)
-    log$products.hit.log<- cbind(rep(status,nrow(log$products.hit.log)),rep(file,nrow(log$products.hit.log)),log$products.hit.log)
-    log$product.all<- cbind(rep(status,nrow(log$product.all)),rep(file,nrow(log$product.all)),log$product.all)
+    log$aisles.log<- cbind(status=rep(status,nrow(log$aisles.log)),id=rep(file,nrow(log$aisles.log)),log$aisles.log)
+    log$speed.log<- cbind(status=rep(status,nrow(log$speed.log)),id=rep(file,nrow(log$speed.log)),log$speed.log)
+    log$crossings.log<- cbind(status=rep(status,nrow(log$crossings.log)),id=rep(file,nrow(log$crossings.log)),log$crossings.log)
+    log$products.log<- cbind(status=rep(status,nrow(log$products.log)),id=rep(file,nrow(log$products.log)),log$products.log)
+    log$walked.past.log<- cbind(status=rep(status,nrow(log$walked.past.log)),id=rep(file,nrow(log$walked.past.log)),log$walked.past.log)
+    log$products.hit.log<- cbind(status=rep(status,nrow(log$products.hit.log)),id=rep(file,nrow(log$products.hit.log)),log$products.hit.log)
+    log$product.all<- cbind(status=rep(status,nrow(log$product.all)),id=rep(file,nrow(log$product.all)),log$product.all)
     return(log)
   }else{
-    combined.logs$aisles.log<- rbind(combined.logs$aisles.log,cbind(rep(status,nrow(log$aisles.log)),rep(file,nrow(log$aisles.log)),log$aisles.log))
-    combined.logs$speed.log<- rbind(combined.logs$speed.log,cbind(rep(status,nrow(log$speed.log)),rep(file,nrow(log$speed.log)),log$speed.log))
-    combined.logs$crossings.log<- rbind(combined.logs$crossings.log,cbind(rep(status,nrow(log$crossings.log)),rep(file,nrow(log$crossings.log)),log$crossings.log))
-    combined.logs$products.log<- rbind(combined.logs$products.log,cbind(rep(status,nrow(log$products.log)),rep(file,nrow(log$products.log)),log$products.log))
-    combined.logs$walked.past.log<- rbind(combined.logs$walked.past.log,cbind(rep(status,nrow(log$walked.past.log)),rep(file,nrow(log$walked.past.log)),log$walked.past.log))
-    combined.logs$products.hit.log<- rbind(combined.logs$products.hit.log,cbind(rep(status,nrow(log$products.hit.log)),rep(file,nrow(log$products.hit.log)),log$products.hit.log))
-    combined.logs$product.all<- rbind(combined.logs$product.all,cbind(rep(status,nrow(log$product.all)),rep(file,nrow(log$product.all)),log$product.all))
+    combined.logs$aisles.log<- rbind(combined.logs$aisles.log,             cbind(status=rep(status,nrow(log$aisles.log)),id=rep(file,nrow(log$aisles.log)),log$aisles.log))
+    combined.logs$speed.log<- rbind(combined.logs$speed.log,               cbind(status=rep(status,nrow(log$speed.log)),id=rep(file,nrow(log$speed.log)),log$speed.log))
+    combined.logs$crossings.log<- rbind(combined.logs$crossings.log,       cbind(status=rep(status,nrow(log$crossings.log)),id=rep(file,nrow(log$crossings.log)),log$crossings.log))
+    combined.logs$products.log<- rbind(combined.logs$products.log,         cbind(status=rep(status,nrow(log$products.log)),id=rep(file,nrow(log$products.log)),log$products.log))
+    combined.logs$walked.past.log<- rbind(combined.logs$walked.past.log,   cbind(status=rep(status,nrow(log$walked.past.log)),id=rep(file,nrow(log$walked.past.log)),log$walked.past.log))
+    combined.logs$products.hit.log<- rbind(combined.logs$products.hit.log, cbind(status=rep(status,nrow(log$products.hit.log)),id=rep(file,nrow(log$products.hit.log)),log$products.hit.log))
+    combined.logs$product.all<- rbind(combined.logs$product.all,           cbind(status=rep(status,nrow(log$product.all)),id=rep(file,nrow(log$product.all)),log$product.all))
     return(combined.logs)
   }
 }

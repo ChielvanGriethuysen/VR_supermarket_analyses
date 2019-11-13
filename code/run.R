@@ -9,7 +9,7 @@ packages <- c("jsonlite", "tidyverse", "png", "ggforce",
 
 lapply(packages, require, character.only = TRUE)
 
-source("code/config.R") # load the configuration file
+source("code/config.R",encoding = "UTF-8") # load the configuration file
 sapply(list.files("code/features", full.names = TRUE, '.R', recursive= TRUE), source) # load FE funcs
 sourceCpp('code/features/Support/cppDoLinesIntersect.cpp') # load the C function that calculates crossings
 

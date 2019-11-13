@@ -5,6 +5,8 @@ add.basic.features<- function(points, input.data, input.look.left= res$input.loo
   points$start.time<-input.data$time[points$start]
   points$stop.time<- input.data$time[points$stop]
   points$time.spend<-points$stop.time- points$start.time
+  points$moment.in.time.start<- (points$start.time-first(input.data$time))/(last(input.data$time)-first(input.data$time))
+  points$moment.in.time.stop<- (points$stop.time-first(input.data$time))/(last(input.data$time)-first(input.data$time))
   points$x.start<-input.data$x[points$start]
   points$z.start<-input.data$z[points$start]
   points$x.stop<-input.data$x[points$stop]
@@ -43,7 +45,7 @@ add.view.quality.features<- function(points, input.data, input.look.left= res$in
   points$missing.view.frac<- numeric(nrow(points))
   points$missing.view.n<- numeric(nrow(points))
   
-  input.look<- if(sum(input.look.left$x==0)< sum(input.look.right$x==0)) input.look.left else input.look.right
+  input.look<- if(sum(is.na(input.look.left$x))< sum(is.na(input.look.right$x))) input.look.left else input.look.right
   if(nrow(points)>0){
     for(i in 1:nrow(points)){
       missing.stats<-missing.data.length(input.look[points$start[i]:points$stop[i],])
