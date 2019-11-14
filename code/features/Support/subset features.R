@@ -2,8 +2,10 @@
 
 
 add.basic.features<- function(points, input.data, input.look.left= res$input.look.left, input.look.right= res$input.look.right){
-  points$start.time<-input.data$time[points$start]
-  points$stop.time<- input.data$time[points$stop]
+  points$start.time.data<-input.data$time[points$start]
+  points$stop.time.data<- input.data$time[points$stop]
+  points$start.time<- points$start.time.data-first(input.data$time)
+  points$stop.time<- points$stop.time.data-first(input.data$time)
   points$time.spend<-points$stop.time- points$start.time
   points$moment.in.time.start<- (points$start.time-first(input.data$time))/(last(input.data$time)-first(input.data$time))
   points$moment.in.time.stop<- (points$stop.time-first(input.data$time))/(last(input.data$time)-first(input.data$time))

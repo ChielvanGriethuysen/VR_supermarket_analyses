@@ -1,6 +1,22 @@
 # plotting functions, for making nice plots
 #
 # Last edited 2019-07-03 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
+empty.map.plot<- function(){
+  ggplot() + 
+    #ylim(-53, -7) + xlim(0, 29) +
+    scale_x_continuous(limits = c(0, 30), expand=c(0,0)) +
+    scale_y_continuous(limits = c(2.5,50), expand=c(0,0)) +
+    annotation_custom(rasterGrob(image, 
+                                 width = unit(1, "npc"), 
+                                 height = unit(1, "npc")), 
+                      -Inf, Inf, -Inf, Inf) +
+    #    coord_fixed() + 
+    coord_flip() +
+    ylab("z")+
+    theme(legend.position = "none",
+          plot.margin = margin(0, 0, 0, 0, "cm"))+
+    geom_hline(yintercept = 45.5)
+}
 
 basic.path.plot<- function(input.data, id, params,save=FALSE){
   gg<-ggplot() + 

@@ -109,8 +109,28 @@ calc.box.feature<-function(input.data, box){
     summarise(start= min(col), stop = max(col)) %>% 
     rename(box.id= row) %>% arrange(start) %>% select(-gap.id) %>% data.frame()
   
+  #merge when gap between exiting and entering the same box is small, making the box more robuste
+  order.of.visiting<- merge.box.feature(order.of.visiting %>% arrange(box.id, start), input.data) %>% arrange(start)
+  
+  
   return(order.of.visiting)
 }
-
+#merge when gap between exiting and entering the same box is small, making the box more robuste
+merge.box.feature<- function(boxen, input.data){
+  
+  for(i in 1:(nrow(boxen)-1)){
+    if(boxen$box.id[i]==boxen$box.id[i+1]){
+      gap<- sum(input.data$dist[boxen$start[i+1]:boxen$stop[i]])
+      if(gap<5)
+      {
+        boxen$stop[i]<- boxen$stop[i+1]
+        boxen<-boxen[-(i+1),]
+        boxen<-merge.box.feature(boxen,input.data)
+        break
+      }
+    }
+  }
+  return(boxen)
+}
 
 

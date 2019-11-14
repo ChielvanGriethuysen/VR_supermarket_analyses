@@ -26,7 +26,7 @@ data.files <- list.files(
 
 # Create data frame to save results
 data <- createDataFrame(data.files)
-
+input.data.list.all<-list()
 
 # loop over all the participants 
 for(i in 1 : length(data.files)){
@@ -40,6 +40,8 @@ for(i in 1 : length(data.files)){
                           image = image, 
                           params= params,
                           i = i)
+  #put input data in one list to make it accasible later for dynemic testing
+  input.data.list.all[id]<- list(res)
 
   #calculate start and stop points and add features
   #for entering a aislesbox
