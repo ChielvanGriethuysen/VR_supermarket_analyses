@@ -133,4 +133,22 @@ merge.box.feature<- function(boxen, input.data){
   return(boxen)
 }
 
+###
+### time based subsetting
+###
+
+time.before.subset<- function(stop, time.before, input.data){
+  intervals<-data.frame(start= numeric(length(start)), stop)
+  for(i in 1:length(stop)){
+    j<- stop[i]
+    time<-0
+    while (time.before>time) {
+      time<-input.data$time[stop[i]] -input.data$time[j]
+      j<-j-1
+    }
+    
+    intervals$start[i]<- j
+  }
+  return(intervals)
+}
 

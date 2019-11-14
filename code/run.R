@@ -27,6 +27,7 @@ data.files <- list.files(
 # Create data frame to save results
 data <- createDataFrame(data.files)
 input.data.list.all<-list()
+id.list<-c()
 
 # loop over all the participants 
 for(i in 1 : length(data.files)){
@@ -42,17 +43,24 @@ for(i in 1 : length(data.files)){
                           i = i)
   #put input data in one list to make it accasible later for dynemic testing
   input.data.list.all[id]<- list(res)
+  id.list[i]<- id
 
   #calculate start and stop points and add features
   #for entering a aislesbox
   res.aisles <- getAisleTimes(input.data= res$input.data,
                               products= res$products,
                               aisles = params$features$aisles)
-  #for entering a productbox  
-  res.products <- WalkpastProduct(input.data = res$input.data,
+  #for entering a productbox but the product is not picked  
+  res.walkpast<- WalkpastProduct(input.data = res$input.data,
                                   productbox =  res$productbox,
                                   products = res$products,
                                   hit.log = res$product.hits)
+  
+  #if product is picked look at what is done during the time before
+  res.products<- picked.products(input.data = res$input.data,
+                                 products= res$product.hits,
+                                 params= params)
+  
   
   #for a change in speed
   res.speed<- speeddiscretisation(aisles.log=res.aisles$log,
@@ -74,7 +82,7 @@ for(i in 1 : length(data.files)){
                   speed.log= res.speed$speed.log, 
                   crossings.log= res.cross$log, 
                   products.log= res.products$log, 
-                  walked.past.log= res.products$log.walked.past, 
+                  walked.past.log= res.walkpast$log.walked.past, 
                   products.hit.log= res$product.hits,
                   product.all= res$product.all)
   

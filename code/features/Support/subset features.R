@@ -1,7 +1,7 @@
 # Last edited 2019-11-11 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
 
-add.basic.features<- function(points, input.data, input.look.left= res$input.look.left, input.look.right= res$input.look.right){
+add.basic.features<- function(points, input.data){
   points$start.time.data<-input.data$time[points$start]
   points$stop.time.data<- input.data$time[points$stop]
   points$start.time<- points$start.time.data-first(input.data$time)

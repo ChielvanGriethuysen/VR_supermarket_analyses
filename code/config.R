@@ -67,6 +67,9 @@ params <- list(
       cross.dist1= 2, #distance required for a path to cross itself before it counts as a crossing 
       cross.dist2= 4  #distance between two crossings
     ),
+    pick= list(
+      pick.time.before= 8
+    ),
     
     number.of.items = 8,  # total number of items in supermarket people can pick up.
     
