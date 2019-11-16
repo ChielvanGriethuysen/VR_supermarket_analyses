@@ -126,10 +126,13 @@ runFirstAnalyses <- function(JSONfile,
   # put the hit log in a dataframe, filter on products from the product list
   start.stop<- which(apply(product.log, 1, function(x) any(grepl("Sessie|Ending", x))))
   product.all<- product.hit.log( data.frame(SesionLog=product.log[(start.stop[1]+1):(start.stop[2]-1),]))
-  product.all<- cbind(product.all,
+  product.all$id<- if(nrow(product.all)>0) 1:nrow(product.all) else NULL
+  product.all<- merge(product.all,
                        calc.spot.event.in.box(data.frame(x.start=product.all$x,z.start= product.all$z),params$features$aisles) %>%
-                        rename(aisles.type= type,
-                               aisles.name= names))
+                        transmute(aisles.type= params$features$aisles$type[row],
+                                  aisles.name= params$features$aisles$names[row],
+                                  id= col), by = "id")
+                        
   product.all<-add.product.hit.position(product.all,input.data)
   product.all<- merge(product.all,products[,c(7,8,10)],by.x  = "product",by.y= "productname",all.x = TRUE)
   product.all<- product.all %>% arrange(time)

@@ -42,23 +42,24 @@ getCrossings = function(input.data, params,products){
     }
     
     # crossings<-crossings[r,]
-    crossings<- add.basic.features(crossings, move_data)
-    colnames(crossings)[5]<-"time.between"
-    crossings<- cbind(crossings, calc.spot.event.in.box(data.frame(x= crossings$x.start, z= crossings$z.start), params$features$aisles) %>%
-                        rename(aisles.type= type,
-                               aisles.name= names))
-    
+   
+    crossings<- add.basic.features(crossings, move_data) %>% rename("time.between"="time.spend")
+    # apply distance filters
     crossings<- crossings%>% filter(absolute.dist>params$features$cross$cross.dist1)
     if(nrow(crossings)>1){
       crossings<- crossings.filter.close(crossings,params$features$cross$cross.dist2,2)
     }
-    
-    n.crossings<- crossings %>% filter(aisles.type!= "none") %>% nrow()
-    n.crossings.shopping<- crossings %>% filter(aisles.type== "shopping") %>%nrow()
+    crossings$id<- if(nrow(crossings)>0) 1:nrow(crossings) else NULL
+    crossings<- merge(crossings, calc.spot.event.in.box(data.frame(x= crossings$x.start, z= crossings$z.start), params$features$aisles) %>%
+                        transmute(aisles.type= params$features$aisles$type[row],
+                                  aisles.name= params$features$aisles$names[row],
+                                  id= col), by= "id", all= TRUE)
+    # n.crossings<- crossings %>% filter(aisles.type!= "none") %>% nrow()
+    # n.crossings.shopping<- crossings %>% filter(aisles.type== "shopping") %>%nrow()
   }
   else{
-    n.crossings<- 0
-    n.crossings.shopping<- 0
+    # n.crossings<- 0
+    # n.crossings.shopping<- 0
   }
   #add if crossing is in a target aisles
   crossings$target<- crossings$aisles.name %in% calc.spot.event.in.box(products, params$features$aisles)[,2]
@@ -67,7 +68,7 @@ getCrossings = function(input.data, params,products){
   crossings$angle<- mapply(function(a,b) min(c(a,b)), a=angles, b= 180-angles )
 
   res.cross <- list(log= crossings,
-                    n.crossings = n.crossings,
+                    # n.crossings = n.crossings,
                     cross.points.all=crossings)
   
   return(res.cross)

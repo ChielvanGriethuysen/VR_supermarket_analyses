@@ -48,6 +48,10 @@ find.first.point.on.dist<- function(data, dist){
 }
 ##calculate the angles between twoo datasets op points and the side of the map 
 calculate.direction<- function(data.o,data.t){
+  if(nrow(data.o)==0){
+    return(NULL)
+  }
+  
   data.o$angles<-0
   for (i in 1:nrow(data.o)){
     A<- c(data.t$x[i], data.t$z[i])

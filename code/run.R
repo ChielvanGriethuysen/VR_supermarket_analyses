@@ -5,7 +5,7 @@
 # preamble ----------------------------------------------------------------
 packages <- c("jsonlite", "tidyverse", "png", "ggforce",
               "ggalt", "Rcpp", "grid", "gganimate","XML", 
-              "DescTools", "xlsx","ggpubr","LearnGeom")
+              "DescTools", "xlsx","ggpubr","LearnGeom","future.apply")
 
 lapply(packages, require, character.only = TRUE)
 
@@ -36,14 +36,18 @@ for(i in 1 : length(data.files)){
   id<- str_split(JSONfile,"_")[[1]][1]
   
   #load data, make datasets to use for analysis
-  res <- runFirstAnalyses(JSONfile = JSONfile, 
-                          Excel=Excel, 
-                          image = image, 
-                          params= params,
-                          i = i)
-  #put input data in one list to make it accasible later for dynemic testing
-  input.data.list.all[id]<- list(res)
-  id.list[i]<- id
+  if(is.null(input.data.list.all[[id]])){
+    res <- runFirstAnalyses(JSONfile = JSONfile, 
+                            Excel=Excel, 
+                            image = image, 
+                            params= params,
+                            i = i)
+    #put input data in one list to make it accasible later for dynemic testing
+    input.data.list.all[id]<- list(res)
+    id.list[i]<- id
+  }else{
+    res<- input.data.list.all[[id]]
+  }
 
   #calculate start and stop points and add features
   #for entering a aislesbox
@@ -58,6 +62,7 @@ for(i in 1 : length(data.files)){
   
   #if product is picked look at what is done during the time before
   res.products<- picked.products(input.data = res$input.data,
+                                 view= res$input.look.left,
                                  products= res$product.hits,
                                  params= params)
   

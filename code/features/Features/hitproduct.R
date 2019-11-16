@@ -1,4 +1,4 @@
-picked.products<- function(input.data, products,params){
+picked.products<- function(input.data, view, products,params){
   
   intervals<- time.before.subset(products$time.index, params$features$pick$pick.time.before, input.data)
   intervals<- add.basic.features(intervals,input.data)
@@ -8,5 +8,28 @@ picked.products<- function(input.data, products,params){
   angles<-calculate.direction(products%>% select(x,z), products%>% select(x.pos,z.pos)) %%180
   intervals$hit.direction<- mapply(function(a,b) min(c(a,b)), a=angles, b= 180-angles )
   
+  #add pre angular moving behaviour
+  walk.angles.summary <- mapply(direction.sub.summary, 
+                                start= intervals$start, 
+                                stop= intervals$stop, 
+                                MoreArgs = list(directions= input.data$walk.direction)) %>% 
+    t() %>% as.data.frame() %>% setNames(paste0("walk.angles.", names(.))) %>% mutate_all(as.numeric)
+  
+  #add pre angular viewing behaviour
+  view.angles.summary<-mapply(direction.sub.summary, 
+                              start= intervals$start, 
+                              stop= intervals$stop, 
+                              MoreArgs = list(directions= view$angle)) %>% 
+    t() %>% as.data.frame() %>% setNames(paste0("view.angles.", names(.))) %>% mutate_all(as.numeric)
+  
+  intervals<- cbind(intervals, walk.angles.summary, view.angles.summary)
+  #add view quality statistics
+  intervals<- add.view.quality.features(intervals, input.data)
+  
+  
+  
+  
+  
   return(list(log= intervals))
 }
+

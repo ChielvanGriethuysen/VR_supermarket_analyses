@@ -78,7 +78,7 @@ box.check<-function(position, box.list){
 box.check.list<-function(points, box.list){
   # a is a matrix with [n.aisles, n.time points] with T or F.
   # T indicating that timepoint was spent in that aisle
-  a<-apply(data.frame(points$x,points$z), 1, box.check, box.list=box.list)
+  a<-future_apply(data.frame(points$x,points$z), 1, box.check, box.list=box.list)
   # t is a matrix with 2 columns. [, 1] = aisle number and [, 2] = time point
   t <- which(a, arr.ind = TRUE)
   t<- data.frame(t)
@@ -90,15 +90,16 @@ box.check.list<-function(points, box.list){
 calc.spot.event.in.box<- function(spot.log, box){
   
   t<-box.check.list(data.frame(x=spot.log$x,z=spot.log$z),box)
-  
-  res.type<- rep("none", nrow(spot.log))
-  res.name<- rep("none", nrow(spot.log))
-  
-  res.type[t$col]<- as.character(box$type[t$row])
-  res.name[t$col]<- as.character(box$names[t$row])
-  
-  data.frame(type=res.type, names= res.name)
+  return(t)
 }
+#   res.type<- rep("none", nrow(spot.log))
+#   res.name<- rep("none", nrow(spot.log))
+#   
+#   res.type[t$col]<- as.character(box$type[t$row])
+#   res.name[t$col]<- as.character(box$names[t$row])
+#   
+#   data.frame(type=res.type, names= res.name)
+# }
 #calculate the moments somone enters end exitst a box( aisles or product box), boxes may overlap
 calc.box.feature<-function(input.data, box){
   t<- box.check.list(data.frame(x=input.data$x,z=input.data$z), box)
@@ -138,7 +139,11 @@ merge.box.feature<- function(boxen, input.data){
 ###
 
 time.before.subset<- function(stop, time.before, input.data){
-  intervals<-data.frame(start= numeric(length(start)), stop)
+  if(length(stop)==0){
+    return(data.frame(start= numeric(), stop=numeric()))
+  }
+  
+  intervals<-data.frame(start= stop, stop)
   for(i in 1:length(stop)){
     j<- stop[i]
     time<-0

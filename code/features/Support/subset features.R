@@ -7,8 +7,8 @@ add.basic.features<- function(points, input.data){
   points$start.time<- points$start.time.data-first(input.data$time)
   points$stop.time<- points$stop.time.data-first(input.data$time)
   points$time.spend<-points$stop.time- points$start.time
-  points$moment.in.time.start<- (points$start.time-first(input.data$time))/(last(input.data$time)-first(input.data$time))
-  points$moment.in.time.stop<- (points$stop.time-first(input.data$time))/(last(input.data$time)-first(input.data$time))
+  points$moment.in.time.start<- points$start.time/(last(input.data$time)-first(input.data$time))
+  points$moment.in.time.stop<- points$stop.time/(last(input.data$time)-first(input.data$time))
   points$x.start<-input.data$x[points$start]
   points$z.start<-input.data$z[points$start]
   points$x.stop<-input.data$x[points$stop]
@@ -165,5 +165,24 @@ productbox.label.add<-function(data, input.data,box){
   data$name<-factor(data$name, levels = box$productnumber)
   return(data)
 }
+# for a vector of angles calculates a summary of a subpart
+direction.sub.summary<- function(directions, start, stop){
+  corection.factor<- 0
+  if(any(directions[start:stop] %>% na.omit() >359)||any(directions[start:stop] %>% na.omit()<1)){
+    directions<- (directions+180)%%360
+    corection.factor<-180
+  }
+  
+  max<-max(directions[start:stop], na.rm = TRUE)
+  min<-min(directions[start:stop], na.rm = TRUE)
+  
+  return(data.frame(mean= (mean(directions[start:stop], na.rm = TRUE)-corection.factor)%%360,
+                    max= (max-corection.factor)%%360,
+                    min= (min-corection.factor)%%360,
+                    max.diff= abs(max-min),
+                    var= var(directions[start:stop], na.rm = TRUE)))
+}
+
+
 
 

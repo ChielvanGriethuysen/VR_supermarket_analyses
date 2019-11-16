@@ -13,7 +13,7 @@ getAisleTimes <- function(input.data, products,
   aisles.data<- add.quality.features(aisles.data,input.data)
   aisles.data<- add.view.quality.features(aisles.data, input.data)
   aisles.data<-aisles.label.add(aisles.data,input.data,aisles)
-  aisles.data$target<- aisles.data$aisles.name %in% calc.spot.event.in.box(products, params$features$aisles)[,2]
+  aisles.data$target<- aisles.data$aisles.name %in% (calc.spot.event.in.box(products, params$features$aisles) %>% transmute(aislesl.name= aisles$names[row]))[,1]
   
   if(nrow(aisles.data)>0){
     #Count number of times in each aisle can be used for output
