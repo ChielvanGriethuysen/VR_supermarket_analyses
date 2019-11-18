@@ -88,17 +88,20 @@ runFirstAnalyses <- function(JSONfile,
   input.look.left<- missing.view.data.fill(input.look.left)
   input.look.right<- missing.view.data.fill(input.look.right)
   
+  #chose wich eye is the beste one for the analysis
+  input.look<- if(sum(is.na(input.look.left$x))< sum(is.na(input.look.right$x))) input.look.left else input.look.right
+  
   #add looking directions
-  input.look.left$angle<- calculate.direction(input.data, input.look.left)
-  input.look.right$angle<- calculate.direction(input.data, input.look.right)
+  input.look$angle<- calculate.direction(input.data, input.look)
   
   #add looking distance
-  input.look.left$dist<- dist.2sets.2d(input.data,input.look.left)
-  input.look.right$dist<- dist.2sets.2d(input.data,input.look.right)
+  input.look$dist<- dist.2sets.2d(input.data,input.look)
   
+  #add lodation
+  input.look<- aisles.scan.location(input.look,params$features$aisles%>% filter(type=="shopping"),0.2)
+
   #remove confidence and lost variable
-  input.look.left<- input.look.left %>% select(-c(lost, confidence))
-  input.look.right<- input.look.right %>% select(-c(lost, confidence))
+  input.look<- input.look %>% select(-c(lost, confidence))
   
   #add speed, distance and direction to position data
   input.data<- speed.dist.add(input.data)
@@ -126,13 +129,13 @@ runFirstAnalyses <- function(JSONfile,
   # put the hit log in a dataframe, filter on products from the product list
   start.stop<- which(apply(product.log, 1, function(x) any(grepl("Sessie|Ending", x))))
   product.all<- product.hit.log( data.frame(SesionLog=product.log[(start.stop[1]+1):(start.stop[2]-1),]))
-  product.all$id<- if(nrow(product.all)>0) 1:nrow(product.all) else NULL
+  product.all$id<- if(nrow(product.all)>0) 1:nrow(product.all) else numeric()
   product.all<- merge(product.all,
                        calc.spot.event.in.box(data.frame(x.start=product.all$x,z.start= product.all$z),params$features$aisles) %>%
                         transmute(aisles.type= params$features$aisles$type[row],
                                   aisles.name= params$features$aisles$names[row],
                                   id= col), by = "id")
-                        
+  
   product.all<-add.product.hit.position(product.all,input.data)
   product.all<- merge(product.all,products[,c(7,8,10)],by.x  = "product",by.y= "productname",all.x = TRUE)
   product.all<- product.all %>% arrange(time)
@@ -141,8 +144,7 @@ runFirstAnalyses <- function(JSONfile,
   product.hits<- filter.product.hits(products,product.all)$hit.target
   
   res <- list(input.data= input.data,
-              input.look.left= input.look.left,
-              input.look.right= input.look.right,
+              input.look= input.look,
               product.hits= product.hits,
               product.all= product.all,
               productbox = productbox,
@@ -210,6 +212,36 @@ missing.view.data.fill<- function(data){
   }
   return(data)
 }
+#calculate where at eache aisles somone viewed, ad location to view points
+aisles.scan.location<- function(view, aisles, grid.size){
+  #divide aisles in the two sides
+  aisles.up<- aisles %>%mutate(xmin= xmax-0.5, side="up")
+  aisles.down<- aisles %>%mutate(xmax= xmin+0.5, side="down")
+  aisles<- rbind(aisles.up,aisles.down)
+  
+  #find location of view points
+  view$id<- 1:nrow(view)
+  view.in.box<- box.check.list(view, aisles) %>% transmute(id= col,aisle.side= aisles$side[row], aisle.name= aisles$names[row])
+  view<-merge(view, view.in.box, by= "id")
+  
+  #divide aisles based on type because the have different length
+  aisles.A<- aisles%>% filter(grepl("A",names))
+  aisles.B<- aisles%>% filter(grepl("B",names))
+  #make grid for A and B aisles
+  aisles.A.widths<- seq(aisles.A$zmin[1], aisles.A$zmax[1],grid.size) 
+  aisles.B.widths<- seq(aisles.B$zmin[1], aisles.B$zmax[1],grid.size) 
+  aisles.hight<- seq(0,2.2,grid.size)
+  #use grid as buckets to discretize coordinates 
+  view.A<- view %>% filter(grepl("A",aisle.name)) %>% mutate(hight= cut(y,aisles.hight, labels = aisles.hight[-length(aisles.hight)]),
+                                                             width= cut(z,aisles.A.widths, labels=aisles.A.widths[-length(aisles.A.widths)])%>%
+                                                               as.character()%>% as.numeric())
+  view.B<- view %>% filter(grepl("B",aisle.name)) %>% mutate(hight= cut(y,aisles.hight, labels = aisles.hight[-length(aisles.hight)]),
+                                                             width= cut(z,aisles.B.widths, labels=aisles.B.widths[-length(aisles.B.widths)])%>%
+                                                               as.character()%>% as.numeric())
+  view<- rbind(view.A,view.B)
+  return(view)
+}
+
 
 #calculate box around products, used to determine if person is doing somting close to the product
 calc.productbox<- function(products){

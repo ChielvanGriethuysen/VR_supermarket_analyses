@@ -71,8 +71,8 @@ speed.discretisation.merge.induction<-function(candidates, input.data, merge.dis
 ##
 # check if a position is in one of the boxes of a box list
 box.check<-function(position, box.list){
-  position[1] > box.list$xmin & position[1] < box.list$xmax &
-    position[2] > box.list$zmin & position[2] < box.list$zmax
+  position[1] > box.list[1] & position[1] < box.list[2] &
+    position[2] > box.list[3] & position[2] < box.list[4]
 }
 #
 box.check.list<-function(points, box.list){
@@ -88,6 +88,9 @@ box.check.list<-function(points, box.list){
 
 # calculates for stops in which aisles they where made
 calc.spot.event.in.box<- function(spot.log, box){
+  if(nrow(spot.log)<1){
+    return(data.frame(row=numeric(), col=numeric()))
+  }
   
   t<-box.check.list(data.frame(x=spot.log$x,z=spot.log$z),box)
   return(t)

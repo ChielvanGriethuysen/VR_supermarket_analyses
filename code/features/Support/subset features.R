@@ -41,13 +41,12 @@ add.quality.features<- function(points, input.data){
   points$errorfrac<- points$nzero/(points$stop-points$start)
   return(points)
 }
-add.view.quality.features<- function(points, input.data, input.look.left= res$input.look.left, input.look.right= res$input.look.right){
+add.view.quality.features<- function(points, input.data, input.look= res$input.look){
   points$missing.view.mean<- numeric(nrow(points))
   points$missing.view.max<- numeric(nrow(points))
   points$missing.view.frac<- numeric(nrow(points))
   points$missing.view.n<- numeric(nrow(points))
   
-  input.look<- if(sum(is.na(input.look.left$x))< sum(is.na(input.look.right$x))) input.look.left else input.look.right
   if(nrow(points)>0){
     for(i in 1:nrow(points)){
       missing.stats<-missing.data.length(input.look[points$start[i]:points$stop[i],])
@@ -182,6 +181,8 @@ direction.sub.summary<- function(directions, start, stop){
                     max.diff= abs(max-min),
                     var= var(directions[start:stop], na.rm = TRUE)))
 }
+
+
 
 
 

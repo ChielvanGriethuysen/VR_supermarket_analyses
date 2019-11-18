@@ -49,7 +49,7 @@ getCrossings = function(input.data, params,products){
     if(nrow(crossings)>1){
       crossings<- crossings.filter.close(crossings,params$features$cross$cross.dist2,2)
     }
-    crossings$id<- if(nrow(crossings)>0) 1:nrow(crossings) else NULL
+    crossings$id<- if(nrow(crossings)>0) 1:nrow(crossings) else numeric()
     crossings<- merge(crossings, calc.spot.event.in.box(data.frame(x= crossings$x.start, z= crossings$z.start), params$features$aisles) %>%
                         transmute(aisles.type= params$features$aisles$type[row],
                                   aisles.name= params$features$aisles$names[row],

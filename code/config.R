@@ -74,12 +74,11 @@ params <- list(
     number.of.items = 8,  # total number of items in supermarket people can pick up.
     
     # Aisles, both names and coordinates are defined here
-    aisles = data.frame(xmin = c(rep(c(5, 9.2, 13, 17, 21), 2), 25.2, c(3,3,5)),
-                        xmax = c(rep(c(8.5, 12.4, 16.4, 20.3, 24.5), 2), 29.3, c(24.5 , 29.3, 29.3)),
-                        zmin = c(rep(29, 5), rep(12.6, 6),  c(37.6, 25, 10)), 
-                        zmax = c(rep(38.6, 5), rep(26.2, 6), c(41, 30.2, 13.8)),
-                        names = c(paste0(rep(1:5, 2), rep(LETTERS[1:2], each = 5)), "6B", "M1", "M2", "M3"), # Names of aisles
-                        #x = 1, y = 1, colour = 1, # Required for gg plot to work (don't ask why)
+    aisles = data.frame(xmin = c(rep(c(4.9, 8.9, 12.9, 17, 21), 2), 25.2, c(3,3,5)),
+                        xmax = c(rep(c(8.4, 12.4, 16.4, 20.5, 24.5), 2), 29.3, c(24.5 , 29.3, 29.3)),
+                        zmin = c(rep(29.2, 5), rep(12.8, 6),  c(37.6, 25, 10)), 
+                        zmax = c(rep(38.4, 5), rep(26, 6), c(41, 30.2, 13.8)),
+                        names = c(paste0(rep(1:5, 2), rep(LETTERS[1:2], each = 5)), "6B", "1M", "2M", "3M"), # Names of aisles
                         type= c(rep("shopping", 11), rep("main", 3)))
     
     
