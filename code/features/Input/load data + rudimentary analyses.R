@@ -222,7 +222,7 @@ aisles.scan.location<- function(view, aisles, grid.size){
   #find location of view points
   view$id<- 1:nrow(view)
   view.in.box<- box.check.list(view, aisles) %>% transmute(id= col,aisle.side= aisles$side[row], aisle.name= aisles$names[row])
-  view<-merge(view, view.in.box, by= "id")
+  view<-merge(view, view.in.box, by= "id", all = TRUE)
   
   #divide aisles based on type because the have different length
   aisles.A<- aisles%>% filter(grepl("A",names))
@@ -232,13 +232,16 @@ aisles.scan.location<- function(view, aisles, grid.size){
   aisles.B.widths<- seq(aisles.B$zmin[1], aisles.B$zmax[1],grid.size) 
   aisles.hight<- seq(0,2.2,grid.size)
   #use grid as buckets to discretize coordinates 
+  view.else<- view %>% filter(!grepl("A|B",aisle.name)) %>% mutate(hight= NA,
+                                                                   width= NA)
+  
   view.A<- view %>% filter(grepl("A",aisle.name)) %>% mutate(hight= cut(y,aisles.hight, labels = aisles.hight[-length(aisles.hight)]),
                                                              width= cut(z,aisles.A.widths, labels=aisles.A.widths[-length(aisles.A.widths)])%>%
                                                                as.character()%>% as.numeric())
   view.B<- view %>% filter(grepl("B",aisle.name)) %>% mutate(hight= cut(y,aisles.hight, labels = aisles.hight[-length(aisles.hight)]),
                                                              width= cut(z,aisles.B.widths, labels=aisles.B.widths[-length(aisles.B.widths)])%>%
                                                                as.character()%>% as.numeric())
-  view<- rbind(view.A,view.B)
+  view<- rbind(view.A,view.B, view.else) %>% arrange(id)
   return(view)
 }
 

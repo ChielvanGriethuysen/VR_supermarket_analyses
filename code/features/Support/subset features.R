@@ -6,7 +6,7 @@ add.basic.features<- function(points, input.data){
   points$stop.time.data<- input.data$time[points$stop]
   points$start.time<- points$start.time.data-first(input.data$time)
   points$stop.time<- points$stop.time.data-first(input.data$time)
-  points$time.spend<-points$stop.time- points$start.time
+  points$time.spent<-points$stop.time- points$start.time
   points$moment.in.time.start<- points$start.time/(last(input.data$time)-first(input.data$time))
   points$moment.in.time.stop<- points$stop.time/(last(input.data$time)-first(input.data$time))
   points$x.start<-input.data$x[points$start]
