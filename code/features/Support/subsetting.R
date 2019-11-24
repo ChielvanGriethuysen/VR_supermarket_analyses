@@ -6,7 +6,7 @@
 
 
 # make parts that are above or below a certain speed, merge these parts if they are close to each other to deal with data errors and small movements
-calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequations=TRUE){
+calc.speed.discretisation<-function(input.data, cuttoff, lowerinequations=TRUE){
   candidates <-output<- data.frame(start = numeric(), stop = numeric())
   j<-1
   dist<-0
@@ -43,13 +43,10 @@ calc.speed.discretisation<-function(input.data, cuttoff, merge.dist, lowerinequa
       i<-i+1
     }
   }
-  #if parts are to short afther each other then combine them
-  #to do: only do this when the the inbetween part is smaller than the two parts that can be combined
-  #output<-speed.discretisation.merge.induction(candidates,input.data, merge.dist)
-  #output
   return(candidates)
-  
 }
+#if parts are to short afther each other then combine them
+#to do: only do this when the the inbetween part is smaller than the two parts that can be combined
 speed.discretisation.merge.induction<-function(candidates, input.data, merge.dist){
   if(nrow(candidates)>1){
     for(l in 1:(nrow(candidates)-1)){
@@ -58,6 +55,7 @@ speed.discretisation.merge.induction<-function(candidates, input.data, merge.dis
          input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist){
         
         candidates$stop[l]<-candidates$stop[l+1]
+        candidates$parts[l]<- candidates$parts[l]+1
         candidates<- candidates[-(l+1),]
         return(speed.discretisation.merge.induction(candidates,input.data,merge.dist))
       }

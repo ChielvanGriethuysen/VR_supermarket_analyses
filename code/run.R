@@ -52,25 +52,28 @@ for(i in 1 : length(data.files)){
   #calculate start and stop points and add features
   #for entering a aislesbox
   res.aisles <- getAisleTimes(input.data= res$input.data,
+                              input.look = res$input.look,
                               products= res$products,
-                              aisles = params$features$aisles)
+                              params = params)
   #for entering a productbox but the product is not picked  
   res.walkpast<- WalkpastProduct(input.data = res$input.data,
+                                 input.look = res$input.look,
                                   productbox =  res$productbox,
                                   products = res$products,
-                                  hit.log = res$product.hits)
+                                  hit.log = res$product.hits,
+                                 params = params)
   
   #if product is picked look at what is done during the time before
   res.products<- picked.products(input.data = res$input.data,
-                                 view= res$input.look.left,
+                                 view= res$input.look,
                                  products= res$product.hits,
                                  params= params)
-  
   
   #for a change in speed
   res.speed<- speeddiscretisation(aisles.log=res.aisles$log,
                                   hits.log= res$product.hits,
                                   input.data = res$input.data,
+                                  input.look= res$input.look,
                                   products= res$products,
                                   params= params)
   #calculate crossings
@@ -120,10 +123,10 @@ for(i in 1 : length(data.files)){
     full<-full.plot(basic,res$input.data,log.list,id,params,res$products,res$productbox,params$features$aisles, save = TRUE)
     # plot places where somone looks
     looking.plot(res.speed$speed.log %>% filter(label== "stop with no movement"), 
-                 res$input.data, res$input.look.left, id,params, full,"stop")
+                 res$input.data, res$input.look, id,params, full,"stop")
     
     looking.plot(res.aisles$log %>% filter(label == "walk through"| label == "same side in out"), 
-                 res$input.data, res$input.look.left, id,params, full, "aisles")
+                 res$input.data, res$input.look, id,params, full, "aisles")
     
     speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log,id=id, save = TRUE)
     speed.map.combine(speed,full,id,params,save=TRUE)

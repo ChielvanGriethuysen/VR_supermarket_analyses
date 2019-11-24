@@ -39,27 +39,14 @@ params <- list(
     # Stops measures the amount of stops. A stop is defined as less than 
     # stop.radius movement in at least stop.time from a point
     stops = list(
-      stop.time = 2,      # seconds of stopping #  more than 5 to much to detect product pickup
-      stop.radius = 0.25,  # meters of walking
-      
-      stop.minimum.duration= 1,
-      stop.max.speed= 0.2,
-      #stop.max.distance=1,
-      stop.merge.distance=0.1
+      stop.minimum.duration= 1, #minimum time a stop schould take
+      stop.max.speed= 0.2, #speed used for discretisation
+      stop.merge.time.1=0.1, #max time between two parts, used to reduce splits by outliers 
+      stop.merge.time.2=1 #max time between two parts, used to ignore short button hits
     ),
     walk= list(
-      walk.minimum.duration= 1,
-      walk.min.speed= 0.4,
-      walk.merge.distance=1
+      walk.minimum.dist= 1 # minimum time a walk schould take
     ),
-    
-    # Slows measures the times someone has slowed. Is defined the same as a
-    # stop, but with different numbers
-    slows = list(
-      slow.time = 4,   # seconds of stopping
-      slow.radius = 1    # meters of walking
-    ),
-    
     # Crossings
     cross = list(
       cross.lag1 = 3, #Time required for a path to cross itself before it counts as a crossing
@@ -69,6 +56,10 @@ params <- list(
     ),
     pick= list(
       pick.time.before= 8
+    ),
+    view= list(
+      min.points.1= 5,
+      min.points.2= 25
     ),
     
     number.of.items = 8,  # total number of items in supermarket people can pick up.

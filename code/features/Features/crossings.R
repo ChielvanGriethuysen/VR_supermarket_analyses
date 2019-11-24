@@ -43,7 +43,7 @@ getCrossings = function(input.data, params,products){
     
     # crossings<-crossings[r,]
    
-    crossings<- add.basic.features(crossings, move_data) %>% rename("time.between"="time.spend")
+    crossings<- add.basic.features(crossings, move_data) %>% rename("time.between"="time.spent")
     # apply distance filters
     crossings<- crossings%>% filter(absolute.dist>params$features$cross$cross.dist1)
     if(nrow(crossings)>1){

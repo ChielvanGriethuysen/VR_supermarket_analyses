@@ -55,7 +55,7 @@ full.plot<- function(gg.basic,input.data, logs, id,params ,products, productbox,
   
   cols<-c("main"= "#00BFC4","shopping"= "#F8766D", "TRUE"="lightgreen", "FALSE"="red")
   
-  discretised.path<-datapoint.add.label(input.data,logs$speed.log)
+    # discretised.path<-datapoint.add.label(input.data,logs$speed.log)
   info.box<-data.frame(x1=0.1,x2= 2.25,y1=49.9,y2=20)
   gg<- gg.basic+
     # geom_rect(data= info.box, mapping = aes(xmin=x1, xmax=x2,

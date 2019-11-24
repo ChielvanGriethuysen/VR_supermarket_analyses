@@ -41,6 +41,8 @@ picked.products<- function(input.data, view, products,params){
   #add view quality statistics
   intervals<- add.view.quality.features(intervals, input.data)
   
+  intervals<- add.view.area(intervals, input.data,view, params)
+  
   
   
   

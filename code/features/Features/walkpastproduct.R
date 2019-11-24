@@ -6,15 +6,18 @@
 
 
 WalkpastProduct<-function(input.data,
+                          input.look,
                           productbox,
                           products,
-                          hit.log){
+                          hit.log,
+                          params){
   
   
   # get data about visiting product boxes
   box.data<-calc.box.feature(input.data,productbox)
   box.data<-add.basic.features(box.data,input.data)
   box.data<-add.quality.features(box.data,input.data)
+  box.data<-add.view.area(box.data, input.data,input.look, params)
   box.data<-add.view.quality.features(box.data,input.data)
   box.data<-productbox.label.add(box.data,input.data,productbox)
   

@@ -23,8 +23,8 @@ add.basic.features<- function(points, input.data){
       points$var.speed[i]<- var(input.data$dist[points$start[i]:points$stop[i]])
     }
   }
-  points$absolute.speed<-points$absolute.dist/points$time.spend
-  points$relative.speed<-points$relative.dist/points$time.spend
+  points$absolute.speed<-points$absolute.dist/points$time.spent
+  points$relative.speed<-points$relative.dist/points$time.spent
   points$dist.frac<-points$absolute.dist/points$relative.dist
   return(points)
 }
@@ -144,7 +144,7 @@ hit.stop<- function(hits, stops){
 stop.to.walk<- function(log, input.data){
   res<- data.frame(start= numeric(), stop=numeric())
   start<-1
-  stop<-log[1,1]-1
+  stop<-log$start[1]-1
   
   for(i in 1:nrow(log)){
     res<-rbind(res, data.frame(start=start,stop=stop))
@@ -183,7 +183,21 @@ direction.sub.summary<- function(directions, start, stop){
 }
 
 
-
+add.view.area<- function(log, input.data, input.look, params){
+  log$areas.up<- log$areas.down<-log$areas.2<- log$areas.1<- log$view.sides<- numeric(nrow(log))
+  
+  for(i in 1: nrow(log)){
+    areas<- input.look[log$start[i]:log$stop[i],] %>% group_by(aisle.name, aisle.side, hight, width) %>% summarise(n=n())
+    log$areas.1[i]<- areas %>% filter(n>=params$features$view$min.points.1 & !is.na(aisle.name)) %>% nrow()
+    log$areas.2[i]<- areas %>% filter(n>=params$features$view$min.points.2 & !is.na(aisle.name)) %>% nrow()
+    log$areas.up[i]<- areas %>% filter(n>=params$features$view$min.points.1& aisle.side== "up") %>% nrow()
+    log$areas.down[i]<- areas %>% filter(n>=params$features$view$min.points.1& aisle.side== "down") %>% nrow()
+    
+    sides<- input.look[log$start[i]:log$stop[i],] %>% group_by(aisle.name, aisle.side) %>% summarise(n=n()) %>% filter(!is.na(aisle.name))
+    log$view.sides[i]<- sides %>% nrow()
+  }
+  return(log)
+}
 
 
 
