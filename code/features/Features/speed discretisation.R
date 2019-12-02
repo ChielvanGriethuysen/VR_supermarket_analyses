@@ -2,16 +2,16 @@
 #
 # Last edited 31-5-2019 by Chiel van Griethuijsen (m.a.vangriethuijsen@students.uu.nl)
 
-speeddiscretisation<-function(input.data,input.look, aisles.log,hits.log, products, params){
+speeddiscretisation<-function(input.data,input.look,hits.log, products, params){
   stop.params<- params$features$stops
   
   #get all discretisations of the speed below cuttoff
   c.stops<-calc.speed.discretisation(input.data = input.data, 
                                    cuttoff = stop.params$stop.max.speed,lowerinequations = TRUE)
   #find real stops by removing outliers smaller than merge.time
-  p.stops<- speed.discretisation.merge.induction(c.stops,input.data,  stop.params$stop.merge.time.1)
+  p.stops<- speed.discretisation.merge.induction(c.stops,input.data, stop.params$stop.merge.dist.1)
   p.stops$parts<-1
-  p.stops<- speed.discretisation.merge.induction(p.stops,input.data,  stop.params$stop.merge.time.2)
+  p.stops<- speed.discretisation.merge.induction(p.stops,input.data, stop.params$stop.merge.dist.2)
   
   #add info
   p.stops<-add.basic.features(p.stops,input.data)
@@ -23,6 +23,11 @@ speeddiscretisation<-function(input.data,input.look, aisles.log,hits.log, produc
   log<- add.quality.features(log, input.data)
   log<- add.view.quality.features(log, input.data)
   log<- add.view.area(log,input.data, input.look,params )
+  
+  view.angles.summary<- direction.sub.summary.feed(input.look$angle, log,"view")
+  view.dist.summary<- dist.sub.summary.feed(input.look$dist, log, "view")
+  log<- cbind(log, view.angles.summary,view.dist.summary)
+  
   log$id<-if(nrow(log)>0) 1:nrow(log) else numeric()
   
   #add location of stop and slow

@@ -50,10 +50,17 @@ calc.speed.discretisation<-function(input.data, cuttoff, lowerinequations=TRUE){
 speed.discretisation.merge.induction<-function(candidates, input.data, merge.dist){
   if(nrow(candidates)>1){
     for(l in 1:(nrow(candidates)-1)){
-      if((input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] ||
-          input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]])&&
-         input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist){
-        
+      # if((input.data$time[candidates$stop[l]]-input.data$time[candidates$start[l]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]] ||
+      #     input.data$time[candidates$stop[l+1]]-input.data$time[candidates$start[l+1]]>input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]])&&
+      #    input.data$time[candidates$start[l+1]]-input.data$time[candidates$stop[l]]<merge.dist){
+      start.a<- candidates$start[l]
+      start.b<- candidates$start[l+1]
+      stop.a<- candidates$stop[l]
+      stop.b<- candidates$stop[l+1]
+      
+      if(dist(input.data[c(start.b,stop.a),]%>% select(x,z))<merge.dist &&(
+         diff(input.data[c(stop.a,start.b),]%>% pull(time))<diff(input.data[c(start.a,stop.a),] %>% pull(time))||
+         diff(input.data[c(stop.a,start.b),]%>% pull(time))<diff(input.data[c(start.b,stop.b),] %>% pull(time)))){
         candidates$stop[l]<-candidates$stop[l+1]
         candidates$parts[l]<- candidates$parts[l]+1
         candidates<- candidates[-(l+1),]

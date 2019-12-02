@@ -36,10 +36,10 @@ dist.2sets.2d<- function(points1, points2){
 #add the label to eache datapoint based on a log file
 datapoint.add.label<-function(input.data, log){
   
-  label<-rep("none",nrow(input.data))
+  label<-rep(FALSE,nrow(input.data))
   
   for (i in 1:nrow(log)) {
-    label[log$start[i]:log$stop[i]]<-log$label[i]
+    label[log$start[i]:log$stop[i]]<-TRUE
   }
   data.frame(input.data,label)
   

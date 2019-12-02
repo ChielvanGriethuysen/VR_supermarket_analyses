@@ -49,6 +49,13 @@ for(i in 1 : length(data.files)){
     res<- input.data.list.all[[id]]
   }
 
+  #for a change in speed
+  res.stops<- speeddiscretisation(hits.log= res$product.hits,
+                                  input.data = res$input.data,
+                                  input.look= res$input.look,
+                                  products= res$products,
+                                  params= params)
+  res$input.data["stop"]<- datapoint.add.label(res$input.data,res.stops$log)$label
   #calculate start and stop points and add features
   #for entering a aislesbox
   res.aisles <- getAisleTimes(input.data= res$input.data,
@@ -61,7 +68,7 @@ for(i in 1 : length(data.files)){
                                   productbox =  res$productbox,
                                   products = res$products,
                                   hit.log = res$product.hits,
-                                 params = params)
+                                  params = params)
   
   #if product is picked look at what is done during the time before
   res.products<- picked.products(input.data = res$input.data,
@@ -69,13 +76,14 @@ for(i in 1 : length(data.files)){
                                  products= res$product.hits,
                                  params= params)
   
-  #for a change in speed
-  res.speed<- speeddiscretisation(aisles.log=res.aisles$log,
-                                  hits.log= res$product.hits,
-                                  input.data = res$input.data,
-                                  input.look= res$input.look,
-                                  products= res$products,
-                                  params= params)
+  
+  #walking
+  res.walks<- walks(input.data=res$input.data, 
+                    input.look=res$input.look, 
+                    params=params, 
+                    stops=res.stops$log,
+                    products= res$products)
+  
   #calculate crossings
   res.cross <- getCrossings(input.data = res$input.data,
                             params= params,
@@ -86,8 +94,9 @@ for(i in 1 : length(data.files)){
   #                         input.look= res$input.look.left,
   #                         aisles = params$features$aisles)
 
-  log.list<- list(aisles.log= res.speed$aisles.log, 
-                  speed.log= res.speed$speed.log, 
+  log.list<- list(aisles.log= res.aisles$log, 
+                  stops.log= res.stops$log,
+                  walks.log= res.walks$log,
                   crossings.log= res.cross$log, 
                   products.log= res.products$log, 
                   walked.past.log= res.walkpast$log.walked.past, 
@@ -122,13 +131,13 @@ for(i in 1 : length(data.files)){
     
     full<-full.plot(basic,res$input.data,log.list,id,params,res$products,res$productbox,params$features$aisles, save = TRUE)
     # plot places where somone looks
-    looking.plot(res.speed$speed.log %>% filter(label== "stop with no movement"), 
+    looking.plot(res.stops$log, 
                  res$input.data, res$input.look, id,params, full,"stop")
     
     looking.plot(res.aisles$log %>% filter(label == "walk through"| label == "same side in out"), 
                  res$input.data, res$input.look, id,params, full, "aisles")
     
-    speed<-speed.plot(res$input.data,res.speed$speed.log, res.aisles$log,id=id, save = TRUE)
+    speed<-speed.plot(res$input.data,res.stops$log, res.aisles$log,id=id, save = TRUE)
     speed.map.combine(speed,full,id,params,save=TRUE)
   }
   #plot.best.r(res$input.data, id)

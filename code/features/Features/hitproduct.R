@@ -9,35 +9,10 @@ picked.products<- function(input.data, view, products,params){
   intervals$hit.direction<- mapply(function(a,b) min(c(a,b)), a=angles, b= 180-angles )
   
   #add pre angular moving behaviour
-  if(nrow(intervals)>0){
-    walk.angles.summary <- mapply(direction.sub.summary, 
-                                  start= intervals$start, 
-                                  stop= intervals$stop, 
-                                  MoreArgs = list(directions= input.data$walk.direction)) %>% 
-      t() %>% as.data.frame() %>% setNames(paste0("walk.angles.", names(.))) %>% mutate_all(as.numeric)
-    
-    #add pre angular viewing behaviour
-    view.angles.summary<-mapply(direction.sub.summary, 
-                                start= intervals$start, 
-                                stop= intervals$stop, 
-                                MoreArgs = list(directions= view$angle)) %>% 
-      t() %>% as.data.frame() %>% setNames(paste0("view.angles.", names(.))) %>% mutate_all(as.numeric)
-  }else{
-    
-    walk.angles.summary <- data.frame(mean= numeric(),
-                                         max= numeric(),
-                                         min= numeric(),
-                                         max.diff= numeric(),
-                                         var= numeric()) %>% setNames(paste0("walk.angles.", names(.))) %>% mutate_all(as.numeric)
-    view.angles.summary<-data.frame(mean= numeric(),
-                                    max= numeric(),
-                                    min= numeric(),
-                                    max.diff= numeric(),
-                                    var= numeric()) %>% setNames(paste0("view.angles.", names(.))) %>% mutate_all(as.numeric)
-  }
-  
-  
+  walk.angles.summary<- direction.sub.summary.feed(input.data$walk.direction, intervals,"walk")
+  view.angles.summary<- direction.sub.summary.feed(view$angle, intervals,"view")
   intervals<- cbind(intervals, walk.angles.summary, view.angles.summary)
+  
   #add view quality statistics
   intervals<- add.view.quality.features(intervals, input.data)
   

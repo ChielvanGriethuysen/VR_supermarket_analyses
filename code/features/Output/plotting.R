@@ -98,7 +98,7 @@ full.plot<- function(gg.basic,input.data, logs, id,params ,products, productbox,
               colour= "black")
     }
     #add stops to pick product
-    gg<-gg+geom_point(data = logs$speed.log %>% filter(n_hit>0),
+    gg<-gg+geom_point(data = logs$stops.log %>% filter(n_hit>0),
                        mapping = aes(x = x.start, y = z.start),
                        fill = 'tomato', colour = 'tomato', size= 3.5)
     # geom_text(aes(y = -43, x = 0.5,
@@ -116,7 +116,8 @@ full.plot<- function(gg.basic,input.data, logs, id,params ,products, productbox,
     if(nrow(logs$crossings.log)){
     gg<-gg+geom_point(data = logs$crossings.log,
                aes(x = x.start, y = z.start), size= 3.5,
-               col = 'blue')
+               col = 'blue') +
+      geom_text(data=logs$crossings.log, mapping = aes(x=x.start-.5,y=z.start,label= paste0(round(angle,2),"°")))
     }
   
     gg<-gg+geom_text(aes(y = 45.5, x = 29, 
@@ -159,18 +160,16 @@ speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data),id, s
   log_place<- log_place %>% filter(start>=start1,stop<=stop1)
   
   
-  log_speed$start.time<- log_speed$start.time-data$time[1]
-  log_speed$stop.time<- log_speed$stop.time-data$time[1]
+  # log_speed$start.time<- log_speed$start.time-data$time[1]
+  # log_speed$stop.time<- log_speed$stop.time-data$time[1]
   
-  log_place$start.time<- log_place$start.time-data$time[1]
-  log_place$stop.time<- log_place$stop.time-data$time[1]
+  # log_place$start.time<- log_place$start.time-data$time[1]
+  # log_place$stop.time<- log_place$stop.time-data$time[1]
   data$time<- data$time-data$time[1]
   
   
   ## test  filter code ##
   
-  log_speed <- log_speed %>% filter(label== "walk"& absolute.speed >= 0.458824867341898
-                                    &  var.speed >= 2.04402427300576e-06)
   
   
   ##  end  ##
@@ -181,7 +180,7 @@ speed.plot<-function(data,log_speed, log_place, start1=0, stop1=nrow(data),id, s
   
   if(nrow(log_speed)>0){
     plot<-plot+
-      geom_rect(log_speed,mapping =  aes(xmin=start.time,xmax=stop.time,ymin=0,ymax=0.6, fill= label),alpha=0.35)+
+      geom_rect(log_speed,mapping =  aes(xmin=start.time,xmax=stop.time,ymin=0,ymax=0.6),alpha=0.35)+
       scale_fill_manual(values= cols)
   }
   if(nrow(log_place)>0){

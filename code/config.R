@@ -42,7 +42,9 @@ params <- list(
       stop.minimum.duration= 1, #minimum time a stop schould take
       stop.max.speed= 0.2, #speed used for discretisation
       stop.merge.time.1=0.1, #max time between two parts, used to reduce splits by outliers 
-      stop.merge.time.2=1 #max time between two parts, used to ignore short button hits
+      stop.merge.time.2=1, #max time between two parts, used to ignore short button hits
+      stop.merge.dist.1=0.1,
+      stop.merge.dist.2=1
     ),
     walk= list(
       walk.minimum.dist= 1 # minimum time a walk schould take
