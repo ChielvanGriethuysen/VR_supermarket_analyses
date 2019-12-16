@@ -269,7 +269,7 @@ all.logs<- function(log, combined.logs,i,file){
 }
 participant.category<-function(file){
   healthy.code<- c("GEZ","DS","H1","HC","C1","01")
-  ill.code<- c("C2","PP","H2","PSY","02","06")
+  ill.code<- c("C2","PP","H2","PSY","02","06","IC")
   
   if(any(startsWith(file,ill.code))){
     return("ill")

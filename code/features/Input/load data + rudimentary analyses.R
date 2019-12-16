@@ -27,7 +27,12 @@ runFirstAnalyses <- function(JSONfile,
     dat <- fromJSON(readLines(paste0('input/', params$input.dir, '/', JSONfile)),
                     simplifyDataFrame = TRUE)
   )
-  input.log<- str_remove(JSONfile,".json") %>% str_c("_Log.xml")
+  if(file.exists(paste0('input/', params$input.dir, '/', str_remove(JSONfile,".json") %>% str_c("_Log.xml")))){
+    input.log<- str_remove(JSONfile,".json") %>% str_c("_Log.xml")
+  }else{
+    input.log<-str_remove(JSONfile,".json") %>% str_c("Log.xml")
+  }
+  
   
   if(file.exists(paste0('input/', params$input.dir, '/', input.log))){
     suppressWarnings(
