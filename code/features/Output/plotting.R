@@ -98,13 +98,19 @@ full.plot<- function(gg.basic,input.data, logs, id,params ,products, productbox,
               colour= "black")
     }
     #add stops to pick product
-    gg<-gg+geom_point(data = logs$stops.log %>% filter(n_hit>0),
-                       mapping = aes(x = x.start, y = z.start),
-                       fill = 'tomato', colour = 'tomato', size= 3.5)
-    # geom_text(aes(y = -43, x = 0.5,
-    #               label = paste("N Stops no movement = ", nrow(logs$speed.log %>% filter(label== "stop with no movement")), "(X)" )),
-    #           size = 5,
-    #           colour = 'tomato')
+    if(nrow(logs$stops.log)>0){
+    gg<-gg+geom_point(data = log.subset(input.data,logs$stops.log) ,
+                       mapping = aes(x = x, y = z),
+                       fill = 'tomato', colour = 'tomato', size= 4)+
+    geom_text(data = logs$stops.log%>% filter(n_hit>0),
+                mapping = aes(x = x.start, y = z.start),
+                label="H", colour = 'black', size= 3)
+    }
+    gg<- gg+geom_text(aes(y = 45.5, x = 27.5,
+                  label = paste("N Stops = ", length(logs$stops.log$id %>% unique()), 
+                                "(",logs$stops.log %>% filter(aisles.type=="shopping") %>% nrow(),")")),
+              size = 5,
+              colour = 'tomato')
     # geom_point(data = discretised.path[discretised.path$label=="stop with some movement",], 
     #                  mapping = aes(x = x, y = -z),
     #                  fill = 'darkorchid', colour = 'darkorchid', size= 3.5)+
@@ -121,7 +127,8 @@ full.plot<- function(gg.basic,input.data, logs, id,params ,products, productbox,
     }
   
     gg<-gg+geom_text(aes(y = 45.5, x = 29, 
-                  label = paste("N crossings =", nrow(logs$crossings.log), "(", logs$crossings.log %>% filter(aisles.type== "shopping") %>%nrow(), ")" )),
+                  label = paste("N crossings =", length(logs$crossings.log$id %>% unique()), 
+                                "(", logs$crossings.log %>% filter(aisles.type== "shopping") %>%nrow(), ")" )),
               colour = 'blue',size=5)
   if(save){
     if( ! file.exists(paste0('output/',params$output.dir,'/png/full'))){
