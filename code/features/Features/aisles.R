@@ -5,7 +5,7 @@
 
 
 getAisleTimes <- function(input.data, input.look, products,
-                          params){
+                          params, stops){
   
   
   aisles.data<-calc.box.feature(input.data,params$features$aisles)
@@ -23,7 +23,8 @@ getAisleTimes <- function(input.data, input.look, products,
   aisles.data$aisles.type<- params$features$aisles$type[aisles.data$box.id]
   aisles.data$target<- aisles.data$aisles.name %in% (calc.spot.event.in.box(products, params$features$aisles) %>% 
                                                        transmute(aislesl.name= params$features$aisles$names[row]))[,1]
-  
+  aisles.data<-add.stops.to.aisles.log(stops %>% group_by(id) %>% summarise(start=first(start),
+                                                                            stop=first(stop)),aisles.data)
 
   
   if(nrow(aisles.data)>0){

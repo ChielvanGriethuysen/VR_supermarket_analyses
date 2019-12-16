@@ -61,7 +61,8 @@ for(i in 1 : length(data.files)){
   res.aisles <- getAisleTimes(input.data= res$input.data,
                               input.look = res$input.look,
                               products= res$products,
-                              params = params)
+                              params = params,
+                              stops= res.stops$log)
   #for entering a productbox but the product is not picked  
   res.walkpast<- WalkpastProduct(input.data = res$input.data,
                                  input.look = res$input.look,
@@ -107,7 +108,7 @@ for(i in 1 : length(data.files)){
   data<-  logs.to.features(data,i,log.list,res$input.data,res$products, params)
   
   #filter.feature.plot(res$input.data,res.aisles$log)
-  #feature.plot(res$input.data, res.speed$speed.log, "all")
+  feature.plot(res$input.data, res.stops$log, "all.stops",id)
   
   #Do intermeadiate save of data
   if(params$save.feature){

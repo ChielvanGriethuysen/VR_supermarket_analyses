@@ -63,6 +63,7 @@ speed.discretisation.merge.induction<-function(candidates, input.data, merge.dis
          diff(input.data[c(stop.a,start.b),]%>% pull(time))<diff(input.data[c(start.b,stop.b),] %>% pull(time)))){
         candidates$stop[l]<-candidates$stop[l+1]
         candidates$parts[l]<- candidates$parts[l]+1
+        candidates$walk.time[l]<-candidates$walk.time[l]+ input.data$time[start.b]-input.data$time[stop.a]
         candidates<- candidates[-(l+1),]
         return(speed.discretisation.merge.induction(candidates,input.data,merge.dist))
       }

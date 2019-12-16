@@ -214,7 +214,8 @@ feature.plot<- function(data, log_speed, map, id){
         geom_point(data[start:stop,], mapping =  aes(-z, x, colour= time))
       
       plot2<-ggplot()+
-        geom_point(data[start:stop,], mapping =  aes(time, speed),size=0.75, alpha=1)+
+        geom_point(data[(start-1000):(stop+1000),], mapping =  aes(time, speed),size=0.75, alpha=1)+
+        geom_rect(mapping = aes(xmin=data$time[start],xmax=data$time[stop],ymax=-0.05,ymin=-0.1), fill= "red", alpha=0.5)+
         ylim(-.1,0.7)
       plot<- ggarrange(plot1,plot2, ncol = 1,nrow = 2,heights = c(2,1))
       

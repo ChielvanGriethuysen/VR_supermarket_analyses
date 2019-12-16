@@ -11,6 +11,7 @@ speeddiscretisation<-function(input.data,input.look,hits.log, products, params){
   #find real stops by removing outliers smaller than merge.time
   p.stops<- speed.discretisation.merge.induction(c.stops,input.data, stop.params$stop.merge.dist.1)
   p.stops$parts<-1
+  p.stops$walk.time<-0
   p.stops<- speed.discretisation.merge.induction(p.stops,input.data, stop.params$stop.merge.dist.2)
   
   #add info

@@ -53,7 +53,7 @@ params <- list(
     cross = list(
       cross.lag1 = 3, #Time required for a path to cross itself before it counts as a crossing
       cross.lag2 = 3, #Minimum time required between two crossings
-      cross.dist1= 2, #distance required for a path to cross itself before it counts as a crossing 
+      cross.dist1= 4, #distance required for a path to cross itself before it counts as a crossing 
       cross.dist2= 4  #distance between two crossings
     ),
     pick= list(
