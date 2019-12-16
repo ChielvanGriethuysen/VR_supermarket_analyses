@@ -27,7 +27,7 @@ runFirstAnalyses <- function(JSONfile,
     dat <- fromJSON(readLines(paste0('input/', params$input.dir, '/', JSONfile)),
                     simplifyDataFrame = TRUE)
   )
-  input.log<- str_remove(JSONfile,".json") %>% str_c("Log.xml")
+  input.log<- str_remove(JSONfile,".json") %>% str_c("_Log.xml")
   
   if(file.exists(paste0('input/', params$input.dir, '/', input.log))){
     suppressWarnings(
@@ -43,13 +43,17 @@ runFirstAnalyses <- function(JSONfile,
                          dat$tracking_data$m_PositionLeftObject, 
                          dist= dat$tracking_data$m_SqrtDistanceLeftEye, 
                          confidence= dat$tracking_data$m_PupilConfidenceLeft,
-                         lost=dat$tracking_data$m_PupilLoss )
+                         lost= rep("None", length(dat$tracking_data$m_PupilTime)) )
   input.look.right<-data.frame(time=dat$tracking_data$m_PupilTime,
                               dat$tracking_data$m_PositionRightObject, 
                               dist= dat$tracking_data$m_SqrtDistanceRightEye, 
                               confidence= dat$tracking_data$m_PupilConfidenceRight,
-                              lost=dat$tracking_data$m_PupilLoss )
+                              lost=rep("None", length(dat$tracking_data$m_PupilTime)) )
   
+  if(!is.null(dat$tracking_data$m_PupilLoss)){
+    input.look.left$lost<- dat$tracking_data$m_PupilLoss
+    input.look.right$lost<-dat$tracking_data$m_PupilLoss
+  }
   
   #make uncertain data nul
   input.look.left<- input.look.left %>% mutate(x=ifelse(confidence>0.75 &(lost=="None" | lost== "Right"),x,NA),
@@ -234,13 +238,20 @@ aisles.scan.location<- function(view, aisles, grid.size){
   #use grid as buckets to discretize coordinates 
   view.else<- view %>% filter(!grepl("A|B",aisle.name)) %>% mutate(hight= NA,
                                                                    width= NA)
-  
+  if(grepl("A", view$aisle.name) %>% any()){
   view.A<- view %>% filter(grepl("A",aisle.name)) %>% mutate(hight= cut(y,aisles.hight, labels = aisles.hight[-length(aisles.hight)]),
                                                              width= cut(z,aisles.A.widths, labels=aisles.A.widths[-length(aisles.A.widths)])%>%
                                                                as.character()%>% as.numeric())
+  }else{
+    view.A<-NULL
+  }
+  if(grepl("B", view$aisle.name) %>% any()){
   view.B<- view %>% filter(grepl("B",aisle.name)) %>% mutate(hight= cut(y,aisles.hight, labels = aisles.hight[-length(aisles.hight)]),
                                                              width= cut(z,aisles.B.widths, labels=aisles.B.widths[-length(aisles.B.widths)])%>%
                                                                as.character()%>% as.numeric())
+  }else{
+    view.B<- NULL
+  }
   view<- rbind(view.A,view.B, view.else) %>% arrange(id)
   return(view)
 }

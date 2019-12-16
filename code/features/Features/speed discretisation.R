@@ -37,7 +37,8 @@ speeddiscretisation<-function(input.data,input.look,hits.log, products, params){
                           id= col), by="id", all= TRUE)
   
   #add if it is in a target aisles
-  log$target<- log$aisles.name %in% calc.spot.event.in.box(products, params$features$aisles)[,2]
+  log$target<- log$aisles.name %in% (calc.spot.event.in.box(products, params$features$aisles)%>% 
+    transmute(aislesl.name= params$features$aisles$names[row]))[,1]
   
   # add if a product was hit, if so, which(first and second) one and the ammount of hits for the case that there are more
   log<- hit.stop(hits.log,log)

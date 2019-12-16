@@ -120,7 +120,7 @@ params <- list(
                                      z =             c( 21.9,  32.5,   18.3,   34.4,   20.0,  37.3 ),
                                      height =        c(3.3,    3.3,    3.3,    3.3,    3.3,   3.3      ),
                                      width =         c(3,   3,    3,    3,    3,    3      ),
-                                     up.down.side =  c("down", "down", "down" , "up",   "down",   "down"),
+                                     up.down.side =  c("up", "up", "up" , "down",   "up",   "up"),
                                      announced =     c(FALSE, FALSE,  FALSE,  FALSE,  FALSE,  FALSE     ),
                                      productnumber = c("P1",   "P2",  "P3",    "P4",   "P5",  "P6" ),
                                      productname =   as.character(c("AH Molen zeezout", "Zwaluw Lucifers 5-pack", "De Ruijter Vruchtenhagel", "Andrélon Wax flexible hold", "LU Bastogne", "AH Sportsokken wit maat 43-46")),

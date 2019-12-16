@@ -112,6 +112,12 @@ calc.spot.event.in.box<- function(spot.log, box){
 calc.box.feature<-function(input.data, box){
   t<- box.check.list(data.frame(x=input.data$x,z=input.data$z), box)
   
+  if(nrow(t)==0){
+    return(data.frame(box.id= numeric(),
+                      start=numeric(),
+                      stop= numeric()))
+  }
+  
   # use max en min point as start en stop and reorder the data
   # but first divide the data in the individual segments by finding a gap, done by looking at the change in two series
   order.of.visiting <-t %>% group_by(row) %>% mutate(id = 1:length(col), gap.id= id-col) %>% group_by(row, gap.id) %>% 
@@ -126,6 +132,10 @@ calc.box.feature<-function(input.data, box){
 }
 #merge when gap between exiting and entering the same box is small, making the box more robuste
 merge.box.feature<- function(boxen, input.data){
+  if (nrow(boxen)<2) {
+    return(boxen)
+  }
+  
   
   for(i in 1:(nrow(boxen)-1)){
     if(boxen$box.id[i]==boxen$box.id[i+1]){

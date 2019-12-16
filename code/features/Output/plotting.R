@@ -260,6 +260,7 @@ plot.best.r = function(data,id){
 
 looking.plot<-function(log,input.data, input.look, id, params,gg,title){
   view.points<-log.subset(input.look, log)
+  if(any(!is.na(view.points$x)))
   gg<- gg+ geom_point(data=view.points, mapping= aes(x=x, y=z), colour="orange", alpha= 0.2)
   
   if( ! file.exists(paste0('output/',params$output.dir,'/png/Look'))){
