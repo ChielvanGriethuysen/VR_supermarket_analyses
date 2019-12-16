@@ -135,8 +135,8 @@ logs.to.features<- function(data,i, log.list,input.data,products ,params){
   
   data$total.stoping.time[i]= log.list$stops.log%>% group_by(id) %>% summarise(time.spent= first(time.spent)) %>% sum()
   
-  data$n.walked.through.aisles[i]= log.list$aisles.log%>% filter(aisles.type= "shopping", label== "walk through") %>% nrow()
-  data$n.walked.in.out.aisles[i]= log.list$aisles.log%>% filter(aisles.type= "shopping",label== "same side in out") %>% nrow()
+  data$n.walked.through.aisles[i]= log.list$aisles.log%>% filter(aisles.type== "shopping", label== "walk through") %>% nrow()
+  data$n.walked.in.out.aisles[i]= log.list$aisles.log%>% filter(aisles.type== "shopping",label== "same side in out") %>% nrow()
   
   data$Hit_Totaal.target[i] = length(unique(product.hits$hit.target$prod_id))
   data$Hit_Totaal.related[i]=length(unique(product.hits$hit.related$prod_id))
@@ -269,7 +269,7 @@ all.logs<- function(log, combined.logs,i,file){
 }
 participant.category<-function(file){
   healthy.code<- c("GEZ","DS","H1","HC","C1","01")
-  ill.code<- c("C2","PP","H2","PSY","02","06")
+  ill.code<- c("C2","PP","H2","PSY","02","06","IC")
   
   if(any(startsWith(file,ill.code))){
     return("ill")
