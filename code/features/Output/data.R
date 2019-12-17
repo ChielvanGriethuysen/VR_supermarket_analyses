@@ -76,8 +76,8 @@ logs.to.features<- function(data,i, log.list,input.data,products ,params){
   data$r.z[i] = cor(input.data$time, input.data$z)
   data$r.best[i]= max(data$r.x[i],data$r.z[i])
   
-  data$time.target[i]=log.list$aisles.log %>% filter(target==TRUE)%>% select(time.spent) %>%sum()
-  data$time.none.target[i]=log.list$aisles.log %>% filter(target==FALSE)%>% select(time.spent) %>%sum()
+  data$time.target[i]=(log.list$aisles.log %>% filter(target==TRUE))$time.spent %>%sum()
+  data$time.none.target[i]=(log.list$aisles.log %>% filter(target==FALSE))$time.spent %>%sum()
   data$target.fraction[i]= data$time.target[i]/data$time.none.target[i]
   
   data$n.crossings[i] = nrow(log.list$crossings.log)
