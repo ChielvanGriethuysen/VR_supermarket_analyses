@@ -38,6 +38,9 @@ createDataFrame <- function(data.files){
                      n.revisit.non.target = numeric(length(data.files)),
                      n.revisit.fraction = numeric(length(data.files)),
                      
+                     n.revisit.target.count = numeric(length(data.files)),
+                     n.revisit.non.target.count = numeric(length(data.files)),
+                     
                      distance.between.target.products.mean = numeric(length(data.files)),
                      distance.between.target.products.sd  = numeric(length(data.files)),
                      
@@ -90,7 +93,7 @@ logs.to.features<- function(data,i, log.list,input.data,products ,params){
   
   aisles<- log.list$aisles.log %>% group_by(aisles.name) %>% summarise(target= first(target),
                                                                        visits=n(),
-                                                                       main= first(label)=="main")
+                                                                       main= first(aisles.type)=="main")
   
   data$n.target.enter[i] = sum((aisles %>% filter(target== TRUE, main==FALSE))$visits)
   data$n.non.target.enter[i] = sum((aisles %>% filter(target== FALSE, main==FALSE))$visits)
@@ -104,6 +107,11 @@ logs.to.features<- function(data,i, log.list,input.data,products ,params){
   data$n.revisit.target[i] = nrow(aisles %>% filter(main==FALSE, visits>1,target== TRUE))
   data$n.revisit.non.target[i] = nrow(aisles %>% filter(main==FALSE, visits>1,target== FALSE))
   data$n.revisit.fraction[i] = data$n.revisit.target[i]/data$n.revisit.non.target[i]
+  
+  data$n.revisit.target.count[i] = sum((aisles %>% filter(main==FALSE, visits>1,target== TRUE))$visits)
+  data$n.revisit.non.target.count[i] = sum((aisles %>% filter(main==FALSE, visits>1,target== FALSE))$visits)
+  
+  
   
   DBAE<- distance.between.aisles.enters(input.data,log.list$aisles.log)
   

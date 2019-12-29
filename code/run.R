@@ -38,10 +38,7 @@ for(i in 1 : length(data.files)){
   #load data, make datasets to use for analysis
   if(is.null(input.data.list.all[[id]])){
     res <- runFirstAnalyses(JSONfile = JSONfile, 
-                            Excel=Excel, 
-                            image = image, 
-                            params= params,
-                            i = i)
+                            params= params)
     #put input data in one list to make it accasible later for dynemic testing
     input.data.list.all[id]<- list(res)
     id.list[i]<- id

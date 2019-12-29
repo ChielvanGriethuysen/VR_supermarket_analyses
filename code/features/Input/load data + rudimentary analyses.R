@@ -4,10 +4,7 @@
 
 
 runFirstAnalyses <- function(JSONfile,
-                             Excel,
-                             image,
-                             params,
-                             i){
+                             params){
   
   # Read the JSON files, remove excess data, 
   # save first basic results (total time, total distance and n data points),

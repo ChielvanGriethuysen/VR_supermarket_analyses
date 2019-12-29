@@ -59,7 +59,7 @@ speed.discretisation.merge.induction<-function(candidates, input.data, merge.dis
       stop.b<- candidates$stop[l+1]
       
       if(dist(input.data[c(start.b,stop.a),]%>% select(x,z))<merge.dist &&(
-         diff(input.data[c(stop.a,start.b),]%>% pull(time))<diff(input.data[c(start.a,stop.a),] %>% pull(time))||
+         diff(input.data[c(stop.a,start.b),]%>% pull(time))<diff(input.data[c(start.a,stop.a),] %>% pull(time))&&
          diff(input.data[c(stop.a,start.b),]%>% pull(time))<diff(input.data[c(start.b,stop.b),] %>% pull(time)))){
         candidates$stop[l]<-candidates$stop[l+1]
         candidates$parts[l]<- candidates$parts[l]+1
