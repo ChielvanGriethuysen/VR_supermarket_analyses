@@ -117,7 +117,7 @@ runFirstAnalyses <- function(JSONfile,
   if(str_detect(dat$dataHeader$m_SupermarketName,"Nemo B")){
     productbox<- calc.productbox(params$products$nemo_b)
     products<- params$products$nemo_b
-  }else if(str_detect(dat$dataHeader$m_SupermarketName,"Nemo A")){
+  }else if(any(str_detect(dat$dataHeader$m_SupermarketName,c("Nemo A","Nemo Opdracht")))){
     productbox<- calc.productbox(params$products$nemo_a)
     products<-params$products$nemo_a
   }else if(str_detect(dat$dataHeader$m_SupermarketName,"UMC")){
